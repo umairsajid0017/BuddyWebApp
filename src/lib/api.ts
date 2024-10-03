@@ -1,13 +1,14 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { User, LoginCredentials, RegisterData } from './types';
+import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
+import { type User, type LoginCredentials, type RegisterData } from './types';
+import { env } from "@/env";
 
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: '/api',
   withCredentials: true,
 });
 
 export const register = (userData: RegisterData): Promise<AxiosResponse<{ user: User }>> =>
-  api.post('/register', userData);
+  api.post('/register', userData, );
 
 export const login = (credentials: LoginCredentials): Promise<AxiosResponse<{ user: User }>> =>
   api.post('/login', credentials);

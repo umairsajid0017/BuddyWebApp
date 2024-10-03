@@ -2,6 +2,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  phone: string;
 }
 
 export interface LoginCredentials {
@@ -11,6 +12,7 @@ export interface LoginCredentials {
 
 export interface RegisterData extends LoginCredentials {
   name: string;
+  phone: string;
 }
 
 export interface ApiResponse<T> {
