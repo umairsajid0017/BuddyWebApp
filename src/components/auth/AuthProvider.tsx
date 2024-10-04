@@ -1,18 +1,20 @@
 'use client'
 
 import { useEffect, type ReactNode } from 'react'
-import useAuthStore from '@/store/authStore'
+import { useAuth } from '@/store/authStore'
 
 interface AuthProviderProps {
   children: ReactNode
 }
 
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const checkAuth = useAuthStore((state) => state.checkAuth)
+  const { checkAuth, isInitialized } = useAuth()
 
   useEffect(() => {
-    void checkAuth();
-  }, [checkAuth])
+    if (!isInitialized) {
+      void checkAuth()
+    }
+  }, [checkAuth, isInitialized])
 
   return <>{children}</>
 }

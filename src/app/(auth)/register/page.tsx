@@ -1,12 +1,11 @@
 'use client'
 import React, { useState, type FormEvent } from 'react';
-import { register } from '@/lib/api';
+import { useRegister } from '@/lib/api';
 import { type RegisterData } from '@/lib/types';
 import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { registerSchema } from "@/lib/schemas";
-
+import QueryClientWrapper from "@/components/client-query/clientQueryWrapper";
 
 
 const Register: React.FC = () => {
@@ -17,8 +16,8 @@ const Register: React.FC = () => {
     phone: '',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const registerMutation = useRegister();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,12 +27,11 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
-    setIsLoading(true);
 
     try {
       const validatedData = registerSchema.parse(formData);
-      const response = await register(validatedData);
-      console.log('User registered:', response.data.user);
+    const response =  await registerMutation.mutateAsync(validatedData);
+      console.log('User registered:', response);
       router.push('/login');
     } catch (error) {
       if (error instanceof ZodError) {
@@ -44,14 +42,10 @@ const Register: React.FC = () => {
           }
         });
         setErrors(newErrors);
-      } else if (axios.isAxiosError(error)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
-        setErrors({ email: error.response?.data?.message || 'Registration failed' });
+        console.log(errors)
       } else {
         setErrors({ email: 'An unexpected error occurred' });
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -132,14 +126,13 @@ const Register: React.FC = () => {
               {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
             </div>
           </div>
-
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={registerMutation.isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              {isLoading ? 'Registering...' : 'Register'}
+              {registerMutation.isLoading ? 'Registering...' : 'Register'}
             </button>
           </div>
         </form>
@@ -148,4 +141,9 @@ const Register: React.FC = () => {
   );
 };
 
+// const Register: React.FC = () => (
+//   <QueryClientWrapper>
+//   <RegisterForm />
+//   </QueryClientWrapper>
+//     );
 export default Register;

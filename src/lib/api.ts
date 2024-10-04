@@ -1,20 +1,20 @@
-import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
+import axios, { type AxiosInstance } from 'axios';
 import { type User, type LoginCredentials, type RegisterData } from './types';
-import { env } from "@/env";
+import { useMutation, useQuery } from 'react-query';
 
 const api: AxiosInstance = axios.create({
   baseURL: '/api',
   withCredentials: true,
 });
 
-export const register = (userData: RegisterData): Promise<AxiosResponse<{ user: User }>> =>
-  api.post('/register', userData, );
+export const useRegister = () =>
+  useMutation((userData: RegisterData) => api.post<{ user: User }>('/register', userData));
 
-export const login = (credentials: LoginCredentials): Promise<AxiosResponse<{ user: User }>> =>
-  api.post('/login', credentials);
+export const useLogin = () =>
+  useMutation((credentials: LoginCredentials) => api.post<{ user: User }>('/login', credentials));
 
-export const logout = (): Promise<AxiosResponse<void>> =>
-  api.post('/logout');
+export const useLogout = () =>
+  useMutation(() => api.post<void>('/logout'));
 
-export const getUser = (): Promise<AxiosResponse<User>> =>
-  api.get('/user');
+export const useUser = () =>
+  useQuery(['user'], () => api.get<User>('/user'));

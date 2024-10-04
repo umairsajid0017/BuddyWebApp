@@ -27,8 +27,17 @@ export default {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
-  			},
+  				foreground: 'hsl(var(--primary-foreground))',
+					900: 'hsl(var(--primary-900))',
+					800: 'hsl(var(--primary-800))',
+					700: 'hsl(var(--primary-700))',
+					600: 'hsl(var(--primary-600))',
+					500: 'hsl(var(--primary-500))',
+					400: 'hsl(var(--primary-400))',
+					300: 'hsl(var(--primary-300))',
+					200: 'hsl(var(--primary-200))',
+					100: 'hsl(var(--primary-100))',
+				},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'

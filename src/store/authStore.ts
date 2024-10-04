@@ -1,20 +1,18 @@
 import { create, type StateCreator } from 'zustand';
 import { createJSONStorage, persist, type PersistOptions } from "zustand/middleware";
-import { login, logout, register, getUser } from "@/lib/api";
 import { userSchema } from "@/lib/schemas";
 import { type User, type LoginCredentials, type RegisterData } from "@/lib/types";
 import { AxiosError } from 'axios';
 import { ZodError } from 'zod';
+import { useRegister, useLogin, useLogout, useUser } from "@/lib/api";
 
 interface AuthState {
   user: User | null;
-  loading: boolean;
   error: string | null;
   isInitialized: boolean;
-  loginUser: (credentials: LoginCredentials) => Promise<User>;
-  registerUser: (userData: RegisterData) => Promise<User>;
-  logoutUser: () => Promise<void>;
-  checkAuth: () => Promise<void>;
+  setUser: (user: User | null) => void;
+  setError: (error: string | null) => void;
+  setIsInitialized: (isInitialized: boolean) => void;
 }
 
 type AuthPersist = (
@@ -24,7 +22,7 @@ type AuthPersist = (
 
 const handleError = (error: unknown): string => {
   if (error instanceof AxiosError) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-member-access
     return error.response?.data?.message || error.message;
   } else if (error instanceof ZodError) {
     return 'Invalid data received from server';
@@ -38,53 +36,11 @@ const useAuthStore = create<AuthState>(
   (persist as AuthPersist)(
     (set) => ({
       user: null,
-      loading: true,
       error: null,
       isInitialized: false,
-      loginUser: async (credentials) => {
-        try {
-          const { data } = await login(credentials);
-          const user = userSchema.parse(data.user);
-          set({ user, error: null });
-          return user;
-        } catch (error: unknown) {
-          const errorMessage = handleError(error);
-          set({ error: errorMessage });
-          throw new Error(errorMessage);
-        }
-      },
-      registerUser: async (userData) => {
-        try {
-          const { data } = await register(userData);
-          const user = userSchema.parse(data.user);
-          set({ user, error: null });
-          return user;
-        } catch (error: unknown) {
-          const errorMessage = handleError(error);
-          set({ error: errorMessage });
-          throw new Error(errorMessage);
-        }
-      },
-      logoutUser: async () => {
-        try {
-          await logout();
-          set({ user: null, error: null });
-        } catch (error: unknown) {
-          const errorMessage = handleError(error);
-          set({ error: errorMessage });
-          throw new Error(errorMessage);
-        }
-      },
-      checkAuth: async () => {
-        try {
-          const { data } = await getUser();
-          const user = userSchema.parse(data);
-          set({ user, loading: false, error: null, isInitialized: true });
-        } catch (error: unknown) {
-          const errorMessage = handleError(error);
-          set({ user: null, loading: false, error: errorMessage, isInitialized: true });
-        }
-      },
+      setUser: (user) => set({ user }),
+      setError: (error) => set({ error }),
+      setIsInitialized: (isInitialized) => set({ isInitialized }),
     }),
     {
       name: 'auth-storage',
@@ -92,5 +48,81 @@ const useAuthStore = create<AuthState>(
     }
   )
 );
+
+export const useAuth = () => {
+  const { user, error, isInitialized, setUser, setError, setIsInitialized } = useAuthStore();
+  const registerMutation = useRegister();
+  const loginMutation = useLogin();
+  const logoutMutation = useLogout();
+  const userQuery = useUser();
+
+  const loginUser = async (credentials: LoginCredentials) => {
+    try {
+      const { data } = await loginMutation.mutateAsync(credentials);
+      const parsedUser = userSchema.parse(data.user);
+      setUser(parsedUser);
+      setError(null);
+      return parsedUser;
+    } catch (error: unknown) {
+      const errorMessage = handleError(error);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const registerUser = async (userData: RegisterData) => {
+    try {
+      const { data } = await registerMutation.mutateAsync(userData);
+      const parsedUser = userSchema.parse(data.user);
+      setUser(parsedUser);
+      setError(null);
+      return parsedUser;
+    } catch (error: unknown) {
+      const errorMessage = handleError(error);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const logoutUser = async () => {
+    try {
+      await logoutMutation.mutateAsync();
+      setUser(null);
+      setError(null);
+    } catch (error: unknown) {
+      const errorMessage = handleError(error);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  const checkAuth = async () => {
+    if (!isInitialized) {
+      try {
+        const { data } = await userQuery.refetch();
+        const parsedUser = userSchema.parse(data);
+        setUser(parsedUser);
+        setError(null);
+      } catch (error: unknown) {
+        const errorMessage = handleError(error);
+        setUser(null);
+        setError(errorMessage);
+      } finally {
+        setIsInitialized(true);
+      }
+    }
+  };
+
+  return {
+    user,
+    error,
+    isInitialized,
+    loginUser,
+    registerUser,
+    logoutUser,
+    checkAuth,
+    isLoading: userQuery.isLoading || !isInitialized,
+  };
+};
 
 export default useAuthStore;
