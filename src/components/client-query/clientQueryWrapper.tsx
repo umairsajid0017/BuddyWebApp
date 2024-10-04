@@ -1,7 +1,8 @@
 'use client'
 
 import { QueryClientProvider, QueryClient } from 'react-query'
-import { type ReactNode, useState } from 'react'
+import React, { type ReactNode, useState } from 'react'
+import { ReactQueryDevtools } from "react-query/devtools";
 
 export default function QueryClientWrapper({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -16,6 +17,8 @@ export default function QueryClientWrapper({ children }: { children: ReactNode }
   return (
     <QueryClientProvider client={queryClient}>
       {children}
+      <ReactQueryDevtools initialIsOpen={false} />
+
     </QueryClientProvider>
   )
 }

@@ -12,7 +12,6 @@ const MyApp = () => {
     <>
       {showSplash && <SplashScreen duration={100000} onFinished={() => setShowSplash(true)} />}
       {!showSplash && <Login />}
-      <ReactQueryDevtools initialIsOpen={false} />
     </>
 
   );

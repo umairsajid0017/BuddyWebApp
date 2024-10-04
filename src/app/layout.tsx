@@ -23,6 +23,7 @@ export default function RootLayout({
       <QueryClientWrapper>
       <AuthProvider>
             {children}
+
           </AuthProvider>
       </QueryClientWrapper>
       </body>

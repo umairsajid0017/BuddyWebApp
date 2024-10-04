@@ -12,7 +12,7 @@
 
 
     --primary: 7, 99%, 68%;
-    --primary-foreground: 7, 99%, 68%;
+    --primary-foreground: 0 0% 100%;
     --primary-900: 7, 99%, 72%;
     --primary-800: 7, 98%, 75%;
     --primary-700: 7, 98%, 78%;
@@ -42,7 +42,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem
+    --radius: 1rem
   }
   .dark {
     --background: 224 71.4% 4.1%;
@@ -78,4 +78,9 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+html,
+body,
+:root {
+  height: 100%;
 }

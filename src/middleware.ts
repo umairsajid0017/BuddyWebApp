@@ -19,5 +19,6 @@ export function middleware(req: NextRequest): NextResponse {
 
 // Configure which routes use this middleware
 export const config = {
-  matcher: ['/dashboard', '/dashboard/:path*', '/settings', '/settings/:path*']
+  // matcher: ['/dashboard', '/dashboard/:path*', '/settings', '/settings/:path*']
+  matcher: ['/settings', '/settings/:path*']
 };

@@ -1,149 +1,214 @@
 'use client'
-import React, { useState, type FormEvent } from 'react';
-import { useRegister } from '@/lib/api';
-import { type RegisterData } from '@/lib/types';
+import React, { useState } from "react";
+import { useRegister } from "@/lib/api";
+import { type RegisterData } from "@/lib/types";
 import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
 import { registerSchema } from "@/lib/schemas";
-import QueryClientWrapper from "@/components/client-query/clientQueryWrapper";
-
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
+import Image from "next/image";
 
 const Register: React.FC = () => {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<RegisterData>({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
   const router = useRouter();
   const registerMutation = useRegister();
 
+  const backgroundImageUrl = (backgroundSvg as { src: string }).src;
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setErrors({});
-
+  const validateStep1 = () => {
     try {
-      const validatedData = registerSchema.parse(formData);
-    const response =  await registerMutation.mutateAsync(validatedData);
-      console.log('User registered:', response);
-      router.push('/login');
+      registerSchema.pick({ name: true, email: true, phone: true }).parse(formData);
+      setErrors({});
+      return true;
     } catch (error) {
       if (error instanceof ZodError) {
         const newErrors: Partial<Record<keyof RegisterData, string>> = {};
-        error.errors.forEach(err => {
+        error.errors.forEach((err) => {
           if (err.path[0]) {
             newErrors[err.path[0] as keyof RegisterData] = err.message;
           }
         });
         setErrors(newErrors);
-        console.log(errors)
+      }
+      return false;
+    }
+  };
+
+  const handleNextStep = () => {
+    if (validateStep1()) {
+      setStep(2);
+    }
+  };
+  const handleBackStep = () => {
+    setStep(1);
+  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrors({});
+
+    try {
+      const validatedData = registerSchema.parse(formData);
+      const response = await registerMutation.mutateAsync(validatedData);
+      console.log("User registered:", response);
+      router.push("/login");
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const newErrors: Partial<Record<keyof RegisterData, string>> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            newErrors[err.path[0] as keyof RegisterData] = err.message;
+          }
+        });
+        setErrors(newErrors);
       } else {
-        setErrors({ email: 'An unexpected error occurred' });
+        setErrors({ email: "An unexpected error occurred" });
       }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="name" className="sr-only">
-                Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Name"
-                value={formData.name}
-                onChange={handleChange}
-              />
-              {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name}</p>}
-            </div>
-            <div>
-              <label htmlFor="email-address" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-              />
-              {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
-            </div>
-            <div>
-              <label htmlFor="phone" className="sr-only">
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Phone Number (+92...)"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-              {errors.phone && <p className="mt-2 text-sm text-red-600">{errors.phone}</p>}
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-              />
-              {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
-            </div>
+    <main
+      className="min-h-screen min-w-screen w-full   flex items-center justify-center p-4"
+      style={{
+        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="mb-4 flex justify-center">
+            <Image src="/assets/logo.png" alt="App Icon" className="h-16 w-16"  width={'64'} height={'64'} />
           </div>
-          <div>
-            <button
-              type="submit"
-              disabled={registerMutation.isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {registerMutation.isLoading ? 'Registering...' : 'Register'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          <CardTitle className="text-center text-2xl font-bold">
+            {step === 1 ? "Welcome to Buddy" : "Create Password"}
+          </CardTitle>
+          <p className="text-center text-sm text-gray-600">
+            {step === 1 ? "Get started for free" : "Your password must have at least one symbol & 8 or more characters."}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={step === 1 ? handleNextStep : handleSubmit} className="space-y-4">
+            {step === 1 ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    placeholder="Your name"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
+                  {errors.name && (
+                    <Alert variant="destructive" className="text-xs text-red-600">{errors.name}</Alert>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email-address">Email address</Label>
+                  <Input
+                    id="email-address"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    placeholder="Your email address"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                  {errors.email && (
+                    <Alert variant="destructive" className="text-xs text-red-600">{errors.email}</Alert>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="text"
+                    required
+                    placeholder="Your mobile number"
+                    value={formData.phone}
+                    onChange={handleChange}
+                  />
+                  {errors.phone && (
+                    <Alert variant="destructive" className="text-xs text-red-600">{errors.phone}</Alert>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+                {errors.password && (
+                  <Alert variant="destructive" className="text-xs text-red-600">{errors.password}</Alert>
+                )}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Creating an account means you&#39;re okay with our Terms of Service, Privacy Policy, and our default Notification Settings.
+            </p>
+            <div className="flex space-x-2">
+              {step === 2 && (
+                <Button
+                  type="button"
+                  className="w-1/2"
+                  onClick={handleBackStep}
+                  variant="outline"
+                >
+                  Back
+                </Button>
+              )}
+              <Button
+                type={step === 1 ? "button" : "submit"}
+                className={step === 1 ? "w-full" : "w-1/2"}
+                onClick={step === 1 ? handleNextStep : undefined}
+                disabled={registerMutation.isLoading}
+              >
+                {step === 1 ? "Next" : registerMutation.isLoading ? "Signing up..." : "Sign up"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{" "}
+            <a href="/login" className="font-medium text-primary hover:underline">
+              Sign in
+            </a>
+          </p>
+        </CardFooter>
+      </Card>
+    </main>
   );
 };
 
-// const Register: React.FC = () => (
-//   <QueryClientWrapper>
-//   <RegisterForm />
-//   </QueryClientWrapper>
-//     );
 export default Register;
