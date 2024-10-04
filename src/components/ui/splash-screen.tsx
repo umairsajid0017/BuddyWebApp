@@ -42,7 +42,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinished, duration = 3000
       }}
     >
       <div className="relative pointer-events-none">
-        <Lottie options={defaultOptions} height={200} width={200}   isClickToPauseDisabled={true} />
+        <Lottie options={defaultOptions} height={42} width={42}   isClickToPauseDisabled={true} />
       </div>
     </div>
   );

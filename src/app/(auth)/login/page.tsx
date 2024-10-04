@@ -1,25 +1,38 @@
 'use client'
-import { useState, type FormEvent, type ChangeEvent } from 'react';
+
+import { useState, type FormEvent } from 'react';
+import { useRouter } from "next/navigation";
+import Image from 'next/image';
+import { ZodError } from 'zod';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import useAuthStore from '@/store/authStore';
 import { loginSchema } from '@/lib/schemas';
 import { type LoginCredentials } from '@/lib/types';
-import { ZodError } from 'zod';
-import { useRouter } from "next/navigation";
+import { useLogin } from '@/lib/api';
+import Lottie from 'react-lottie';
+import Loading from '@/components/ui/loading';
+import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
+
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
-const Login = () => {
-  const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '' });
+export default function Login() {
+  const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '', loginType: 'email' });
   const [errors, setErrors] = useState<LoginErrors>({});
-  const loginUser = useAuthStore((state) => state.loginUser);
+  const loginMutation = useLogin();
   const router = useRouter();
+  const backgroundImageUrl = (backgroundSvg as { src: string }).src;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     try {
-      loginSchema.parse(credentials);
-      await loginUser(credentials);
+      const validatedCredentials = loginSchema.parse(credentials);
+      const response = await loginMutation.mutateAsync(validatedCredentials);
+      console.log('User logged in:', response);
       void router.push('/dashboard');
     } catch (error: unknown) {
       if (error instanceof ZodError) {
@@ -35,32 +48,76 @@ const Login = () => {
     }
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCredentials((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="email"
-        name="email"
-        value={credentials.email}
-        onChange={handleInputChange}
-        placeholder="Email"
-      />
-      {errors.email && <p>{errors.email}</p>}
-      <input
-        type="password"
-        name="password"
-        value={credentials.password}
-        onChange={handleInputChange}
-        placeholder="Password"
-      />
-      {errors.password && <p>{errors.password}</p>}
-      <button type="submit">Login</button>
-    </form>
-  );
-};
-
-export default Login;
+    <main
+      className="min-h-screen w-full flex items-center justify-center p-4"
+      style={{
+        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <div className="mb-4 flex justify-center">
+            <Image src="/assets/logo.png" alt="App Icon" width={64} height={64} />
+          </div>
+          <CardTitle className="text-center text-2xl font-bold">
+            Welcome back to Buddy
+          </CardTitle>
+          <p className="text-center text-sm text-gray-600">
+            Sign in to your account
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  autoComplete="email"
+                  required
+                  value={credentials.email}
+                  onChange={handleChange}
+                />
+                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={credentials.password}
+                  onChange={handleChange}
+                />
+                {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+              </div>
+              <Button type="submit" className="w-full" variant={loginMutation.isLoading ? "outline": "default"}   disabled={loginMutation.isLoading}>
+              {loginMutation.isLoading ? <Loading/>  : "Sign in"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <a href="/register" className="font-medium text-primary hover:underline">
+              Sign up
+            </a>
+          </p>
+        </CardFooter>
+      </Card>
+    </main>
+  )
+}

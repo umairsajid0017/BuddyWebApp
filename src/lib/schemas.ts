@@ -14,11 +14,13 @@ export const userSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters long'),
+  loginType: z.string(),
 }) satisfies z.ZodType<LoginCredentials>;
 
 export const registerSchema = loginSchema.extend({
   name: z.string().min(2, 'Name must be at least 2 characters long'),
   phone: z.string().regex(phoneRegex, 'Phone number must be in +92 format'),
+  otp: z.string().optional(),
 }) satisfies z.ZodType<RegisterData>;
 
 // Inferred types from the schemas
