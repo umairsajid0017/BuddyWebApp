@@ -6,11 +6,16 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { DashboardComponent } from "@/components/component/dashboard-component";
 import { useAuth } from "@/store/authStore";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useRouter } from "next/navigation";
 
 const MyApp = () => {
 
+const { user, isLoading, isInitialized } = useAuth();
+const router = useRouter();
+
 
   return (
+
     // <ProtectedRoute>
          <DashboardComponent />
       // </ProtectedRoute>

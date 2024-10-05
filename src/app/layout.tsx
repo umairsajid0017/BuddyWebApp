@@ -7,6 +7,8 @@ import AuthProvider from "@/components/auth/AuthProvider";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import QueryClientWrapper from "@/components/client-query/clientQueryWrapper";
+import NavBar from "@/components/ui/navbar";
+import NavbarWrapper from "@/components/ui/navbar-wrapper";
 
 export const metadata: Metadata = {
   title: "Buddy Customer",
@@ -17,11 +19,15 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  
   return (
+
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
       <QueryClientWrapper>
       {/* <AuthProvider> */}
+      <NavbarWrapper/>
+
             {children}
 
           {/* </AuthProvider> */}

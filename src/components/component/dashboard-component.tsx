@@ -11,72 +11,77 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import NavBar from "@/components/ui/navbar"
 import { JSX, SVGProps } from "react"
+import ServicesComponent from "../services/services-component"
+import useServicesStore from "@/store/servicesStore"
 
 export function DashboardComponent() {
+  const {services, isLoading} = useServicesStore();
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <NavBar />
+    <div className="flex flex-col min-h-screen px-6 bg-gray-100">
       <main className="flex-1 p-6">
         <section className="grid grid-cols-4 gap-4 mt-6">
-          <Card className="col-span-1">
+          <Card className="col-span-1 bg-primary-100 p-6">
             <CardContent>
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex flex-col gap-2">
                   <h3 className="text-sm font-medium">Total Spend</h3>
-                  <p className="text-2xl font-bold">$3,4k</p>
+                  <p className="text-3xl font-bold">$3,4k</p>
                 </div>
                 <CreditCardIcon className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
-          <Card className="col-span-1">
+          <Card className="col-span-1 bg-[#F0EAF3] p-6">
             <CardContent>
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex flex-col gap-2">
                   <h3 className="text-sm font-medium">Total Orders</h3>
-                  <p className="text-2xl font-bold">164</p>
+                  <p className="text-3xl font-bold">164</p>
                 </div>
                 <BoxIcon className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
-          <Card className="col-span-1">
+          <Card className="col-span-1 bg-[#FFF9EE] p-6">
             <CardContent>
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex flex-col gap-2">
                   <h3 className="text-sm font-medium">Pending Orders</h3>
-                  <p className="text-2xl font-bold">24</p>
+                  <p className="text-3xl font-bold">24</p>
                 </div>
                 <ClockIcon className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
-          <Card className="col-span-1">
+          <Card className="col-span-1 bg-[#FEF2F2] p-6">
             <CardContent>
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex flex-col gap-2">
                   <h3 className="text-sm font-medium">Over Due</h3>
-                  <p className="text-2xl font-bold">33</p>
+                  <p className="text-3xl font-bold">33</p>
                 </div>
                 <CircleAlertIcon className="w-6 h-6" />
               </div>
             </CardContent>
           </Card>
         </section>
-        <section className="flex items-center justify-between mt-6">
-          <div className="flex-1 p-6 bg-white rounded-lg shadow">
-            <h3 className="text-lg font-medium">Start booking service to get your work done!</h3>
-            <div className="mt-4">
-              <Input type="text" placeholder="Search services" className="w-full" />
-            </div>
-          </div>
-          <div className="ml-4 w-1/3 bg-red-100 rounded-lg shadow">
-            <div className="p-4">
-              <h3 className="text-lg font-medium">30% Today's Special!</h3>
-              <p className="text-sm">Get discount for every order, only valid for today!</p>
-            </div>
-          </div>
-        </section>
+        <section className="flex flex-col lg:flex-row gap-4 mt-6">
+      <div className="flex-1 bg-white rounded-lg shadow p-8 flex flex-col justify-between">
+        <div className="text-center">
+          <h3 className="text-2xl font-semibold">
+            Start booking service to <br className="hidden sm:inline" /> get your work done!
+          </h3>
+        </div>
+        <div className="mt-4">
+          <Input type="text" placeholder="Search services" className="w-full h-14" />
+        </div>
+      </div>
+      <div className="lg:w-1/3 bg-red-100 rounded-lg shadow p-8 flex flex-col justify-center">
+        <h3 className="text-lg font-medium">30% Today's Special!</h3>
+        <p className="text-sm mt-2">Get discount for every order, only valid for today!</p>
+      </div>
+    </section>
         <section className="mt-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">All Categories</h3>
@@ -85,13 +90,13 @@ export function DashboardComponent() {
             </Button>
           </div>
           <div className="grid grid-cols-8 gap-4 mt-4">
-            {["Electrician", "Plumber", "Mason", "Painter", "Carpenter", "Mechanic", "Helper", "Maid"].map(
-              (category) => (
-                <Card key={category} className="p-4">
-                  <ComponentIcon className="w-10 h-10" />
-                  <h4 className="mt-2 text-sm font-medium">{category}</h4>
-                  <p className="text-xs text-gray-600">25 Services Listed</p>
-                </Card>
+            {services.slice(0, 6).map(
+              (service) => (
+              <Card key={service.id} className="p-4">
+                <ComponentIcon className="w-10 h-10" />
+                <h4 className="mt-2 text-sm font-medium">{service.name}</h4>
+                {/* <p className="text-xs text-gray-600">{service} Services Listed</p> */}
+              </Card>
               ),
             )}
           </div>
@@ -104,28 +109,13 @@ export function DashboardComponent() {
             </Button>
           </div>
           <div className="flex items-center mt-4 space-x-2">
-            {["All", "Cleaning", "Repairing", "Painting", "Laundry", "Appliance"].map((filter) => (
-              <Badge key={filter} variant="secondary">
-                {filter}
+            {services.map((filter) => (
+              <Badge key={filter.id} variant={"outline"}>
+                {filter.name}
               </Badge>
             ))}
           </div>
-          <div className="grid grid-cols-4 gap-4 mt-4">
-            {["AID FAST", "Corona", "Mr. Eileen Hermiston", "Cindy Bergstrom"].map((service) => (
-              <Card key={service} className="p-4">
-                <div className="h-32 bg-gray-200 rounded-lg" />
-                <h4 className="mt-2 text-sm font-medium">{service}</h4>
-                <p className="text-xs text-gray-600">Best in House Cleaning</p>
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-lg font-bold">$20</p>
-                  <div className="flex items-center text-xs text-gray-600">
-                    <StarIcon className="w-4 h-4" />
-                    <span className="ml-1">4.9 | 6182 reviews</span>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+          <ServicesComponent/>
         </section>
       </main>
     </div>

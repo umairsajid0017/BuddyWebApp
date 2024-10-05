@@ -1,6 +1,24 @@
 import React, { useEffect } from 'react';
 import { useServices, useDeleteService } from '@/lib/api';
 import useServicesStore from '@/store/servicesStore';
+import SplashScreen from '../ui/splash-screen';
+import { Card } from '../ui/card';
+import { StarIcon } from 'lucide-react';
+import { Service } from '@/lib/types';
+import { Skeleton } from '../ui/skeleton';
+
+
+const ServiceSkeleton = () => (
+    <Card className="p-4">
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-4 w-3/4 mt-2" />
+      <Skeleton className="h-3 w-full mt-2" />
+      <div className="flex items-center justify-between mt-2">
+        <Skeleton className="h-6 w-20" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </Card>
+  )
 
 const ServicesComponent: React.FC = () => {
   const { data: services, isLoading, error } = useServices();
@@ -46,7 +64,15 @@ const ServicesComponent: React.FC = () => {
     });
   };
 
-//   if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+        {[...Array(8)].map((_, index) => (
+          <ServiceSkeleton key={index} />
+        ))}
+      </div>
+    )
+  }
 //   if (error) return <div>Error: {error.message}</div>;
 
 //   // Check if storeServices is an array
@@ -56,23 +82,22 @@ const ServicesComponent: React.FC = () => {
 //   }
 
   return (
-    <div>
-      <h1>Services</h1>
-      {storeServices.length === 0 ? (
-        <p>No services available.</p>
-      ) : (
-        <ul>
-          {storeServices.map((service) => (
-            <li key={service.id}>
-              <h2>{service.name}</h2>
-              <p>{service.description}</p>
-              <p>Price: {service.price}</p>
-              {/* <button onClick={() => handleDelete(service.id)}>Delete</button> */}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <div className="grid grid-cols-4 gap-4 mt-4">
+            {storeServices.map((service: Service) => (
+              <Card key={service.id} className="p-4">
+                <div className="h-32 bg-gray-200 rounded-lg" />
+                <h4 className="mt-2 text-sm font-medium">{service.name}</h4>
+                <p className="text-xs text-gray-600">{service.description}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-lg font-bold">Rs. {service.price}</p>
+                  <div className="flex items-center text-xs text-gray-600">
+                    <StarIcon className="w-4 h-4" />
+                    <span className="ml-1">4.9 | 6182 reviews</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
   );
 };
 

@@ -17,6 +17,7 @@ import Loading from '@/components/ui/loading';
 import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
 import axios from 'axios';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { setAuthCookie } from './authOptions';
 
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
@@ -40,6 +41,7 @@ export default function Login() {
       console.log('User logged in:', user, token);
       useAuthStore.getState().setUser(user);
       useAuthStore.getState().setToken(token);
+      setAuthCookie(token)
       void router.push('/');
     } catch (error: unknown) {
       if (error instanceof ZodError) {
