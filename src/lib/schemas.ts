@@ -9,6 +9,24 @@ export const userSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters long'),
   email: z.string().email('Invalid email address'),
   phone: z.string().regex(phoneRegex, 'Phone number must be in +92 format'),
+  email_verified_at: z.string().nullable(),
+  image: z.string().nullable(),
+  dob: z.string().nullable(),
+  country: z.string().nullable(),
+  gender: z.string().nullable(),
+  address: z.string().nullable(),
+  loginType: z.string(),
+  otp: z.string(),
+  otp_expires_at: z.string(),
+  long: z.number().nullable(),
+  lat: z.number().nullable(),
+  civil_id_number: z.string().nullable(),
+  company_id: z.number().nullable(),
+  attachments: z.string().nullable(),
+  role: z.string().nullable(),
+  status: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
 }) satisfies z.ZodType<User>;
 
 export const loginSchema = z.object({
@@ -17,12 +35,13 @@ export const loginSchema = z.object({
   loginType: z.string(),
 }) satisfies z.ZodType<LoginCredentials>;
 
-export const registerSchema = loginSchema.extend({
+export const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters long'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters long'),
   phone: z.string().regex(phoneRegex, 'Phone number must be in +92 format'),
   otp: z.string().optional(),
 }) satisfies z.ZodType<RegisterData>;
-
 // Inferred types from the schemas
 export type UserSchema = z.infer<typeof userSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;

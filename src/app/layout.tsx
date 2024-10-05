@@ -21,10 +21,10 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
       <QueryClientWrapper>
-      <AuthProvider>
+      {/* <AuthProvider> */}
             {children}
 
-          </AuthProvider>
+          {/* </AuthProvider> */}
       </QueryClientWrapper>
       </body>
     </html>

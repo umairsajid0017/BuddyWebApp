@@ -3,6 +3,24 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  email_verified_at: string | null;
+  image: string | null;
+  dob: string | null;
+  country: string | null;
+  gender: string | null;
+  address: string | null;
+  loginType: string;
+  otp: string;
+  otp_expires_at: string;
+  long: number | null;
+  lat: number | null;
+  civil_id_number: string | null;
+  company_id: number | null;
+  attachments: string | null;
+  role: string | null;
+  status: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface LoginCredentials {
@@ -39,4 +57,26 @@ export interface VerifyOtpError {
   errors?: {
     [key: string]: string[];
   };
+}
+
+
+export interface Service {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  category_id: number;
+  long: number | null;
+  lat: number | null;
+  user_id: number;
+  created_at: string | null;
+  updated_at: string | null;
+  user: User;
+  ratings: any[]; 
+}
+
+export interface ServicesResponse extends ApiResponse<Service[]> {
+  data: Service[];
+  message?: string;
+  success: boolean;
 }

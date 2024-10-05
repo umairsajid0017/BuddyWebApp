@@ -15,6 +15,8 @@ import { useLogin } from '@/lib/api';
 import Lottie from 'react-lottie';
 import Loading from '@/components/ui/loading';
 import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
+import axios from 'axios';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
@@ -22,6 +24,7 @@ type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 export default function Login() {
   const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '', loginType: 'email' });
   const [errors, setErrors] = useState<LoginErrors>({});
+  const [backendErrors, setBackendErrors] = useState<{ [key: string]: string[] }>({});
   const loginMutation = useLogin();
   const router = useRouter();
   const backgroundImageUrl = (backgroundSvg as { src: string }).src;
@@ -29,11 +32,15 @@ export default function Login() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
+    setBackendErrors({});
     try {
       const validatedCredentials = loginSchema.parse(credentials);
       const response = await loginMutation.mutateAsync(validatedCredentials);
-      console.log('User logged in:', response);
-      void router.push('/dashboard');
+      const {user, token} = response.data;
+      console.log('User logged in:', user, token);
+      useAuthStore.getState().setUser(user);
+      useAuthStore.getState().setToken(token);
+      void router.push('/');
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         const newErrors: LoginErrors = {};
@@ -42,8 +49,16 @@ export default function Login() {
           newErrors[path] = err.message;
         });
         setErrors(newErrors);
+      } else if (axios.isAxiosError(error)) {
+        console.error('Login failed', error.response?.data);
+        if (error.response?.data?.data) {
+          setBackendErrors(error.response.data.data);
+        } else {
+          setBackendErrors({ general: [error.response?.data?.message || "An unexpected error occurred"] });
+        }
       } else {
         console.error('Login failed', error);
+        setBackendErrors({ general: ["An unexpected error occurred"] });
       }
     }
   };
@@ -103,8 +118,20 @@ export default function Login() {
                 />
                 {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
               </div>
-              <Button type="submit" className="w-full" variant={loginMutation.isLoading ? "outline": "default"}   disabled={loginMutation.isLoading}>
-              {loginMutation.isLoading ? <Loading/>  : "Sign in"}
+              {Object.keys(backendErrors).length > 0 && (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {Object.entries(backendErrors).map(([field, messages]) => (
+                      <div key={field}>
+                        <strong>{field === 'general' ? '' : `${field}: `}</strong>
+                        {messages.join(", ")}
+                      </div>
+                    ))}
+                  </AlertDescription>
+                </Alert>
+              )}
+              <Button type="submit" className="w-full" variant={loginMutation.isLoading ? "outline" : "default"} disabled={loginMutation.isLoading}>
+                {loginMutation.isLoading ? <Loading /> : "Sign in"}
               </Button>
             </div>
           </form>

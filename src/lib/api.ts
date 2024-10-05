@@ -1,17 +1,24 @@
-import axios, { AxiosError, type AxiosInstance } from 'axios';
-import { type User, type LoginCredentials, type RegisterData, VerifyOtpResponse, VerifyOtpError, VerifyOtpData } from './types';
-import { useMutation, useQuery } from 'react-query';
+import axios, { AxiosError, AxiosResponse, type AxiosInstance } from 'axios';
+import { type User, type LoginCredentials, type RegisterData, VerifyOtpResponse, VerifyOtpError, VerifyOtpData, Service, ServicesResponse } from './types';
+import { useMutation, UseMutationResult, useQuery, UseQueryOptions } from 'react-query';
+import useAuthStore from '@/store/authStore';
 
 const api: AxiosInstance = axios.create({
   baseURL: '/api',
   withCredentials: true,
 });
-
+api.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
 export const useRegister = () =>
   useMutation((userData: RegisterData) => api.post<{ user: User }>('/register', userData));
 
 export const useLogin = () =>
-  useMutation((credentials: LoginCredentials) => api.post<{ user: User }>('/login', credentials));
+  useMutation((credentials: LoginCredentials) => api.post<{ user: User; token: string }>('/login', credentials));
 
 export const useLogout = () =>
   useMutation(() => api.post<void>('/logout'));
@@ -35,4 +42,41 @@ export const useVerifyOtp = () => {
       },
     }
   );
+};
+
+
+export const useServices = (options?: UseQueryOptions<ServicesResponse, AxiosError>) => {
+  return useQuery<ServicesResponse, AxiosError>(
+    ['services'],
+    async () => {
+      const response = await api.get<ServicesResponse>('/services');
+      return response.data;
+    },
+    options
+  );
+};
+
+export const useService = (id: number, options?: UseQueryOptions<Service, AxiosError>) => {
+  return useQuery<Service, AxiosError>(
+    ['service', id],
+    async () => {
+      const response = await api.get<Service>(`/services/${id}`);
+      return response.data;
+    },
+    options
+  );
+};
+
+export const useCreateService = (): UseMutationResult<AxiosResponse<Service>, AxiosError, Partial<Service>> => {
+  return useMutation((newService: Partial<Service>) => api.post<Service>('/services', newService));
+};
+
+export const useUpdateService = (): UseMutationResult<AxiosResponse<Service>, AxiosError, { id: number; updates: Partial<Service> }> => {
+  return useMutation(({ id, updates }: { id: number; updates: Partial<Service> }) => 
+    api.put<Service>(`/services/${id}`, updates)
+  );
+};
+
+export const useDeleteService = (): UseMutationResult<AxiosResponse<void>, AxiosError, number> => {
+  return useMutation((id: number) => api.delete(`/services/${id}`));
 };

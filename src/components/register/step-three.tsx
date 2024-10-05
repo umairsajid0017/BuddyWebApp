@@ -20,13 +20,12 @@ const StepThree: React.FC<StepThreeProps> = ({ handleVerifyEmail }) => {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2">
+      <div className="space-y-2 flex items-center justify-center">
         <InputOTP
           maxLength={6}
           value={verificationCode}
           onChange={(value) => setVerificationCode(value)}
           >
-
             <InputOTPGroup>
         <InputOTPSlot index={0} />
         <InputOTPSlot index={1} />
@@ -35,7 +34,7 @@ const StepThree: React.FC<StepThreeProps> = ({ handleVerifyEmail }) => {
         <InputOTPSlot index={4} />
         <InputOTPSlot index={5} />
       </InputOTPGroup>
-      </InputOTP>
+      </InputOTP> 
 
       </div>
       <Button type="submit" className="w-full">Verify and Create Account</Button>

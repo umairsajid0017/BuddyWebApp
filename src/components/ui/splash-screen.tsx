@@ -4,7 +4,7 @@ import * as loadingAnimation from '@/components/ui/assets/animations/loading-spl
 import backgroundSvg from '@/components/ui/assets/background-pattern.svg';
 
 interface SplashScreenProps {
-  onFinished: () => void;
+  onFinished?: () => void;
   duration?: number;
 }
 
@@ -12,14 +12,14 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinished, duration = 3000
   const [isVisible, setIsVisible] = useState(true);
   const backgroundImageUrl = (backgroundSvg as { src: string }).src;
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-      onFinished();
-    }, duration);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setIsVisible(false);
+  //     onFinished();
+  //   }, duration);
 
-    return () => clearTimeout(timer);
-  }, [duration, onFinished]);
+  //   return () => clearTimeout(timer);
+  // }, [duration, onFinished]);
 
   const defaultOptions = {
     loop: true,
@@ -42,7 +42,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinished, duration = 3000
       }}
     >
       <div className="relative pointer-events-none">
-        <Lottie options={defaultOptions} height={42} width={42}   isClickToPauseDisabled={true} />
+        <Lottie options={defaultOptions} height={200} width={200}   isClickToPauseDisabled={true} />
       </div>
     </div>
   );

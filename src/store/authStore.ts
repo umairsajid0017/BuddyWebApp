@@ -9,20 +9,27 @@ import { useRegister, useLogin, useLogout, useUser } from "@/lib/api";
 interface AuthState {
   user: User | null;
   error: string | null;
+  token: string | null;
   isInitialized: boolean;
   setUser: (user: User | null) => void;
   setError: (error: string | null) => void;
   setIsInitialized: (isInitialized: boolean) => void;
+  setToken: (token: string | null) => void;
+}
+
+// Define a separate interface for the persisted slice of the state
+interface PersistedAuthState {
+  user: User | null;
+  token: string | null;  // Add token to persisted state
 }
 
 type AuthPersist = (
   config: StateCreator<AuthState>,
-  options: PersistOptions<AuthState>
+  options: PersistOptions<AuthState, PersistedAuthState>
 ) => StateCreator<AuthState>;
 
 const handleError = (error: unknown): string => {
   if (error instanceof AxiosError) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-member-access
     return error.response?.data?.message || error.message;
   } else if (error instanceof ZodError) {
     return 'Invalid data received from server';
@@ -37,20 +44,26 @@ const useAuthStore = create<AuthState>(
     (set) => ({
       user: null,
       error: null,
+      token: null,
       isInitialized: false,
       setUser: (user) => set({ user }),
       setError: (error) => set({ error }),
+      setToken: (token) => set({ token }),
       setIsInitialized: (isInitialized) => set({ isInitialized }),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
+      partialize: (state): PersistedAuthState => ({ 
+        user: state.user,
+        token: state.token  // Persist the token as well
+      }),
     }
   )
 );
 
 export const useAuth = () => {
-  const { user, error, isInitialized, setUser, setError, setIsInitialized } = useAuthStore();
+  const { user, error, token, isInitialized, setUser, setError, setToken, setIsInitialized } = useAuthStore();
   const registerMutation = useRegister();
   const loginMutation = useLogin();
   const logoutMutation = useLogout();
@@ -61,6 +74,7 @@ export const useAuth = () => {
       const { data } = await loginMutation.mutateAsync(credentials);
       const parsedUser = userSchema.parse(data.user);
       setUser(parsedUser);
+      setToken(data.token);  // Save the token
       setError(null);
       return parsedUser;
     } catch (error: unknown) {
@@ -88,6 +102,7 @@ export const useAuth = () => {
     try {
       await logoutMutation.mutateAsync();
       setUser(null);
+      setToken(null);  // Clear the token
       setError(null);
     } catch (error: unknown) {
       const errorMessage = handleError(error);
@@ -99,13 +114,23 @@ export const useAuth = () => {
   const checkAuth = async () => {
     if (!isInitialized) {
       try {
-        const { data } = await userQuery.refetch();
-        const parsedUser = userSchema.parse(data);
-        setUser(parsedUser);
-        setError(null);
+        if (user && token) {
+          // If we have a user and token in the store, validate it with the server
+          const { data } = await userQuery.refetch();
+          const parsedUser = userSchema.parse(data);
+          setUser(parsedUser);
+          setError(null);
+        } else {
+          // If no user or token in store, check with the server
+          const { data } = await userQuery.refetch();
+          const parsedUser = userSchema.parse(data);
+          setUser(parsedUser);
+          setError(null);
+        }
       } catch (error: unknown) {
         const errorMessage = handleError(error);
         setUser(null);
+        setToken(null);  // Clear the token on error
         setError(errorMessage);
       } finally {
         setIsInitialized(true);
@@ -116,6 +141,7 @@ export const useAuth = () => {
   return {
     user,
     error,
+    token,
     isInitialized,
     loginUser,
     registerUser,

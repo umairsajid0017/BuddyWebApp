@@ -23,6 +23,7 @@ const Register: React.FC = () => {
     phone: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
+  const [backendErrors, setBackendErrors] = useState<{ [key: string]: string[] }>({});
   const router = useRouter();
   const registerMutation = useRegister();
 
@@ -41,6 +42,7 @@ const Register: React.FC = () => {
 
   const handleBackStep = () => {
     setStep((prevStep) => prevStep - 1);
+    setBackendErrors({});
   };
 
   const validateStep1 = () => {
@@ -63,16 +65,24 @@ const Register: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    console.log("Registering user:", formData);
     e.preventDefault();
     setErrors({});
-
     try {
+      console.log("Validating data...");
       const validatedData = registerSchema.parse(formData);
+      console.log("Data validated successfully:", validatedData);
+      
+      console.log("Calling registerMutation.mutateAsync...");
       const response = await registerMutation.mutateAsync(validatedData);
-      console.log("User registered:", response);
+      console.log("API call completed. Response:", response);
+      
+      console.log("Setting step to 3...");
       setStep(3);
     } catch (error) {
+      console.error("Error in handleSubmit:", error);
       if (error instanceof ZodError) {
+        console.log("ZodError encountered:", error.errors);
         const newErrors: Partial<Record<keyof RegisterData, string>> = {};
         error.errors.forEach((err) => {
           if (err.path[0]) {
@@ -80,8 +90,16 @@ const Register: React.FC = () => {
           }
         });
         setErrors(newErrors);
+      } if (axios.isAxiosError(error)) {
+        console.log("Axios error:", error.response?.data);
+        if (error.response?.data?.data) {
+          setBackendErrors(error.response.data.data);
+        } else {
+          setBackendErrors({ general: [error.response?.data?.message || "An unexpected error occurred"] });
+        }
       } else {
-        setErrors({ email: "An unexpected error occurred" });
+        console.log("Unknown error:", error);
+        setBackendErrors({ general: ["An unexpected error occurred"] });
       }
     }
   };
@@ -126,7 +144,7 @@ const Register: React.FC = () => {
       }}
     >
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="pb-2">
           <div className="mb-4 flex justify-center">
             <Image src="/assets/logo.png" alt="App Icon" className="h-16 w-16" width={'64'} height={'64'} />
           </div>
@@ -138,8 +156,14 @@ const Register: React.FC = () => {
              step === 2 ? "Your password must have at least one symbol & 8 or more characters." :
              `We texted you a code to verify your email ${formData.email}`}
           </p>
+              {step === 3 && (
+                <div className="flex justify-center items-center  pointer-events-none">
+                  <Image src="/assets/verify-email.svg" alt="Verify Email" className="h-[180px] w-[180px]" width={'180'} height={'180'} />
+                </div>
+              )}
+
         </CardHeader>
-        <CardContent>
+        <CardContent >
           {step === 1 && (
             <StepOne
               formData={formData}
@@ -149,14 +173,15 @@ const Register: React.FC = () => {
             />
           )}
           {step === 2 && (
-            <StepTwo
-              formData={formData}
-              errors={errors}
-              handleChange={handleChange}
-              handleSubmit={handleSubmit}
-              handleBackStep={handleBackStep}
-              isLoading={registerMutation.isLoading}
-            />
+           <StepTwo
+           formData={formData}
+           errors={errors}
+           backendErrors={backendErrors}
+           handleChange={handleChange}
+           handleSubmit={handleSubmit}
+           handleBackStep={handleBackStep}
+           isLoading={registerMutation.isLoading}
+         />
           )}
           {step === 3 && (
             <StepThree
@@ -176,5 +201,6 @@ const Register: React.FC = () => {
     </main>
   );
 };
+
 
 export default Register;
