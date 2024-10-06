@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { MailsIcon, SettingsIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/authStore";
+import { useRouter } from "next/navigation";
 
 const NavBar: React.FC = () => {
     const {user} = useAuth();
     useEffect(() => {   
         console.log("User:", user);
     }, [user]);
+    const router = useRouter()
     return (
         <header className="bg-white shadow">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -28,6 +30,13 @@ const NavBar: React.FC = () => {
               <MailsIcon className="w-5 h-5" />
             </Button>
             <div className="flex items-center">
+              {
+                user ? 
+                (
+
+
+                  <>
+
               <Avatar>
                 <AvatarImage src="/placeholder-user.jpg" alt="User" />
                 <AvatarFallback>LC</AvatarFallback>
@@ -36,6 +45,12 @@ const NavBar: React.FC = () => {
                 <p className="text-sm font-medium">{user?.name}</p>
                 <p className="text-xs">User</p>
               </div>
+              </>)
+              : 
+              <Button onClick={()=> router.push('/login')} >
+                Login
+              </Button>
+              }
             </div>
           </div>
         </div>

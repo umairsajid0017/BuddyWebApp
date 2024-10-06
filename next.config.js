@@ -6,6 +6,9 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
+  images: {
+    domains: ['images.pexels.com'], // Add 'images.pexels.com' here
+  },
   async rewrites() {
     return [
       {

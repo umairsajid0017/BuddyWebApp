@@ -10,25 +10,33 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import NavBar from "@/components/ui/navbar"
-import { JSX, SVGProps } from "react"
+import { JSX, SVGProps, useEffect } from "react"
 import ServicesComponent from "../services/services-component"
 import useServicesStore from "@/store/servicesStore"
+import DashboardSkeleton from "./dashboard-skeleton"
+import { useServices } from "@/lib/api"
 
 export function DashboardComponent() {
-  const {services, isLoading} = useServicesStore();
+  const {services} = useServicesStore();
+  const {isLoading} = useServices();
+
+  useEffect(()=>{}, [isLoading])
+  if(isLoading)
+    return <DashboardSkeleton/>
 
   return (
-    <div className="flex flex-col min-h-screen px-6 bg-gray-100">
+    <div className="flex flex-col min-h-screen px-24 mx-8 ">
       <main className="flex-1 p-6">
         <section className="grid grid-cols-4 gap-4 mt-6">
           <Card className="col-span-1 bg-primary-100 p-6">
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium">Total Spend</h3>
-                  <p className="text-3xl font-bold">$3,4k</p>
+                  <h3 className="text-base font-regular">Total Spend</h3>
+                  <p className="text-3xl font-bold">Rs. 3.4k</p>
                 </div>
-                <CreditCardIcon className="w-6 h-6" />
+                {/* <CreditCardIcon className="w-6 h-6" /> */}
+                <Image src={"/assets/icons/wallet.svg"} alt="wallet" width={48} height={48} />
               </div>
             </CardContent>
           </Card>
@@ -36,10 +44,12 @@ export function DashboardComponent() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium">Total Orders</h3>
+                  <h3 className="text-base font-regular">Total Orders</h3>
                   <p className="text-3xl font-bold">164</p>
                 </div>
-                <BoxIcon className="w-6 h-6" />
+                {/* <BoxIcon className="w-6 h-6" /> */}
+                <Image src={"/assets/icons/box.svg"} alt="box" width={48} height={48} />
+                
               </div>
             </CardContent>
           </Card>
@@ -47,10 +57,10 @@ export function DashboardComponent() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium">Pending Orders</h3>
+                  <h3 className="text-base font-regular">Pending Orders</h3>
                   <p className="text-3xl font-bold">24</p>
                 </div>
-                <ClockIcon className="w-6 h-6" />
+                <Image src={"/assets/icons/clock.svg"} alt="clock" width={48} height={48} />
               </div>
             </CardContent>
           </Card>
@@ -58,28 +68,29 @@ export function DashboardComponent() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium">Over Due</h3>
+                  <h3 className="text-base font-regular">Over Due</h3>
                   <p className="text-3xl font-bold">33</p>
                 </div>
-                <CircleAlertIcon className="w-6 h-6" />
+                <Image src={"/assets/icons/stopwatch.svg"} alt="timer" width={48} height={48} />
               </div>
             </CardContent>
           </Card>
         </section>
         <section className="flex flex-col lg:flex-row gap-4 mt-6">
-      <div className="flex-1 bg-white rounded-lg shadow p-8 flex flex-col justify-between">
+      <div className="flex-1 bg-[#F3EEF5] rounded-lg shadow p-8 flex flex-col justify-center">
         <div className="text-center">
           <h3 className="text-2xl font-semibold">
             Start booking service to <br className="hidden sm:inline" /> get your work done!
           </h3>
         </div>
-        <div className="mt-4">
-          <Input type="text" placeholder="Search services" className="w-full h-14" />
+        <div className="mt-4 w-full flex items-center justify-center">
+          <Input type="text" placeholder="Search services" className="w-10/12 h-14" />
         </div>
+
       </div>
-      <div className="lg:w-1/3 bg-red-100 rounded-lg shadow p-8 flex flex-col justify-center">
-        <h3 className="text-lg font-medium">30% Today's Special!</h3>
-        <p className="text-sm mt-2">Get discount for every order, only valid for today!</p>
+      <div className="lg:w-1/3 bg-red-100 rounded-lg shadow p-0 flex flex-col justify-center">
+        <img src={"/assets/promo-2.png"} alt="promo"  className="w-full h-full object-cover rounded-lg" />
+
       </div>
     </section>
         <section className="mt-6">
@@ -92,8 +103,11 @@ export function DashboardComponent() {
           <div className="grid grid-cols-8 gap-4 mt-4">
             {services.slice(0, 6).map(
               (service) => (
-              <Card key={service.id} className="p-4">
-                <ComponentIcon className="w-10 h-10" />
+              <Card key={service.id} className="p-4 bg-primary-100">
+                {/* <ComponentIcon className="w-10 h-10" />
+                 */}
+                <Image src={`/assets/icons/${service.name.toLowerCase()}.svg`} alt="timer" width={48} height={48} />
+                 
                 <h4 className="mt-2 text-sm font-medium">{service.name}</h4>
                 {/* <p className="text-xs text-gray-600">{service} Services Listed</p> */}
               </Card>
@@ -115,7 +129,7 @@ export function DashboardComponent() {
               </Badge>
             ))}
           </div>
-          <ServicesComponent/>
+          <ServicesComponent />
         </section>
       </main>
     </div>

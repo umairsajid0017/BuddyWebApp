@@ -5,7 +5,7 @@ import NavBar from "@/components/ui/navbar"
 
 export default function NavbarWrapper() {
   const pathname = usePathname()
-  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/signup')
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register')
 
   if (isAuthPage) {
     return null
