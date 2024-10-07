@@ -80,3 +80,15 @@ export interface ServicesResponse extends ApiResponse<Service[]> {
   message?: string;
   success: boolean;
 }
+interface InboxItemInterface {
+  id: string
+  senderName: string
+  senderAvatar: string
+  title: string
+  description?: string
+  date: string
+  read: boolean
+}
+
+
+export type InboxItem = Partial<Record<keyof InboxItemInterface, any>>;

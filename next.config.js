@@ -17,6 +17,11 @@ const config = {
       },
     ];
   },
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost','https://symmetrical-fishstick-9v79vr94vj7h79vg-3000.app.github.dev/'],
+    },
+  }
 };
 
 export default config;

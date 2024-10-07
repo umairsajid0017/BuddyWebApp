@@ -3,7 +3,7 @@ import { type User, type LoginCredentials, type RegisterData, VerifyOtpResponse,
 import { useMutation, UseMutationResult, useQuery, UseQueryOptions } from 'react-query';
 import useAuthStore from '@/store/authStore';
 
-const api: AxiosInstance = axios.create({
+export const api: AxiosInstance = axios.create({
   baseURL: '/api',
   withCredentials: true,
 });

@@ -40,8 +40,30 @@ export default {
 				},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
+  				foreground: 'hsl(var(--secondary-foreground))',
+				  900: 'hsl(var(--secondary-900))',
+				  800: 'hsl(var(--secondary-800))',
+				  700: 'hsl(var(--secondary-700))',
+				  600: 'hsl(var(--secondary-600))',
+				  500: 'hsl(var(--secondary-500))',
+				  400: 'hsl(var(--secondary-400))',
+				  300: 'hsl(var(--secondary-300))',
+				  200: 'hsl(var(--secondary-200))',
+				  100: 'hsl(var(--secondary-100))',
   			},
+			text: {
+				DEFAULT: 'hsl(var(--text))',
+				foreground: 'hsl(var(--text-foreground))',
+				900: 'hsl(var(--text-900))',
+				800: 'hsl(var(--text-800))',
+				700: 'hsl(var(--text-700))',
+				600: 'hsl(var(--text-600))',
+				500: 'hsl(var(--text-500))',
+				400: 'hsl(var(--text-400))',
+				300: 'hsl(var(--text-300))',
+				200: 'hsl(var(--text-200))',
+				100: 'hsl(var(--text-100))',
+			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'
