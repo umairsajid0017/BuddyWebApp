@@ -24,7 +24,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, iconSrc, bgColor }) =
 );
 
 const DashboardStats = () => (
-  <section className="grid grid-cols-4 gap-4 mt-6">
+  <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
     <StatCard 
       title="Total Spend" 
       value="Rs. 3.4k" 

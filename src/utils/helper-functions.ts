@@ -4,3 +4,20 @@ export default function kebabCase(str: string): string {
       .replace(/([A-Z])/g, (match, p1) => `${p1.toLowerCase()}`)
       .replace(/^\-|\-$/g, '');
   }
+
+
+  type NameParts = {
+    firstName: string;
+    lastName: string;
+  };
+  
+export function splitFullName(fullName: string): NameParts {
+    const nameParts = fullName.trim().split(/\s+/); 
+    const lastName = nameParts.pop() || ""; 
+    const firstName = nameParts.join(" ") || ""; 
+  
+    return {
+      firstName,
+      lastName,
+    };
+  }

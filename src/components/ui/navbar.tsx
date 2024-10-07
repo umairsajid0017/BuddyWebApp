@@ -11,6 +11,7 @@ import TooltipWrapper from "./tooltip-wrapper";
 import InboxDropdown from "./inbox-dropdown";
 import { InboxItem } from "@/lib/types";
 import InboxComponent from "../inbox/inbox-component";
+import Link from "next/link";
 
 const NavBar: React.FC = () => {
  
@@ -22,12 +23,12 @@ const NavBar: React.FC = () => {
   return (
     <header className="flex justify-center bg-white shadow">
       <div className="container flex items-center justify-between px-6 py-4 md:mx-auto">
-        <div className="flex items-center gap-2">
+        <Link href={"/"} className="flex items-center gap-2">
           <Image src={"/assets/logo.png"} alt="logo" width={48} height={48} />
           <h1 className="hidden text-2xl font-bold md:flex">
             Buddies<span className="text-primary">App</span>
           </h1>
-        </div>
+        </Link>
         <div className="flex items-center space-x-4">
           <Input
             type="search"

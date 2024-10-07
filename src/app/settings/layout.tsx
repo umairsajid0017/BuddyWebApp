@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   ShieldIcon,
   HelpCircleIcon,
   ChevronRightIcon,
+  Loader2Icon,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -24,6 +25,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import kebabCase from "@/utils/helper-functions";
+import Loading from "@/components/ui/loading";
 
 const settingsItems = [
   { href: "/settings/profile", icon: UserIcon, label: "Edit Profile" },
@@ -42,6 +44,15 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const pathSegments = pathname.split("/").filter(Boolean);
 
@@ -51,37 +62,37 @@ export default function SettingsLayout({
       settingsItems.find((item) => item.href === href)?.label || segment;
     return { href, label };
   });
+
   return (
     <div className="container mx-auto p-6">
-        <div className="mb-4">
-
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator>
-            <ChevronRightIcon className="h-4 w-4" />
-          </BreadcrumbSeparator>
-          {breadcrumbItems.map((item, index) => (
+      <div className="mb-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator>
+              <ChevronRightIcon className="h-4 w-4" />
+            </BreadcrumbSeparator>
+            {breadcrumbItems.map((item, index) => (
               <React.Fragment key={item.href}>
-              <BreadcrumbItem>
-                {index === breadcrumbItems.length - 1 ? (
-                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                ) : (
+                <BreadcrumbItem>
+                  {index === breadcrumbItems.length - 1 ? (
+                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  ) : (
                     <BreadcrumbLink href={item.href}>{kebabCase(item.label)}</BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
-              {index < breadcrumbItems.length - 1 && (
+                  )}
+                </BreadcrumbItem>
+                {index < breadcrumbItems.length - 1 && (
                   <BreadcrumbSeparator>
-                  <ChevronRightIcon className="h-4 w-4" />
-                </BreadcrumbSeparator>
-              )}
-            </React.Fragment>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>{" "}
-          </div>
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </BreadcrumbSeparator>
+                )}
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
       <div className="flex flex-col gap-6 md:flex-row">
         {/* Sidebar */}
         <div className="w-full md:w-1/4">
@@ -107,7 +118,15 @@ export default function SettingsLayout({
 
         {/* Main Content */}
         <div className="w-full md:w-3/4">
-          <div className="rounded-lg bg-white p-6 shadow">{children}</div>
+          <div className="rounded-lg bg-white p-6 shadow">
+            {isLoading ? (
+              <div className="flex p-16 items-center justify-center">
+                <Loading/>
+              </div>
+            ) : (
+              children
+            )}
+          </div>
         </div>
       </div>
     </div>
