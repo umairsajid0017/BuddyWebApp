@@ -6,18 +6,32 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import NavBar from "@/components/ui/navbar"
 import { JSX, SVGProps, useEffect } from "react"
-import ServicesComponent from "../services/services-component"
+import PopularServices from "../services/popular-services"
 import useServicesStore from "@/store/servicesStore"
 import DashboardSkeleton from "./dashboard-skeleton"
 import { useServices } from "@/lib/api"
 import TooltipWrapper from "../ui/tooltip-wrapper"
 import DashboardStats from "./dashboard-stats"
+import kebabCase from "@/utils/helper-functions"
 
 export function DashboardComponent() {
-  const {services} = useServicesStore();
-  const {isLoading} = useServices();
+  const {data: servicesResponse, isLoading, error } = useServices();
+  const { 
+    services, 
+    setServices, 
+    setLoading, 
+    setError,
+    deleteService 
+  } = useServicesStore();
 
-  useEffect(()=>{}, [isLoading])
+  useEffect(()=>{
+    if (servicesResponse) {
+      setServices(servicesResponse.data);
+    }
+    setLoading(isLoading);
+    setError(error ? error.message : null);
+  }, [services, isLoading, error, setServices, setLoading, setError])
+  
   if(isLoading)
     return <DashboardSkeleton/>
 
@@ -52,15 +66,17 @@ export function DashboardComponent() {
             </Button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mt-4">
-            {services.map(
+            {services.slice(0,8).map(
               (service) => (
                 <TooltipWrapper content={service.description}>
 
               <Card key={service.id} className="p-4 bg-primary-100 hover:border-primary-400 transition-all  duration-300 cursor-pointer font-medium">
-               
-                <Image src={`/assets/icons/${service.name.toLowerCase()}.svg`} alt="timer" width={48} height={48} />
+               <CardContent className="flex flex-col items-center justify-center gap-2 p-2">
+
+                <Image src={`/assets/icons/${kebabCase(service.name)}.svg`} alt="timer" width={60} height={60} />
                  
-                <h4 className="mt-2 text-sm">{service.name}</h4>
+                <h4 className="mt-2 text-base font-semibold">{service.name}</h4>
+               </CardContent>
               </Card>
                  </TooltipWrapper>
               ),
@@ -81,7 +97,7 @@ export function DashboardComponent() {
               </Button>
             ))}
           </div>
-          <ServicesComponent />
+          <PopularServices services={services} />
         </section>
       </main>
     </div>

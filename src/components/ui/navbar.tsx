@@ -44,7 +44,7 @@ const NavBar: React.FC = () => {
             </Button>
           </TooltipWrapper>
           <TooltipWrapper content="Account Settings">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon"  onClick={()=> router.push('/settings')}>
               <SettingsIcon className="h-5 w-5" />
             </Button>
           </TooltipWrapper>

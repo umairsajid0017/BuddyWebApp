@@ -1,5 +1,5 @@
 'use client'
-import ServicesComponent from "@/components/services/services-component";
+import PopularServices from "@/components/services/popular-services";
 
 
 
@@ -9,6 +9,6 @@ export default function Test() {
   
 
   return (
-    <ServicesComponent />
+    <PopularServices />
   );
 }
