@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import * as React from "react";
-import { Bell, Check, MailsIcon, Trash } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import * as React from "react"
+import { Bell, Check, MailsIcon, Trash } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,15 +11,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import TooltipWrapper from "./tooltip-wrapper";
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
-import { InboxItem } from "@/lib/types";
+} from "@/components/ui/dropdown-menu"
+import TooltipWrapper from "./tooltip-wrapper"
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
+import { InboxItem } from "@/lib/types"
 
 interface InboxDropdownProps {
-  items: InboxItem[];
-  onMarkAsRead: (id: string) => void;
-  onDelete: (id: string) => void;
+  items: InboxItem[]
+  onMarkAsRead: (id: string) => void
+  onDelete: (id: string) => void
 }
 
 export default function InboxDropdown({
@@ -27,25 +27,34 @@ export default function InboxDropdown({
   onMarkAsRead,
   onDelete,
 }: InboxDropdownProps) {
-  const unreadCount = items.filter((item) => !item.read).length;
+  const unreadCount = items.filter((item) => !item.read).length
+  const [open, setOpen] = React.useState(false)
+
+  const handleMarkAsRead = (e: React.MouseEvent, id: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onMarkAsRead(id)
+  }
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onDelete(id)
+  }
 
   return (
-    <DropdownMenu>
-          <TooltipWrapper content={"Inbox"}>
-      <DropdownMenuTrigger asChild>
-        {/* <Button variant="outline" size="icon" className="relative">
-          <Bell className="h-4 w-4" />
-          <span className="sr-only">Toggle inbox menu</span>
-        </Button> */}
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <TooltipWrapper content="Inbox">
+        <DropdownMenuTrigger asChild>
           <Button className="relative" variant="ghost" size="icon">
             <MailsIcon className="h-5 w-5" />
             {unreadCount > 0 && (
               <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-red-500" />
             )}
           </Button>
-      </DropdownMenuTrigger>
-        </TooltipWrapper>
-        <DropdownMenuContent align="end" className="w-80">
+        </DropdownMenuTrigger>
+      </TooltipWrapper>
+      <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Inbox</p>
@@ -60,7 +69,7 @@ export default function InboxDropdown({
             <DropdownMenuItem disabled>No messages</DropdownMenuItem>
           ) : (
             items.map((item) => (
-              <DropdownMenuItem key={item.id} className="flex flex-col items-start p-4">
+              <DropdownMenuItem key={item.id} className="flex flex-col items-start p-4" onSelect={(e) => e.preventDefault()}>
                 <div className="flex w-full items-center">
                   <Avatar className="h-8 w-8 mr-2">
                     <AvatarImage src={item.senderAvatar} alt={item.senderName} />
@@ -83,7 +92,7 @@ export default function InboxDropdown({
                       variant="ghost"
                       size="sm"
                       className="h-8 px-2 text-xs"
-                      onClick={() => onMarkAsRead(item.id)}
+                      onClick={(e) => handleMarkAsRead(e, item.id)}
                     >
                       <Check className="mr-1 h-3 w-3" />
                       Mark as read
@@ -93,7 +102,7 @@ export default function InboxDropdown({
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2 text-xs"
-                    onClick={() => onDelete(item.id)}
+                    onClick={(e) => handleDelete(e, item.id)}
                   >
                     <Trash className="mr-1 h-3 w-3" />
                     Delete
@@ -105,5 +114,5 @@ export default function InboxDropdown({
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }

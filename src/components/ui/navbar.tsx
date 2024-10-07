@@ -10,42 +10,11 @@ import { useRouter } from "next/navigation";
 import TooltipWrapper from "./tooltip-wrapper";
 import InboxDropdown from "./inbox-dropdown";
 import { InboxItem } from "@/lib/types";
+import InboxComponent from "../inbox/inbox-component";
 
 const NavBar: React.FC = () => {
-  const [message, setMessage] = useState<InboxItem[] | null>([
-    {
-      id: "1",
-      title: "Hello",
-      // description: "string",
-      date: new Date().toLocaleDateString("en-US", {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      read: false,
-      senderAvatar: "https://api.dicebear.com/9.x/adventurer/svg?seed=Sophia",
-      senderName: "Sophia"
-    },
-    {
-      id: "2",
-      title: "Hello",
-      // description: "string",
-      date:  new Date().toLocaleDateString("en-US", {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      read: false,
-      senderAvatar: "https://api.dicebear.com/9.x/bottts/svg?seed=Mackenzie",
-      senderName: "Mackenzie"
-    },
-  ])
-
+ 
   const { user } = useAuth();
-
-  const handleDelete = (id: string)=> {
-    setMessage(prevMessages => prevMessages?.filter(msg => msg.id !== id) || null);
-  }
   useEffect(() => {
     console.log("User:", user);
   }, [user]);
@@ -79,13 +48,7 @@ const NavBar: React.FC = () => {
               <SettingsIcon className="h-5 w-5" />
             </Button>
           </TooltipWrapper>
-            <InboxDropdown
-              items={
-                message!
-              }
-              onDelete={(id)=> handleDelete(id) }
-              onMarkAsRead={() => {}}
-            />
+           <InboxComponent/>
          
           <div className="flex items-center">
             {user ? (
