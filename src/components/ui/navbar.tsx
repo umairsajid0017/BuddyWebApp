@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MailsIcon, SearchIcon, SettingsIcon } from "lucide-react";
+import { MailsIcon, SearchIcon, SettingsIcon, ShoppingCart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ import InboxComponent from "../inbox/inbox-component";
 import Link from "next/link";
 
 const NavBar: React.FC = () => {
- 
+
   const { user } = useAuth();
   useEffect(() => {
     console.log("User:", user);
@@ -44,13 +44,24 @@ const NavBar: React.FC = () => {
               <SearchIcon className="h-5 w-5" />
             </Button>
           </TooltipWrapper>
-          <TooltipWrapper content="Account Settings">
-            <Button variant="ghost" size="icon"  onClick={()=> router.push('/settings')}>
-              <SettingsIcon className="h-5 w-5" />
-            </Button>
-          </TooltipWrapper>
-           <InboxComponent/>
-         
+
+          {user &&
+            <>
+              <TooltipWrapper content={"My Bookings"}>
+                <Button variant="ghost" size="icon" onClick={() => router.push('/bookings')}>
+
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+              </TooltipWrapper>
+              <TooltipWrapper content="Account Settings">
+                <Button variant="ghost" size="icon" onClick={() => router.push('/settings')}>
+                  <SettingsIcon className="h-5 w-5" />
+                </Button>
+              </TooltipWrapper>
+            </>
+          }
+          {user && <InboxComponent />}
+
           <div className="flex items-center">
             {user ? (
               <>
@@ -61,13 +72,13 @@ const NavBar: React.FC = () => {
                     variant={"ghost"}
                   >
                     <Avatar className="cursor-pointer">
-                      <AvatarImage src="/placeholder-user.jpg" alt="User" />
+                      <AvatarImage src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny" alt="User" />
                       <AvatarFallback>LC</AvatarFallback>
                     </Avatar>
 
                     <div className="ml-3 hidden flex-col items-start justify-start p-2 md:flex">
                       <p className="text-sm font-medium">{user?.name}</p>
-                      <p className="text-secondary-800 text-xs">
+                      <p className="text-[#619EFF] text-xs">
                         {user?.email}
                       </p>
                     </div>

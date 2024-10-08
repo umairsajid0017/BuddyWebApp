@@ -50,14 +50,16 @@ const InboxComponent: React.FC = ()=> {
         setMessage(prevMessages => prevMessages?.filter(msg => msg.id !== id) || null);
       }
 
+      const handleMarkAsRead = (id: string) =>{
 
+      }
       return <>
          <InboxDropdown
               items={
                 message!
               }
               onDelete={(id)=> handleDelete(id) }
-              onMarkAsRead={() => {}}
+              onMarkAsRead={(id) => {handleMarkAsRead(id)}}
             />
             </>
 

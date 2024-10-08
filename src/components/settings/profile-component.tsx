@@ -30,11 +30,11 @@ export default function ProfileComponent() {
       <div className="flex justify-end mb-6">
         <div className="relative">
           <Avatar className="h-24 w-24">
-            <AvatarImage src="/placeholder.svg?height=96&width=96" alt="Profile picture" />
+            <AvatarImage src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny" alt="Profile picture" />
             <AvatarFallback>{`${firstName[0] ?? ""}${lastName[0] ?? ""}`}</AvatarFallback>
             </Avatar>
-          <Button size="sm" className="absolute bottom-0 right-0 rounded-full" variant="secondary">
-            <CameraIcon className="h-4 w-4" />
+          <Button size="sm" className="absolute bottom-0 right-0 rounded-full" variant="outline">
+            <CameraIcon className="h-4 w-4 text-primary" />
           </Button>
         </div>
       </div>
