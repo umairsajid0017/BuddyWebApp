@@ -62,11 +62,11 @@ export function DashboardComponent() {
           </h3>
         </div>
         <div className="mt-4 w-full flex items-center justify-center">
-          <Input type="text" placeholder="Search services" className="w-10/12 h-14" />
+          <Input type="text" placeholder="Search services" className="w-full md:w-10/12 h-14" />
         </div>
 
       </div>
-      <div className="lg:w-1/3 h-64 bg-red-100 rounded-lg shadow p-0 flex flex-col justify-center">
+      <div className="lg:w-1/3 h-48 md:h-64 bg-red-100 rounded-lg shadow p-0 flex flex-col justify-center">
       <CardStack
         items={images}
         renderItem={(item) => (

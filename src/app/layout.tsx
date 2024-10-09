@@ -13,7 +13,7 @@ import NavbarWrapper from "@/components/ui/navbar-wrapper";
 export const metadata: Metadata = {
   title: "Buddy Customer",
   description: "Buddy website for customers",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [{ rel: "icon", url: "/assets/logo.png" }],
 };
 
 export default function RootLayout({

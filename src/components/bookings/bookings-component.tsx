@@ -1,10 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SprayCan, PaintBucket, Waves, Calendar } from 'lucide-react';
+import { SprayCan, PaintBucket, Waves } from 'lucide-react';
 import Image from 'next/image';
+import BookingDetailsSheet from './bookings-details-sheet';
+import { Button } from '../ui/button';
 
 type Task = {
     id: string;
@@ -12,6 +13,9 @@ type Task = {
     image: string;
     person: string;
     status: 'Upcoming' | 'Completed' | 'Cancelled';
+    date?: string;
+    time?: string;
+    location?: string;
 };
 
 type TaskCardProps = {
@@ -51,35 +55,27 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => (
                         ? 'default'
                         : task.status === 'Completed'
                             ? 'default'
-                            : 'secondary'
+                            : 'destructive'
                 }
                 className={`${task.status === 'Completed' ? 'bg-green-500 hover:bg-green-400' : ''}`}
-            >        {task.status}
+            >
+                {task.status}
             </Badge>
-            <Button variant="outline" size="sm">Details</Button>
+            <BookingDetailsSheet task={task} />
         </CardFooter>
     </Card>
 );
 
 const tasks: Task[] = [
-    // { id: '1', title: 'House Cleaning', image: '/api/placeholder/400/320', person: 'Jenny Wilson', status: 'Upcoming' },
-    // { id: '2', title: 'Garage Cleaning', image: '/api/placeholder/400/320', person: 'Florencio Dorrance', status: 'Completed' },
-    // { id: '3', title: 'Painting the Walls', image: '/api/placeholder/400/320', person: 'Benny Spanbauer', status: 'Upcoming' },
-    // { id: '5', title: 'Laundry', image: '/api/placeholder/400/320', person: 'Jenny Wilson', status: 'Cancelled' },
-    // { id: '6', title: 'Laundry', image: '/api/placeholder/400/320', person: 'Jenny Wilson', status: 'Cancelled' },
-    // { id: '7', title: 'Laundry', image: '/api/placeholder/400/320', person: 'Jenny Wilson', status: 'Cancelled' },
-    // { id: '1', title: 'House Cleaning', image: '/api/placeholder/400/320', person: 'Jenny Wilson', status: 'Upcoming' },
-    { id: '2', title: 'Garage Cleaning', image: '/api/placeholder/400/320', person: 'Florencio Dorrance', status: 'Completed' },
-    // { id: '3', title: 'Painting the Walls', image: '/api/placeholder/400/320', person: 'Benny Spanbauer', status: 'Upcoming' },
-    // { id: '5', title: 'Laundry', image: '/api/placeholder/400/320', person: 'Jenny Wilson', status: 'Cancelled' },
-    { id: '6', title: 'Laundry', image: '/api/placeholder/400/320', person: 'Jenny Wilson', status: 'Cancelled' },
-    // { id: '7', title: 'Laundry', image: '/api/placeholder/400/320', person: 'Jenny Wilson', status: 'Cancelled' },
+    { id: '2', title: 'Garage Cleaning', image: '/assets/garage.png', person: 'Florencio Dorrance', status: 'Completed', date: '2023-06-15', time: '14:00 - 16:00', location: '123 Main St, Anytown, USA' },
+    { id: '6', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Cancelled', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
+    { id: '4', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Upcoming', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
 ];
 
 const NoBookingsView: React.FC<{ status: string }> = ({ status }) => (
     <div className="flex flex-col items-center justify-center py-12">
         <div className="flex justify-center items-center  pointer-events-none">
-            <Image src="/assets/verify-email.svg" alt="Verify Email" className="h-[180px] w-[180px]" width={'180'} height={'180'} />
+            <Image src="/assets/verify-email.svg" alt="Verify Email" className="h-[180px] w-[180px]" width={180} height={180} />
         </div>
         <h2 className="text-2xl text-center font-semibold mb-2">You have no {status} booking</h2>
         <p className="text-gray-500 text-center mb-6">You do not have any {status} booking. Make a new booking by clicking the button below.</p>

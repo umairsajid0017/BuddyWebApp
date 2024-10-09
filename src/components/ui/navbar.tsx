@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MailsIcon, SearchIcon, SettingsIcon, ShoppingCart } from "lucide-react";
+import { Calendar, MailsIcon, SearchIcon, SettingsIcon, ShoppingCart, Tag } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
@@ -12,10 +12,17 @@ import InboxDropdown from "./inbox-dropdown";
 import { InboxItem } from "@/lib/types";
 import InboxComponent from "../inbox/inbox-component";
 import Link from "next/link";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 
 const NavBar: React.FC = () => {
 
   const { user } = useAuth();
+
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleMouseEnter = () => setIsOpen(true)
+  const handleMouseLeave = () => setIsOpen(false)
+
   useEffect(() => {
     console.log("User:", user);
   }, [user]);
@@ -47,13 +54,36 @@ const NavBar: React.FC = () => {
 
           {user &&
             <>
-              <TooltipWrapper content={"My Bookings"}>
-                <Button variant="ghost" size="icon" onClick={() => router.push('/bookings')}>
-
+              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+                <TooltipWrapper key={"Bookings"} content={"My Bookings"}>
+                  {/* <Button variant="ghost" size="icon" onClick={() => router.push('/bookings')}>
                   <ShoppingCart className="h-5 w-5" />
-                </Button>
-              </TooltipWrapper>
-              <TooltipWrapper content="Account Settings">
+                </Button> */}
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipWrapper>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48"
+                >
+                  <DropdownMenuItem onClick={() => router.push('/offers')}>
+                    <Tag className="mr-2 h-4 w-4" />
+                    <span>Offers</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/bookings')}>
+                    <Calendar className="mr-2 h-4 w-4" />
+                    <span>My Bookings</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <TooltipWrapper key={"account-settings"} content="Account Settings">
                 <Button variant="ghost" size="icon" onClick={() => router.push('/settings')}>
                   <SettingsIcon className="h-5 w-5" />
                 </Button>
@@ -65,7 +95,7 @@ const NavBar: React.FC = () => {
           <div className="flex items-center">
             {user ? (
               <>
-                <TooltipWrapper content={"Account"}>
+                <TooltipWrapper key={"account"} content={"Account"}>
                   <Button
                     className="flex items-center justify-start px-2"
                     size={"lg"}
