@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar, LogOut, MailsIcon, SearchIcon, SettingsIcon, ShoppingCart, Tag, User } from "lucide-react";
+import { Bookmark, Calendar, LogOut, MailsIcon, SearchIcon, SettingsIcon, ShoppingCart, Tag, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
@@ -122,6 +122,10 @@ const NavBar: React.FC = () => {
                     <DropdownMenuItem onClick={() => router.push('/profile')}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                      <Bookmark className="mr-2 h-4 w-4" />
+                      <span>Bookmarks</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => router.push('/bookings')}>
                       <LogOut className="mr-2 h-4 w-4" />

@@ -103,7 +103,7 @@ export default function SettingsLayout({
                 <Button
                   key={item.href}
                   variant={isActive ? "secondary" : "ghost"}
-                  className={`w-full justify-start ${isActive ? "bg-secondary-100" : ""}`}
+                  className={`w-full justify-start ${isActive ? "bg-primary-100" : ""}`}
                   asChild
                 >
                   <Link href={item.href}>
