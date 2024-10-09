@@ -1,7 +1,7 @@
-import ProfileComponent from "@/components/settings/profile-component"
+import ProfileComponent from "@/components/settings/profile-settings-component"
 
 
-const Profile: React.FC = ()=> {
+const ProfileSettings: React.FC = ()=> {
     return (
         <>
             <ProfileComponent/>
@@ -9,4 +9,4 @@ const Profile: React.FC = ()=> {
     )
 }
 
-export default Profile;
+export default ProfileSettings;

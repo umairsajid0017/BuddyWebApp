@@ -87,6 +87,12 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({ task }) => {
                             onCancel={() => console.log('Cancellation aborted')}
                         />
                     }
+                    {
+                        (task.status === 'Completed') && 
+                        <Button className='flex-1'>
+                            Book Again
+                        </Button>
+                    }
                     </div>
                 </div>
 

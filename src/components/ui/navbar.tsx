@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar, MailsIcon, SearchIcon, SettingsIcon, ShoppingCart, Tag } from "lucide-react";
+import { Calendar, LogOut, MailsIcon, SearchIcon, SettingsIcon, ShoppingCart, Tag, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
@@ -18,10 +18,9 @@ const NavBar: React.FC = () => {
 
   const { user } = useAuth();
 
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpenBookings, setIsOpenBookings] = useState(false)
+  const [isOpenAccount, setIsOpenAccount] = useState(false)
 
-  const handleMouseEnter = () => setIsOpen(true)
-  const handleMouseLeave = () => setIsOpen(false)
 
   useEffect(() => {
     console.log("User:", user);
@@ -54,11 +53,8 @@ const NavBar: React.FC = () => {
 
           {user &&
             <>
-              <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+              <DropdownMenu open={isOpenBookings} onOpenChange={setIsOpenBookings}>
                 <TooltipWrapper key={"Bookings"} content={"My Bookings"}>
-                  {/* <Button variant="ghost" size="icon" onClick={() => router.push('/bookings')}>
-                  <ShoppingCart className="h-5 w-5" />
-                </Button> */}
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
@@ -73,7 +69,7 @@ const NavBar: React.FC = () => {
                   align="end"
                   className="w-48"
                 >
-                  <DropdownMenuItem onClick={() => router.push('/offers')}>
+                  <DropdownMenuItem onClick={() => router.push('/bookings/offers')}>
                     <Tag className="mr-2 h-4 w-4" />
                     <span>Offers</span>
                   </DropdownMenuItem>
@@ -95,25 +91,44 @@ const NavBar: React.FC = () => {
           <div className="flex items-center">
             {user ? (
               <>
-                <TooltipWrapper key={"account"} content={"Account"}>
-                  <Button
-                    className="flex items-center justify-start px-2"
-                    size={"lg"}
-                    variant={"ghost"}
-                  >
-                    <Avatar className="cursor-pointer">
-                      <AvatarImage src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny" alt="User" />
-                      <AvatarFallback>LC</AvatarFallback>
-                    </Avatar>
+                <DropdownMenu open={isOpenAccount} onOpenChange={setIsOpenAccount}>
 
-                    <div className="ml-3 hidden flex-col items-start justify-start p-2 md:flex">
-                      <p className="text-sm font-medium">{user?.name}</p>
-                      <p className="text-[#619EFF] text-xs">
-                        {user?.email}
-                      </p>
-                    </div>
-                  </Button>
-                </TooltipWrapper>
+                    <DropdownMenuTrigger asChild>
+
+                      <Button
+                        className="flex items-center justify-start px-2"
+                        size={"lg"}
+                        variant={"ghost"}
+                        onClick={() => router.push('/profile')}
+                      >
+                        <Avatar className="cursor-pointer">
+                          <AvatarImage src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny" alt="User" />
+                          <AvatarFallback>LC</AvatarFallback>
+                        </Avatar>
+
+                        <div className="ml-3 hidden flex-col items-start justify-start p-2 md:flex">
+                          <p className="text-sm font-medium">{user?.name}</p>
+                          <p className="text-[#619EFF] text-xs">
+                            {user?.email}
+                          </p>
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-48"
+                  >
+                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/bookings')}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <Button onClick={() => router.push("/login")}>Login</Button>

@@ -67,9 +67,15 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => (
 );
 
 const tasks: Task[] = [
-    { id: '2', title: 'Garage Cleaning', image: '/assets/garage.png', person: 'Florencio Dorrance', status: 'Completed', date: '2023-06-15', time: '14:00 - 16:00', location: '123 Main St, Anytown, USA' },
+    { id: '2', title: 'Garage Cleaning', image: '/assets/garage.png', person: 'Florencio Dorrance', status: 'Cancelled', date: '2023-06-15', time: '14:00 - 16:00', location: '123 Main St, Anytown, USA' },
     { id: '6', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Cancelled', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
-    { id: '4', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Upcoming', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
+    { id: '4', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Completed', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
+    { id: '7', title: 'Garage Cleaning', image: '/assets/garage.png', person: 'Florencio Dorrance', status: 'Completed', date: '2023-06-15', time: '14:00 - 16:00', location: '123 Main St, Anytown, USA' },
+    { id: '8', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Cancelled', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
+    { id: '9', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Completed', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
+    { id: '11', title: 'Garage Cleaning', image: '/assets/garage.png', person: 'Florencio Dorrance', status: 'Completed', date: '2023-06-15', time: '14:00 - 16:00', location: '123 Main St, Anytown, USA' },
+    { id: '13', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Upcoming', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
+    { id: '14', title: 'Laundry', image: '/assets/laundry.png', person: 'Jenny Wilson', status: 'Upcoming', date: '2023-06-18', time: '10:00 - 12:00', location: '456 Elm St, Somewhere, USA' },
 ];
 
 const NoBookingsView: React.FC<{ status: string }> = ({ status }) => (
