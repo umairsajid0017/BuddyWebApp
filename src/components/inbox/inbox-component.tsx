@@ -1,6 +1,6 @@
 import { InboxItem } from "@/lib/types";
 import React, { useState } from "react";
-import InboxDropdown from "../ui/inbox-dropdown";
+import InboxDropdown from "./inbox-dropdown";
 
 const InboxComponent: React.FC = ()=> {
     const [message, setMessage] = useState<InboxItem[] | null>([

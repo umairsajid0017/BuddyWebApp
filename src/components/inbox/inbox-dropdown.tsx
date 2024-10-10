@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Bell, Check, MailsIcon, Trash } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Bell, Check, MailsIcon, Trash, Inbox } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,8 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import TooltipWrapper from "./tooltip-wrapper"
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar"
+import TooltipWrapper from "../ui/tooltip-wrapper"
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { InboxItem } from "@/lib/types"
 
 interface InboxDropdownProps {
@@ -27,6 +28,7 @@ export default function InboxDropdown({
   onMarkAsRead,
   onDelete,
 }: InboxDropdownProps) {
+  const router = useRouter()
   const unreadCount = items.filter((item) => !item.read).length
   const [open, setOpen] = React.useState(false)
 
@@ -40,6 +42,11 @@ export default function InboxDropdown({
     e.preventDefault()
     e.stopPropagation()
     onDelete(id)
+  }
+
+  const handleInboxClick = () => {
+    router.push('/inbox')
+    setOpen(false)
   }
 
   return (
@@ -112,6 +119,13 @@ export default function InboxDropdown({
             ))
           )}
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="cursor-pointer" onSelect={handleInboxClick}>
+          <Button variant="ghost" className="w-full justify-start" onClick={handleInboxClick}>
+            <Inbox className="mr-2 h-4 w-4" />
+            View All Messages
+          </Button>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

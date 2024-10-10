@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import TooltipWrapper from "./tooltip-wrapper";
-import InboxDropdown from "./inbox-dropdown";
+import InboxDropdown from "../inbox/inbox-dropdown";
 import { InboxItem } from "@/lib/types";
 import InboxComponent from "../inbox/inbox-component";
 import Link from "next/link";
