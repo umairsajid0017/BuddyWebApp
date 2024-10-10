@@ -25,18 +25,7 @@ const Profile: React.FC = () => {
   const { user } = useAuth()
   const { data: servicesResponse, isLoading, error } = useServices();
 
-  // const user: UserInfo = {
-  //   firstName: "John",
-  //   lastName: "Doe",
-  //   dateOfBirth: "11/27/95",
-  //   email: "johndoe23@gmail.com",
-  //   country: "United States",
-  //   phoneNumber: "0334-5557891",
-  //   nationalId: "3922-5657995-01",
-  //   gender: "Male",
-  //   address: "267 New Avenue Park, New York",
-  //   avatarUrl: "https://api.dicebear.com/9.x/dylan/svg?seed=Destiny"
-  // }
+
 
   useEffect(() => {
     if (servicesResponse) {

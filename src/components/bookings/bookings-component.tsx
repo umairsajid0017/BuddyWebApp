@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SprayCan, PaintBucket, Waves } from 'lucide-react';
 import Image from 'next/image';
 import BookingDetailsSheet from './bookings-details-sheet';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
+import { NewBookingDialog } from './create-booking';
 
 type Task = {
     id: string;
@@ -85,15 +88,17 @@ const NoBookingsView: React.FC<{ status: string }> = ({ status }) => (
         </div>
         <h2 className="text-2xl text-center font-semibold mb-2">You have no {status} booking</h2>
         <p className="text-gray-500 text-center mb-6">You do not have any {status} booking. Make a new booking by clicking the button below.</p>
-        <Button variant="default" className="">
-            Make New Booking
-        </Button>
+        <NewBookingDialog />
     </div>
 );
 
 const BookingsComponent: React.FC = () => {
     return (
         <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold">My Bookings</h1>
+                <NewBookingDialog />
+            </div>
             <Tabs defaultValue="upcoming">
                 <TabsList className="mb-4">
                     <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
