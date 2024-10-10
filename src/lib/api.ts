@@ -15,11 +15,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 export const useRegister = () =>
-  useMutation((userData: RegisterData) => api.post<{ user: User }>('/register', userData));
+  useMutation((userData: RegisterData) => 
+    api.post<{ status: boolean; message: string; data?: { user: User } }>('/register', userData)
+    .then(response => {
+      if (response.data.status === false) {
+        throw new Error(response.data.message);
+      }
+      return response.data.data;
+    })
+  );
 
-export const useLogin = () =>
-  useMutation((credentials: LoginCredentials) => api.post<{ user: User; token: string }>('/login', credentials));
-
+  export const useLogin = () =>
+    useMutation((credentials: LoginCredentials) => 
+      api.post<{ 
+        status: boolean; 
+        token: string; 
+        user: User;
+        message?: string
+      }>('/login', credentials)
+      .then(response => {
+        if (response.data.status === false) {
+          throw new Error(response.data.message || "Login failed");
+        }
+        return response.data;
+      })
+    );
 export const useLogout = () =>
   useMutation(() => api.post<void>('/logout'));
 

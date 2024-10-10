@@ -32,17 +32,24 @@ export default function Login() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrors({});
-    setBackendErrors({});
-    try {
-      const validatedCredentials = loginSchema.parse(credentials);
-      const response = await loginMutation.mutateAsync(validatedCredentials);
-      const {user, token} = response.data;
-      console.log('User logged in:', user, token);
-      useAuthStore.getState().setUser(user);
-      useAuthStore.getState().setToken(token);
-      setAuthCookie(token)
-      void router.push('/');
+  setErrors({});
+  setBackendErrors({});
+  try {
+    const validatedCredentials = loginSchema.parse(credentials);
+    const data = await loginMutation.mutateAsync(validatedCredentials);
+    
+       // Check if data has the expected properties
+       if (data && data.status && data.token && data.user) {
+        const { user, token } = data;
+        console.log('User logged in:', user, token);
+        useAuthStore.getState().setUser(user);
+        useAuthStore.getState().setToken(token);
+        setAuthCookie(token);
+        void router.push('/');
+      } else {
+        throw new Error("Login successful but received unexpected data format");
+      }
+    
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         const newErrors: LoginErrors = {};
@@ -53,10 +60,15 @@ export default function Login() {
         setErrors(newErrors);
       } else if (axios.isAxiosError(error)) {
         console.error('Login failed', error.response?.data);
-        if (error.response?.data?.data) {
-          setBackendErrors(error.response.data.data);
+        // Even for network errors, we might get a 200 status, so we need to check the response data
+        if (error.response?.data) {
+          if (error.response.data.status === false) {
+            setBackendErrors({ general: [error.response.data.message] });
+          } else {
+            setBackendErrors({ general: ["An unexpected error occurred"] });
+          }
         } else {
-          setBackendErrors({ general: [error.response?.data?.message || "An unexpected error occurred"] });
+          setBackendErrors({ general: ["An unexpected error occurred"] });
         }
       } else {
         console.error('Login failed', error);
