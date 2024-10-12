@@ -101,7 +101,7 @@ export default function CalendarComponent() {
           </div>
           <h4 className="font-semibold mb-2">You have no service booking</h4>
           <p className="text-sm text-muted-foreground">
-            You don't have a service booking on this date
+            You don&apos;t have a service booking on this date
           </p>
         </div>
       </div>

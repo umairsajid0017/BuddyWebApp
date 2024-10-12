@@ -61,15 +61,15 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({ task }) => {
                         </Badge>
                         <div className="flex items-center space-x-2">
                             <Calendar className="h-4 w-4" />
-                            <span>{task.date || 'Date not specified'}</span>
+                            <span>{task.date ?? 'Date not specified'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                             <Clock className="h-4 w-4" />
-                            <span>{task.time || 'Time not specified'}</span>
+                            <span>{task.time ?? 'Time not specified'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                             <MapPin className="h-4 w-4" />
-                            <span>{task.location || 'Location not specified'}</span>
+                            <span>{task.location ?? 'Location not specified'}</span>
                         </div>
                     </div>
                     <div className="flex space-x-4">

@@ -38,43 +38,66 @@ const PopularServices: React.FC<PopularServicesProps> = ({services}) => {
     
   }, [isLoading, services]);
 
+  interface PexelsPhoto {
+    src: {
+      medium: string;
+    };
+  }
+  
+  interface PexelsResponse {
+    photos?: PexelsPhoto[];  // Mark photos as optional
+  }
+  
+  interface ImageResult {
+    id: number;
+    url: string;
+  }
+  
   const fetchImages = async (services: Service[]) => {
     const imagePromises = services.map(service =>
       fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(service.name)}&per_page=1`, {
         headers: {
-          Authorization: PEXELS_API_KEY
-        }
+          Authorization: PEXELS_API_KEY,
+        },
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.photos && data.photos.length > 0) {
-          return { id: service.id, url: data.photos[0].src.medium };
-        }
-        return null;
-      })
-      .catch(error => {
-        console.error('Error fetching image:', error);
-        return null;
-      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch image");
+          }
+          return response.json() as Promise<PexelsResponse>;
+        })
+        .then(data => {
+          // Add null/undefined check for `data` and `data.photos`
+          if (data?.photos && data.photos.length > 0) {
+            return { id: service.id, url: data!.photos[0]!.src.medium } as ImageResult;
+          }
+          return null;
+        })
+        .catch(error => {
+          console.error('Error fetching image:', error);
+          return null;
+        })
     );
-
+  
     const imageResults = await Promise.all(imagePromises);
-    const newImages = imageResults.reduce((acc, result) => {
+  
+    // Use a more specific type for imageResults
+    const newImages = imageResults.reduce((acc: { [key: number]: string }, result) => {
       if (result) {
         acc[result.id] = result.url;
       }
       return acc;
-    }, {} as { [key: number]: string });
-
+    }, {});
+  
     setImages(newImages);
   };
-
+  
 
 
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-        {[...Array(8)].map((_, index) => (
+        {[...Array<number>(8)].map((_: any, index) => (
           <ServiceSkeleton key={index} />
         ))}
       </div>

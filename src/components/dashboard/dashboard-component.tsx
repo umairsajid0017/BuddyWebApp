@@ -86,7 +86,7 @@ export function DashboardComponent() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mt-4">
             {services.slice(0,8).map(
               (service) => (
-                <TooltipWrapper content={service.description}>
+                <TooltipWrapper key={service.id} content={service.description}>
 
               <Card key={service.id} className="p-4 bg-primary-100 hover:border-primary-400 transition-all  duration-300 cursor-pointer font-medium">
                <CardContent className="flex flex-col items-center justify-center gap-2 p-2">

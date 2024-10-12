@@ -9,6 +9,6 @@ export default function Test() {
   
 
   return (
-    <PopularServices />
+    <PopularServices key={"1"} services={[]} />
   );
 }

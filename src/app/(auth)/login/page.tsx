@@ -3,14 +3,14 @@
 import { useState, type FormEvent } from 'react';
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
-import { ZodError } from 'zod';
+import { ZodError, ZodIssue } from 'zod';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import useAuthStore from '@/store/authStore';
 import { loginSchema } from '@/lib/schemas';
-import { type LoginCredentials } from '@/lib/types';
+import { User, type LoginCredentials } from '@/lib/types';
 import { useLogin } from '@/lib/api';
 import Lottie from 'react-lottie';
 import Loading from '@/components/ui/loading';
@@ -18,6 +18,13 @@ import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
 import axios from 'axios';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { setAuthCookie } from './authOptions';
+interface LoginResponse {
+  status: boolean;
+  token: string;
+  user: User;
+  message?: string
+}
+
 
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
@@ -25,10 +32,10 @@ type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 export default function Login() {
   const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '', loginType: 'email' });
   const [errors, setErrors] = useState<LoginErrors>({});
-  const [backendErrors, setBackendErrors] = useState<{ [key: string]: string[] }>({});
+  const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
   const loginMutation = useLogin();
   const router = useRouter();
-  const backgroundImageUrl = (backgroundSvg as { src: string }).src;
+  const backgroundImageUrl = backgroundSvg.src;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,7 +43,7 @@ export default function Login() {
   setBackendErrors({});
   try {
     const validatedCredentials = loginSchema.parse(credentials);
-    const data = await loginMutation.mutateAsync(validatedCredentials);
+    const data: LoginResponse = await loginMutation.mutateAsync(validatedCredentials);
     
        // Check if data has the expected properties
        if (data && data.status && data.token && data.user) {
@@ -44,8 +51,14 @@ export default function Login() {
         console.log('User logged in:', user, token);
         useAuthStore.getState().setUser(user);
         useAuthStore.getState().setToken(token);
-        setAuthCookie(token);
-        void router.push('/');
+        setAuthCookie(token)
+        .then(() => {
+          console.log('Cookie set successfully');
+        })
+        .catch((error) => {
+          console.error('Failed to set cookie', error);
+        });
+       void router.push('/');
       } else {
         throw new Error("Login successful but received unexpected data format");
       }
@@ -53,10 +66,11 @@ export default function Login() {
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         const newErrors: LoginErrors = {};
-        error.errors.forEach((err) => {
+      ( error.errors as ZodIssue[]).forEach((err) => {
           const path = err.path[0] as keyof LoginCredentials;
           newErrors[path] = err.message;
         });
+        //@ts-ignore
         setErrors(newErrors);
       } else if (axios.isAxiosError(error)) {
         console.error('Login failed', error.response?.data);
@@ -152,7 +166,7 @@ export default function Login() {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a href="/register" className="font-medium text-primary hover:underline">
               Sign up
             </a>

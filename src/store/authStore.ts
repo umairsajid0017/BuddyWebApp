@@ -29,8 +29,9 @@ type AuthPersist = (
 ) => StateCreator<AuthState>;
 
 const handleError = (error: unknown): string => {
-  if (error instanceof AxiosError) {
-    return error.response?.data?.message || error.message;
+  if (error instanceof AxiosError && error.response) {
+    const responseData = error.response?.data as { message?: string };
+    return responseData?.message ?? error.message;
   } else if (error instanceof ZodError) {
     return 'Invalid data received from server';
   } else if (error instanceof Error) {
@@ -38,6 +39,9 @@ const handleError = (error: unknown): string => {
   }
   return 'An unknown error occurred';
 };
+
+
+
 
 const useAuthStore = create<AuthState>(
   (persist as AuthPersist)(
@@ -71,10 +75,10 @@ export const useAuth = () => {
 
   const loginUser = async (credentials: LoginCredentials) => {
     try {
-      const { data } = await loginMutation.mutateAsync(credentials);
-      const parsedUser = userSchema.parse(data.user);
+      const result = await loginMutation.mutateAsync(credentials);
+      const parsedUser = userSchema.parse(result.user); 
       setUser(parsedUser);
-      setToken(data.token);  // Save the token
+      setToken(result.token);  // Save the token
       setError(null);
       return parsedUser;
     } catch (error: unknown) {
@@ -83,11 +87,15 @@ export const useAuth = () => {
       throw new Error(errorMessage);
     }
   };
+  
 
   const registerUser = async (userData: RegisterData) => {
     try {
-      const { data } = await registerMutation.mutateAsync(userData);
-      const parsedUser = userSchema.parse(data.user);
+      const data = await registerMutation.mutateAsync(userData);
+      
+   
+      
+      const parsedUser = data ? userSchema.parse(data) : null;     
       setUser(parsedUser);
       setError(null);
       return parsedUser;
@@ -97,7 +105,7 @@ export const useAuth = () => {
       throw new Error(errorMessage);
     }
   };
-
+  
   const logoutUser = async () => {
     try {
       await logoutMutation.mutateAsync();
@@ -115,13 +123,11 @@ export const useAuth = () => {
     if (!isInitialized) {
       try {
         if (user && token) {
-          // If we have a user and token in the store, validate it with the server
           const { data } = await userQuery.refetch();
           const parsedUser = userSchema.parse(data);
           setUser(parsedUser);
           setError(null);
         } else {
-          // If no user or token in store, check with the server
           const { data } = await userQuery.refetch();
           const parsedUser = userSchema.parse(data);
           setUser(parsedUser);
@@ -130,7 +136,7 @@ export const useAuth = () => {
       } catch (error: unknown) {
         const errorMessage = handleError(error);
         setUser(null);
-        setToken(null);  // Clear the token on error
+        setToken(null);
         setError(errorMessage);
       } finally {
         setIsInitialized(true);

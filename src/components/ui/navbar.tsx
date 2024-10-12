@@ -30,10 +30,10 @@ const NavBar: React.FC = () => {
     <header className="flex justify-center bg-white shadow">
       <div className="container flex items-center justify-between px-6 py-4 md:mx-auto">
         <Link href={"/"} className="flex items-center gap-2">
-          <Image src={"/assets/logo.png"} alt="logo" width={48} height={48} />
-          <h1 className="hidden text-2xl font-bold md:flex">
-            Buddies<span className="text-primary">App</span>
-          </h1>
+          <Image src={"/assets/logo-main.jpg"} alt="logo" width={48} height={48} />
+            {/* <h1 className="hidden text-2xl font-bold md:flex">
+              Buddies<span className="text-primary">App</span>
+            </h1> */}
         </Link>
         <div className="flex items-center space-x-4">
           <Input
