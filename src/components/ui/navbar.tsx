@@ -30,10 +30,8 @@ const NavBar: React.FC = () => {
     <header className="flex justify-center bg-white shadow">
       <div className="container flex items-center justify-between px-6 py-4 md:mx-auto">
         <Link href={"/"} className="flex items-center gap-2">
-          <Image src={"/assets/logo.png"} alt="logo" width={48} height={48} />
-          <h1 className="hidden text-2xl font-bold md:flex">
-            Buddies<span className="text-primary">App</span>
-          </h1>
+          <Image src={"/assets/logo.jpg"} alt="logo" width={48} height={48} />
+
         </Link>
         <div className="flex items-center space-x-4">
           <Input
@@ -53,67 +51,62 @@ const NavBar: React.FC = () => {
 
           {user &&
             <>
-              <DropdownMenu open={isOpenBookings} onOpenChange={setIsOpenBookings}>
-                <TooltipWrapper key={"Bookings"} content={"My Bookings"}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="relative"
-                    >
-                      <ShoppingCart className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                </TooltipWrapper>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-48"
+              <TooltipWrapper key={"Bookings"} content={"My Bookings"}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                  onClick={() => router.push('/bookings')}
                 >
-                  <DropdownMenuItem onClick={() => router.push('/bookings/offers')}>
-                    <Tag className="mr-2 h-4 w-4" />
-                    <span>Offers</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push('/bookings')}>
-                    <Calendar className="mr-2 h-4 w-4" />
-                    <span>My Bookings</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <Calendar className="h-5 w-5" />
+                </Button>
+              </TooltipWrapper>
+              <TooltipWrapper key={"offers"} content={"Offers"}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                  onClick={() => router.push('/bookings/offers')}
+                >
+                  <Tag className="h-5 w-5" />
+                </Button>
+              </TooltipWrapper>
+              {user && <InboxComponent />}
               <TooltipWrapper key={"account-settings"} content="Account Settings">
                 <Button variant="ghost" size="icon" onClick={() => router.push('/settings')}>
                   <SettingsIcon className="h-5 w-5" />
                 </Button>
               </TooltipWrapper>
+
             </>
           }
-          {user && <InboxComponent />}
 
           <div className="flex items-center">
             {user ? (
               <>
                 <DropdownMenu open={isOpenAccount} onOpenChange={setIsOpenAccount}>
 
-                    <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild>
 
-                      <Button
-                        className="flex items-center justify-start px-2"
-                        size={"lg"}
-                        variant={"ghost"}
-                        onClick={() => router.push('/profile')}
-                      >
-                        <Avatar className="cursor-pointer">
-                          <AvatarImage src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny" alt="User" />
-                          <AvatarFallback>LC</AvatarFallback>
-                        </Avatar>
+                    <Button
+                      className="flex items-center justify-start px-2"
+                      size={"lg"}
+                      variant={"ghost"}
+                      onClick={() => router.push('/profile')}
+                    >
+                      <Avatar className="cursor-pointer">
+                        <AvatarImage src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny" alt="User" />
+                        <AvatarFallback>LC</AvatarFallback>
+                      </Avatar>
 
-                        <div className="ml-3 hidden flex-col items-start justify-start p-2 md:flex">
-                          <p className="text-sm font-medium">{user?.name}</p>
-                          <p className="text-[#619EFF] text-xs">
-                            {user?.email}
-                          </p>
-                        </div>
-                      </Button>
-                    </DropdownMenuTrigger>
+                      <div className="ml-3 hidden flex-col items-start justify-start p-2 md:flex">
+                        <p className="text-sm font-medium">{user?.name}</p>
+                        <p className="text-[#619EFF] text-xs">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
 
                   <DropdownMenuContent
                     align="end"
