@@ -10,7 +10,7 @@ export const api: AxiosInstance = axios.create({
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`;
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -35,7 +35,7 @@ export const useRegister = () =>
       }>('/login', credentials)
       .then(response => {
         if (response.data.status === false) {
-          throw new Error(response.data.message || "Login failed");
+          throw new Error(response.data.message ?? "Login failed");
         }
         return response.data;
       })
@@ -69,7 +69,7 @@ export const useServices = (options?: UseQueryOptions<ServicesResponse, AxiosErr
   return useQuery<ServicesResponse, AxiosError>(
     ['services'],
     async () => {
-      const response = await api.get<ServicesResponse>('/services');
+      const response = await api.get<ServicesResponse>('/getServices');
       return response.data;
     },
     options
@@ -80,7 +80,7 @@ export const useService = (id: number, options?: UseQueryOptions<Service, AxiosE
   return useQuery<Service, AxiosError>(
     ['service', id],
     async () => {
-      const response = await api.get<Service>(`/services/${id}`);
+      const response = await api.get<Service>(`/getServices/${id}`);
       return response.data;
     },
     options
@@ -88,15 +88,15 @@ export const useService = (id: number, options?: UseQueryOptions<Service, AxiosE
 };
 
 export const useCreateService = (): UseMutationResult<AxiosResponse<Service>, AxiosError, Partial<Service>> => {
-  return useMutation((newService: Partial<Service>) => api.post<Service>('/services', newService));
+  return useMutation((newService: Partial<Service>) => api.post<Service>('/getServices', newService));
 };
 
 export const useUpdateService = (): UseMutationResult<AxiosResponse<Service>, AxiosError, { id: number; updates: Partial<Service> }> => {
   return useMutation(({ id, updates }: { id: number; updates: Partial<Service> }) => 
-    api.put<Service>(`/services/${id}`, updates)
+    api.put<Service>(`/getServices/${id}`, updates)
   );
 };
 
 export const useDeleteService = (): UseMutationResult<AxiosResponse<void>, AxiosError, number> => {
-  return useMutation((id: number) => api.delete(`/services/${id}`));
+  return useMutation((id: number) => api.delete(`/getServices/${id}`));
 };

@@ -59,7 +59,7 @@ export default function SettingsLayout({
   const breadcrumbItems = pathSegments.map((segment, index) => {
     const href = `/${pathSegments.slice(0, index + 1).join("/")}`;
     const label =
-      settingsItems.find((item) => item.href === href)?.label || segment;
+      settingsItems.find((item) => item.href === href)?.label ?? segment;
     return { href, label };
   });
 
