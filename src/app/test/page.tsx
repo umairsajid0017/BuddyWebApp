@@ -1,5 +1,5 @@
 'use client'
-import PopularServices from "@/components/services/popular-services";
+import PopularServices from "@/components/services/popular-services-component";
 
 
 

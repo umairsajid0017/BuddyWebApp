@@ -19,7 +19,7 @@ export default function VerifyAccountComponent() {
     }
 
     const handleVerify = () => {
-        // Handle verification logic here
+        //TODO: Implement verification logic
         console.log('Verifying account...')
     }
 

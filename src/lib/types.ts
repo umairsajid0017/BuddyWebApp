@@ -54,9 +54,7 @@ export interface VerifyOtpResponse {
 export interface VerifyOtpError {
   status: boolean;
   message: string;
-  errors?: {
-    [key: string]: string[];
-  };
+  errors?: Record<string, string[]>;
 }
 
 
@@ -72,7 +70,7 @@ export interface Service {
   created_at: string | null;
   updated_at: string | null;
   user: User;
-  ratings: any[]; 
+  ratings: unknown[]; 
 }
 
 export interface ServicesResponse extends ApiResponse<Service[]> {
@@ -91,4 +89,4 @@ interface InboxItemInterface {
 }
 
 
-export type InboxItem = Partial<Record<keyof InboxItemInterface, any>>;
+export type InboxItem = Partial<Record<keyof InboxItemInterface, unknown>>;

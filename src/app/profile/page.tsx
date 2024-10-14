@@ -1,6 +1,6 @@
 "use client"
 import UserProfile from "@/components/account/user-profile-component"
-import PopularServices from "@/components/services/popular-services"
+import PopularServicesSection from "@/components/services/popular-services-section"
 import { Button } from "@/components/ui/button"
 import Loading from "@/components/ui/loading"
 import Main from "@/components/ui/main"
@@ -39,24 +39,7 @@ const Profile: React.FC = () => {
 
       <UserProfile user={user!} />
     }
-    {services.length > 0 &&
-      <section className="mt-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">Most Popular Services</h3>
-          <Button variant="link" className="text-sm">
-            See All
-          </Button>
-        </div>
-        <div className="flex items-center mt-4 space-x-2 overflow-scroll no-scrollbar">
-          {services.map((filter) => (
-            <Button key={filter.id} variant={"outline"}>
-              {filter.name}
-            </Button>
-          ))}
-        </div>
-        <PopularServices services={services} />
-      </section>
-    }
+    <PopularServicesSection services={services} />
   </Main>
 }
 

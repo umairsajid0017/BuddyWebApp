@@ -6,6 +6,7 @@ import { StarIcon } from 'lucide-react';
 import { Service } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 import Image from 'next/image';
+import { number } from 'zod';
 
 
 interface PopularServicesProps {
@@ -29,15 +30,16 @@ const ServiceSkeleton = () => (
 const PopularServices: React.FC<PopularServicesProps> = ({services}) => {
   const { isLoading, error } = useServices();
  
-  const [images, setImages] = useState<{ [key: number]: string }>({});
+  const [images, setImages] = useState<Record<number, string>>({});
 
   useEffect(() => {
     if (services) {
-      fetchImages(services);
+      void fetchImages(services);
     }
     
   }, [isLoading, services]);
 
+  //TODO: Remove this function and use the actual images from the API
   const fetchImages = async (services: Service[]) => {
     const imagePromises = services.map(service =>
       fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(service.name)}&per_page=1`, {
@@ -47,7 +49,9 @@ const PopularServices: React.FC<PopularServicesProps> = ({services}) => {
       })
       .then(response => response.json())
       .then(data => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (data.photos && data.photos.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           return { id: service.id, url: data.photos[0].src.medium };
         }
         return null;
@@ -61,10 +65,11 @@ const PopularServices: React.FC<PopularServicesProps> = ({services}) => {
     const imageResults = await Promise.all(imagePromises);
     const newImages = imageResults.reduce((acc, result) => {
       if (result) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         acc[result.id] = result.url;
       }
       return acc;
-    }, {} as { [key: number]: string });
+    }, {} as Record<number, string>);
 
     setImages(newImages);
   };
@@ -74,7 +79,7 @@ const PopularServices: React.FC<PopularServicesProps> = ({services}) => {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-        {[...Array(8)].map((_, index) => (
+        {[...Array<number>(8)].map((_, index) => (
           <ServiceSkeleton key={index} />
         ))}
       </div>

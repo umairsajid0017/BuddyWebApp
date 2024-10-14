@@ -1,12 +1,9 @@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
-import NavBar from "@/components/ui/navbar"
-import { JSX, SVGProps, useEffect } from "react"
-import PopularServices from "../services/popular-services"
+import { useEffect } from "react"
+import PopularServices from "../services/popular-services-component"
 import useServicesStore from "@/store/servicesStore"
 import DashboardSkeleton from "./dashboard-skeleton"
 import { useServices } from "@/lib/api"
@@ -14,6 +11,8 @@ import TooltipWrapper from "../ui/tooltip-wrapper"
 import DashboardStats from "./dashboard-stats"
 import kebabCase from "@/utils/helper-functions"
 import CardStack from "../ui/card-stack"
+import { useRouter } from "next/navigation"
+import PopularServicesSection from "../services/popular-services-section"
 
 type ImageItem = {
   src: string
@@ -29,6 +28,7 @@ const images: ImageItem[] = [
 
 export function DashboardComponent() {
   const {data: servicesResponse, isLoading, error } = useServices();
+  const router = useRouter();
   const { 
     services, 
     setServices, 
@@ -86,7 +86,7 @@ export function DashboardComponent() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mt-4">
             {services.slice(0,8).map(
               (service) => (
-                <TooltipWrapper content={service.description}>
+                <TooltipWrapper key={service.id} content={service.description}>
 
               <Card key={service.id} className="p-4 bg-primary-100 hover:border-primary-400 transition-all  duration-300 cursor-pointer font-medium">
                <CardContent className="flex flex-col items-center justify-center gap-2 p-2">
@@ -101,22 +101,7 @@ export function DashboardComponent() {
             )}
           </div>
         </section>
-        <section className="mt-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Most Popular Services</h3>
-            <Button variant="link" className="text-sm">
-              See All
-            </Button>
-          </div>
-          <div className="flex items-center mt-4 space-x-2 overflow-scroll no-scrollbar">
-            {services.map((filter) => (
-              <Button key={filter.id} variant={"outline"}>
-                {filter.name}
-              </Button>
-            ))}
-          </div>
-          <PopularServices services={services} />
-        </section>
+        <PopularServicesSection services={services} />
       </main>
     </div>
   )
