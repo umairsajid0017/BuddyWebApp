@@ -13,6 +13,7 @@ import kebabCase from "@/utils/helper-functions"
 import CardStack from "../ui/card-stack"
 import { useRouter } from "next/navigation"
 import PopularServicesSection from "../services/popular-services-section"
+import { SearchComponent } from "../services/search-services/search-component"
 
 type ImageItem = {
   src: string
@@ -27,55 +28,55 @@ const images: ImageItem[] = [
 ]
 
 export function DashboardComponent() {
-  const {data: servicesResponse, isLoading, error } = useServices();
+  const { data: servicesResponse, isLoading, error } = useServices();
   const router = useRouter();
-  const { 
-    services, 
-    setServices, 
-    setLoading, 
+  const {
+    services,
+    setServices,
+    setLoading,
     setError,
-    deleteService 
+    deleteService
   } = useServicesStore();
 
-  useEffect(()=>{
+  useEffect(() => {
     if (servicesResponse) {
       setServices(servicesResponse.data);
     }
     setLoading(isLoading);
     setError(error ? error.message : null);
-  }, [services, isLoading, error, setServices, setLoading, setError])
-  
-  if(isLoading)
-    return <DashboardSkeleton/>
+  }, [services, isLoading, error, setServices, setLoading, setError, servicesResponse])
+
+  if (isLoading)
+    return <DashboardSkeleton />
 
   return (
     <div className="flex flex-col min-h-screen lg:px-24 md:mx-8 ">
       <main className="flex-1 p-6">
-       <DashboardStats/>
+        <DashboardStats />
         <section className="flex flex-col lg:flex-row gap-4 mt-6">
-      <div className="relative flex-1   rounded-lg shadow p-8 flex flex-col justify-center">
-        <Image src={"/assets/search-bg.svg"} alt="Search" width={"300"} height={"300"} className="absolute h-full w-full top-0 left-0 -z-10 object-cover rounded-lg"/>
-        <div className="absolute top-0 left-0 rounded-lg w-full h-full bg-[#F3EEF5] -z-20"/>
-        <div className="text-center">
-          <h3 className="text-2xl font-semibold">
-            Start booking service to <br className="hidden sm:inline" /> get your work done!
-          </h3>
-        </div>
-        <div className="mt-4 w-full flex items-center justify-center">
-          <Input type="text" placeholder="Search services" className="w-full md:w-10/12 h-14" />
-        </div>
+          <div className="relative flex-1   rounded-lg shadow p-8 flex flex-col justify-center">
+            <Image src={"/assets/search-bg.svg"} alt="Search" width={"300"} height={"300"} className="absolute h-full w-full top-0 left-0 -z-10 object-cover rounded-lg" />
+            <div className="absolute top-0 left-0 rounded-lg w-full h-full bg-[#F3EEF5] -z-20" />
+            <div className="text-center">
+              <h3 className="text-2xl font-semibold">
+                Start booking service to <br className="hidden sm:inline" /> get your work done!
+              </h3>
+            </div>
+            <div className="mt-4 w-full flex items-center justify-center">
+              <SearchComponent />
+            </div>
 
-      </div>
-      <div className="lg:w-1/3 h-48 md:h-64 bg-red-100 rounded-lg shadow p-0 flex flex-col justify-center">
-      <CardStack
-        items={images}
-        renderItem={(item) => (
-          <img src={item.src} alt={item.alt} className="w-full h-full object-cover" />
-        )}
-        interval={2000}
-      />
-      </div>
-    </section>
+          </div>
+          <div className="lg:w-1/3 h-48 md:h-64 bg-red-100 rounded-lg shadow p-0 flex flex-col justify-center">
+            <CardStack
+              items={images}
+              renderItem={(item) => (
+                <img src={item.src} alt={item.alt} className="w-full h-full object-cover" />
+              )}
+              interval={2000}
+            />
+          </div>
+        </section>
         <section className="mt-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">All Categories</h3>
@@ -84,19 +85,19 @@ export function DashboardComponent() {
             </Button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mt-4">
-            {services.slice(0,8).map(
+            {services.slice(0, 8).map(
               (service) => (
                 <TooltipWrapper key={service.id} content={service.description}>
 
-              <Card key={service.id} className="p-4 bg-primary-100 hover:border-primary-400 transition-all  duration-300 cursor-pointer font-medium">
-               <CardContent className="flex flex-col items-center justify-center gap-2 p-2">
+                  <Card key={service.id} className="p-4 bg-primary-100 hover:border-primary-400 transition-all  duration-300 cursor-pointer font-medium">
+                    <CardContent className="flex flex-col items-center justify-center gap-2 p-2">
 
-                <Image src={`/assets/icons/${kebabCase(service.name)}.svg`} alt="timer" width={60} height={60} />
-                 
-                <h4 className="mt-2 text-base font-semibold">{service.name}</h4>
-               </CardContent>
-              </Card>
-                 </TooltipWrapper>
+                      <Image src={`/assets/icons/${kebabCase(service.name)}.svg`} alt="timer" width={60} height={60} />
+
+                      <h4 className="mt-2 text-base font-semibold">{service.name}</h4>
+                    </CardContent>
+                  </Card>
+                </TooltipWrapper>
               ),
             )}
           </div>
