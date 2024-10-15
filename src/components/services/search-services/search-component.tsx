@@ -103,10 +103,22 @@ export function SearchComponent({ onClose }: SearchComponentProps) {
     }
   }, [searchTerm, services])
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch(e);
+      if (window.innerWidth < 768 && onClose) {
+        onClose();
+      }
+    }
+  }
+
+  const handleSearch = (e: React.FormEvent | React.KeyboardEvent) => {
     e.preventDefault()
     if (searchTerm) {
       router.push(`/services/search?q=${encodeURIComponent(searchTerm)}`)
+      if (window.innerWidth < 768 && onClose) {
+        onClose();
+      }
     }
   }
 
@@ -134,6 +146,7 @@ export function SearchComponent({ onClose }: SearchComponentProps) {
           className="w-full h-14 pl-10 pr-20"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex">
           {searchTerm && (
@@ -149,19 +162,6 @@ export function SearchComponent({ onClose }: SearchComponentProps) {
               </Button>
             </TooltipWrapper>
           )}
-          {/* {onClose && (
-            <TooltipWrapper content="Close">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="md:hidden"
-              >
-                <X className="h-4 w-4 text-gray-400" />
-              </Button>
-            </TooltipWrapper>
-          )} */}
         </div>
       </form>
       {showDropdown && (

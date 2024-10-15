@@ -9,7 +9,11 @@ import { StarIcon } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
+
+
+//TODO: This service card component is used in multiple places. It should be moved to a shared component.
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
   <Link href={`/services/${service.id}`} className="block">
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -36,6 +40,7 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
   </Link>
 )
 
+//TODO: This service skeleton component is used in multiple places. It should be moved to a shared component.
 const ServiceSkeleton: React.FC = () => (
   <Card className="p-4">
     <Skeleton className="h-32 w-full" />
@@ -46,6 +51,29 @@ const ServiceSkeleton: React.FC = () => (
       <Skeleton className="h-4 w-24" />
     </div>
   </Card>
+)
+
+const NoResultsFound: React.FC<{ query: string }> = ({ query }) => (
+  <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <Image
+      src="/assets/no-results-found.svg"
+      alt="No results found"
+      width={300}
+      height={300}
+      className="mb-8"
+    />
+    <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+      No results found for &quot;{query}&quot;
+    </h2>
+    <p className="text-gray-600 text-center mb-8">
+      We couldn&apos;t find any services matching your search. Try adjusting your search terms or browse our categories.
+    </p>
+    <Button asChild>
+      <Link href="/">
+        Browse All Services
+      </Link>
+    </Button>
+  </div>
 )
 
 const SearchResults: React.FC = () => {
@@ -86,7 +114,7 @@ const SearchResults: React.FC = () => {
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500">No services found matching your search.</p>
+        <NoResultsFound query={query} />
       )}
     </div>
   )
