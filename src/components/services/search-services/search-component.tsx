@@ -59,7 +59,11 @@ const SearchSkeleton: React.FC = () => (
   </Card>
 )
 
-export function SearchComponent() {
+interface SearchComponentProps {
+  onClose?: () => void
+}
+
+export function SearchComponent({ onClose }: SearchComponentProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<Service[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -69,7 +73,6 @@ export function SearchComponent() {
   const router = useRouter()
   const { data: servicesResponse } = useServices()
 
-  //TODO: This line needs to be refactored
   const services = React.useMemo(() => servicesResponse?.data ?? [], [servicesResponse])
 
   useEffect(() => {
@@ -121,31 +124,45 @@ export function SearchComponent() {
   }
 
   return (
-    <div className="relative w-full md:w-10/12" ref={dropdownRef}>
+    <div className="relative w-full" ref={dropdownRef}>
       <form onSubmit={handleSearch} className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         <Input
           ref={inputRef}
           type="text"
           placeholder="Search services"
-          className="w-full h-14 pl-10 pr-10"
+          className="w-full h-14 pl-10 pr-20"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        {searchTerm && (
+        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex">
+          {searchTerm && (
             <TooltipWrapper content={"Clear"}>
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2"
-            onClick={handleClear}
-            >
-            <X className="h-4 w-4 text-gray-400" />
-          </Button>
-              </TooltipWrapper>
-        )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="mr-1 hidden md:flex"
+                onClick={handleClear}
+              >
+                <X className="h-4 w-4 text-gray-400" />
+              </Button>
+            </TooltipWrapper>
+          )}
+          {/* {onClose && (
+            <TooltipWrapper content="Close">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="md:hidden"
+              >
+                <X className="h-4 w-4 text-gray-400" />
+              </Button>
+            </TooltipWrapper>
+          )} */}
+        </div>
       </form>
       {showDropdown && (
         <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg max-h-96 overflow-y-auto">
