@@ -13,8 +13,10 @@ import StepOne from "@/components/register/step-one";
 import StepTwo from "@/components/register/step-two";
 import StepThree from "@/components/register/step-three";
 import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
 
 const Register: React.FC = () => {
+  const {toast} = useToast();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<RegisterData>({
     name: "",
@@ -23,7 +25,7 @@ const Register: React.FC = () => {
     phone: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
-  const [backendErrors, setBackendErrors] = useState<{ [key: string]: string[] }>({});
+  const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
   const router = useRouter();
   const registerMutation = useRegister();
 
@@ -90,13 +92,27 @@ const Register: React.FC = () => {
           }
         });
         setErrors(newErrors);
-      } if (axios.isAxiosError(error)) {
-        console.log("Axios error:", error.response?.data);
-        if (error.response?.data?.data) {
-          setBackendErrors(error.response.data.data);
-        } else {
-          setBackendErrors({ general: [error.response?.data?.message || "An unexpected error occurred"] });
+      } else if (error instanceof Error && 'errors' in error) {
+
+        //This method required a lot of changes to work properly
+        //I needed to change the Error to ServerError by extending the Error class
+        //to accomodate the errors comming from the server
+        const serverError = error as Error & { errors?: Record<string, string[]> }
+        const errorMessages = serverError.errors 
+          ? Object.values(serverError.errors).flat().join(', ')
+          : serverError.message
+        
+        if (serverError.errors) {
+          setErrors(Object.fromEntries(
+            Object.entries(serverError.errors).map(([key, value]) => [key, value[0]])
+          ))
         }
+        console.log("Server error:", serverError.message, serverError.errors);
+        toast({
+          title: serverError.message,
+          description: errorMessages,
+          variant: "destructive",
+        })
       } else {
         console.log("Unknown error:", error);
         setBackendErrors({ general: ["An unexpected error occurred"] });

@@ -12,44 +12,42 @@ import useAuthStore from '@/store/authStore';
 import { loginSchema } from '@/lib/schemas';
 import { type LoginCredentials } from '@/lib/types';
 import { useLogin } from '@/lib/api';
-import Lottie from 'react-lottie';
-import Loading from '@/components/ui/loading';
 import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
-import axios from 'axios';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { setAuthCookie } from './authOptions';
-
+import { Mail, Lock, AlertCircle, AlertTriangle } from 'lucide-react';
+import Loading from '@/components/ui/loading';
+import { useToast } from '@/hooks/use-toast';
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
 export default function Login() {
+  const {toast} = useToast();
   const [credentials, setCredentials] = useState<LoginCredentials>({ email: '', password: '', loginType: 'email' });
   const [errors, setErrors] = useState<LoginErrors>({});
-  const [backendErrors, setBackendErrors] = useState<{ [key: string]: string[] }>({});
+  const [serverError, setServerError] = useState<string | null>(null);
   const loginMutation = useLogin();
   const router = useRouter();
   const backgroundImageUrl = (backgroundSvg as { src: string }).src;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  setErrors({});
-  setBackendErrors({});
-  try {
-    const validatedCredentials = loginSchema.parse(credentials);
-    const data = await loginMutation.mutateAsync(validatedCredentials);
-    
-       // Check if data has the expected properties
-       if (data && data.status && data.token && data.user) {
+    e.preventDefault(); 
+    setErrors({});
+    setServerError(null);
+    try {
+      const validatedCredentials = loginSchema.parse(credentials);
+      const data = await loginMutation.mutateAsync(validatedCredentials);
+      
+      if (data.status && data.token && data.user) {
         const { user, token } = data;
         console.log('User logged in:', user, token);
         useAuthStore.getState().setUser(user);
         useAuthStore.getState().setToken(token);
-        setAuthCookie(token);
+        void setAuthCookie(token);
         void router.push('/');
       } else {
-        throw new Error("Login successful but received unexpected data format");
+        throw new Error(data.message ?? "Login failed");
       }
-    
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         const newErrors: LoginErrors = {};
@@ -58,27 +56,25 @@ export default function Login() {
           newErrors[path] = err.message;
         });
         setErrors(newErrors);
-      } else if (axios.isAxiosError(error)) {
-        console.error('Login failed', error.response?.data);
-        // Even for network errors, we might get a 200 status, so we need to check the response data
-        if (error.response?.data) {
-          if (error.response.data.status === false) {
-            setBackendErrors({ general: [error.response.data.message] });
-          } else {
-            setBackendErrors({ general: ["An unexpected error occurred"] });
-          }
-        } else {
-          setBackendErrors({ general: ["An unexpected error occurred"] });
-        }
+        console.log('Validation errors:', newErrors);
+      } else if (error instanceof Error) {
+        setServerError(error.message);
+        toast({
+          title: "Login failed",
+          description: error.message,
+          variant: "destructive",
+        })
       } else {
-        console.error('Login failed', error);
-        setBackendErrors({ general: ["An unexpected error occurred"] });
+        setServerError("An unexpected error occurred");
       }
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
     const { name, value } = e.target;
+    if(name === 'email') setErrors((prev) => ({ ...prev, email: '' }));
+    if(name === 'password') setErrors((prev) => ({ ...prev, password: '' }));
     setCredentials((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -94,7 +90,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="mb-4 flex justify-center">
-            <Image src="/assets/logo.png" alt="App Icon" width={64} height={64} />
+            <Image src="/assets/logo.jpg" alt="App Icon" width={64} height={64} />
           </div>
           <CardTitle className="text-center text-2xl font-bold">
             Welcome back to Buddy
@@ -104,55 +100,64 @@ export default function Login() {
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} method="POST">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  autoComplete="email"
-                  required
-                  value={credentials.email}
-                  onChange={handleChange}
-                />
-                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-              </div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    autoComplete="email"
+                    required
+                    value={credentials.email}
+                    onChange={handleChange}
+                    className="pl-10"
+                  />
+                </div>
+                {errors.email && (
+                   <Alert variant="destructive">
+                   <AlertDescription className='flex gap-2 items-center'><AlertTriangle/> {errors.email}</AlertDescription>
+                 </Alert>
+                  )}              </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={credentials.password}
-                  onChange={handleChange}
-                />
-                {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={credentials.password}
+                    onChange={handleChange}
+                    className="pl-10"
+                    // required
+                  />
+                </div>
+                {errors.password && (
+                   <Alert variant="destructive">
+                   <AlertDescription className='flex gap-2 items-center'><AlertTriangle/> {errors.password}</AlertDescription>
+                   </Alert>
+                  )}
               </div>
-              {Object.keys(backendErrors).length > 0 && (
+              {/* {serverError && (
                 <Alert variant="destructive">
-                  <AlertDescription>
-                    {Object.entries(backendErrors).map(([field, messages]) => (
-                      <div key={field}>
-                        <strong>{field === 'general' ? '' : `${field}: `}</strong>
-                        {messages.join(", ")}
-                      </div>
-                    ))}
-                  </AlertDescription>
+                  <AlertDescription>{serverError}</AlertDescription>
                 </Alert>
-              )}
+              )} */}
               <Button type="submit" className="w-full" variant={loginMutation.isLoading ? "outline" : "default"} disabled={loginMutation.isLoading}>
-                {loginMutation.isLoading ? <Loading /> : "Sign in"}
+                {loginMutation.isLoading ? <Loading/> : "Sign in"}
               </Button>
             </div>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a href="/register" className="font-medium text-primary hover:underline">
               Sign up
             </a>

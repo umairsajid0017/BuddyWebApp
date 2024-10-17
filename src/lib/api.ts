@@ -1,7 +1,24 @@
-import axios, { AxiosError, AxiosResponse, type AxiosInstance } from 'axios';
-import { type User, type LoginCredentials, type RegisterData, VerifyOtpResponse, VerifyOtpError, VerifyOtpData, Service, ServicesResponse } from './types';
-import { useMutation, UseMutationResult, useQuery, UseQueryOptions } from 'react-query';
+import axios, { type AxiosError, type AxiosResponse, type AxiosInstance } from 'axios';
+import { type User, type LoginCredentials, type RegisterData, type VerifyOtpResponse, type VerifyOtpError, type VerifyOtpData, type Service, type ServicesResponse } from './types';
+import { useMutation, type UseMutationResult, useQuery, type UseQueryOptions } from 'react-query';
 import useAuthStore from '@/store/authStore';
+
+interface ServerResponse {
+  status: boolean;
+  message: string;
+  errors?: Record<string, string[]>;
+  data?: { user: User };
+}
+
+class ServerError extends Error {
+  errors?: Record<string, string[]>;
+
+  constructor(message: string, errors?: Record<string, string[]>) {
+    super(message);
+    this.name = 'ServerError';
+    this.errors = errors;
+  }
+}
 
 export const api: AxiosInstance = axios.create({
   baseURL: '/api',
@@ -14,17 +31,23 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+
+//The useRegister hook is a custom hook that uses the useMutation hook from react-query to register a new user.
+//It sends a POST request to the /register endpoint with the user's data and returns the response data.
 export const useRegister = () =>
   useMutation((userData: RegisterData) => 
-    api.post<{ status: boolean; message: string; data?: { user: User } }>('/register', userData)
+    api.post<ServerResponse>('/register', userData)
     .then(response => {
       if (response.data.status === false) {
-        throw new Error(response.data.message);
+        throw new ServerError(response.data.message, response.data.errors);
       }
       return response.data.data;
     })
   );
 
+//The useLogin hook is a custom hook that uses the useMutation hook from react-query to log in a user.
+//It sends a POST request to the /login endpoint with the user's credentials and returns the response data.
   export const useLogin = () =>
     useMutation((credentials: LoginCredentials) => 
       api.post<{ 
@@ -40,12 +63,20 @@ export const useRegister = () =>
         return response.data;
       })
     );
+
+//The useLogout hook is a custom hook that uses the useMutation hook from react-query to log out a user.
 export const useLogout = () =>
   useMutation(() => api.post<void>('/logout'));
 
+//The useUser hook is a custom hook that uses the useQuery hook from react-query to fetch the current user data.
+//At the current moment this hook is useless for our code 
 export const useUser = () =>
   useQuery(['user'], () => api.get<User>('/user'));
 
+
+//The useVerifyOtp hook is a custom hook that uses the useMutation hook from react-query to verify an OTP code.
+//It sends a POST request to the /verify-otp endpoint with the OTP code and returns the response data.
+//It takes and email and an OTP that was sent to the user and returns the response data.
 export const useVerifyOtp = () => {
   return useMutation<VerifyOtpResponse, AxiosError<VerifyOtpError>, VerifyOtpData>(
     (data) => api.post('/verify-otp', data),
@@ -65,6 +96,10 @@ export const useVerifyOtp = () => {
 };
 
 
+// To use the useServices hook in your components, you can import it like this:
+// import { useServices } from '@/lib/api'
+// const { data: services, isLoading, isError } = useServices()
+// This will fetch the services from the API and return the data, loading state, and error state.
 export const useServices = (options?: UseQueryOptions<ServicesResponse, AxiosError>) => {
   return useQuery<ServicesResponse, AxiosError>(
     ['services'],
@@ -76,6 +111,8 @@ export const useServices = (options?: UseQueryOptions<ServicesResponse, AxiosErr
   );
 };
 
+//The useService hook is a custom hook that uses the useQuery hook from react-query to fetch a single service by its ID.
+//It takes the service ID as an argument and returns the service data.
 export const useService = (id: number, options?: UseQueryOptions<Service, AxiosError>) => {
   return useQuery<Service, AxiosError>(
     ['service', id],
@@ -87,10 +124,14 @@ export const useService = (id: number, options?: UseQueryOptions<Service, AxiosE
   );
 };
 
+//The useCreateService hook is a custom hook that uses the useMutation hook from react-query to create a new service.
+//At the current moment this hook is useless for our code
 export const useCreateService = (): UseMutationResult<AxiosResponse<Service>, AxiosError, Partial<Service>> => {
   return useMutation((newService: Partial<Service>) => api.post<Service>('/getServices', newService));
 };
 
+//The useUpdateService hook is a custom hook that uses the useMutation hook from react-query to update an existing service.
+//At the current moment this hook is useless for our code
 export const useUpdateService = (): UseMutationResult<AxiosResponse<Service>, AxiosError, { id: number; updates: Partial<Service> }> => {
   return useMutation(({ id, updates }: { id: number; updates: Partial<Service> }) => 
     api.put<Service>(`/getServices/${id}`, updates)

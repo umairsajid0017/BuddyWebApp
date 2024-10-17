@@ -31,8 +31,8 @@ export const userSchema = z.object({
 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
-  loginType: z.string(),
+  password: z.string().min(1, { message: "Password is required" }),
+  loginType: z.literal('email'), 
 }) satisfies z.ZodType<LoginCredentials>;
 
 export const registerSchema = z.object({
