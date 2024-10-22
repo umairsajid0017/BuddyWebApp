@@ -92,7 +92,7 @@ export const useAuth = () => {
       const result = await loginMutation.mutateAsync(credentials);
       const parsedUser = userSchema.parse(result.user);
       setUser(parsedUser);
-      setToken(data.token); // Save the token
+      setToken(result.token); // Save the token
       setError(null);
       return parsedUser;
     } catch (error: unknown) {

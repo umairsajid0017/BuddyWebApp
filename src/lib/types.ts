@@ -100,4 +100,4 @@ export interface SearchServicesResponse {
   tag_line: string;
 }
 
-export type InboxItem = Partial<Record<keyof InboxItemInterface, unknown>>;
+export type InboxItem = Partial<Record<keyof InboxItemInterface, any>>;
