@@ -32,7 +32,7 @@ export interface LoginCredentials {
 export interface RegisterData extends LoginCredentials {
   name: string;
   phone: string;
-  otp?: string; 
+  otp?: string;
 }
 
 export interface ApiResponse<T> {
@@ -57,7 +57,6 @@ export interface VerifyOtpError {
   errors?: Record<string, string[]>;
 }
 
-
 export interface Service {
   id: number;
   name: string;
@@ -70,7 +69,7 @@ export interface Service {
   created_at: string | null;
   updated_at: string | null;
   user: User;
-  ratings: unknown[]; 
+  ratings: unknown[];
 }
 
 export interface ServicesResponse extends ApiResponse<Service[]> {
@@ -79,14 +78,13 @@ export interface ServicesResponse extends ApiResponse<Service[]> {
   success: boolean;
 }
 interface InboxItemInterface {
-  id: string
-  senderName: string
-  senderAvatar: string
-  title: string
-  description?: string
-  date: string
-  read: boolean
+  id: string;
+  senderName: string;
+  senderAvatar: string;
+  title: string;
+  description?: string;
+  date: string;
+  read: boolean;
 }
 
-
-export type InboxItem = Partial<Record<keyof InboxItemInterface, unknown>>;
+export type InboxItem = Partial<Record<keyof InboxItemInterface, any>>;
