@@ -71,21 +71,31 @@ interface SearchComponentProps {
 
 export function SearchComponent({ onClose }: SearchComponentProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchServicesResponse[]>(
-    [],
-  );
-  //const [isLoading, setIsLoading] = useState(false);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const { data: servicesResponse } = useServices();
 
   const { data: searchServices, isLoading } = useSearchServices({
-    name: searchTerm,
+    name: debouncedSearchTerm,
   });
 
-  const services = useMemo(() => searchServices ?? [], [searchServices]);
+  const searchResults = useMemo(() => {
+    if (!searchServices) return [];
+    return searchServices;
+  }, [searchServices]);
+
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchTerm]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -103,29 +113,15 @@ export function SearchComponent({ onClose }: SearchComponentProps) {
   }, []);
 
   useEffect(() => {
-    if (searchTerm) {
-      // setIsLoading(true);
+    if (debouncedSearchTerm) {
       //TODO: Implement search functionality
 
       console.log("Search Services inside search component: ", searchServices);
-
-      if (services) {
-        const filteredServices = services.filter(
-          (service) =>
-            service.service_name
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            service.tag_line.toLowerCase().includes(searchTerm.toLowerCase()),
-        );
-        setSearchResults(filteredServices);
-      }
-      // setIsLoading(false);
       setShowDropdown(true);
     } else {
-      setSearchResults([]);
       setShowDropdown(false);
     }
-  }, [searchTerm, services]);
+  }, [debouncedSearchTerm]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
