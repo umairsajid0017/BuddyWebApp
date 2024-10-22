@@ -9,9 +9,7 @@ import Loading from "@/components/ui/loading";
 interface StepTwoProps {
   formData: RegisterData;
   errors: Partial<Record<keyof RegisterData, string>>;
-  backendErrors: {
-    [key: string]: string[];
-  };
+  backendErrors: Record<string, string[]>;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   handleBackStep: () => void;

@@ -1,0 +1,147 @@
+import React, { useEffect, useState } from "react";
+import { useServices, useDeleteService } from "@/lib/api";
+import useServicesStore from "@/store/servicesStore";
+import { Card, CardContent } from "../ui/card";
+import { StarIcon } from "lucide-react";
+import { Service } from "@/lib/types";
+import { Skeleton } from "../ui/skeleton";
+import Image from "next/image";
+import { number } from "zod";
+
+interface PopularServicesProps {
+  services: Service[];
+}
+
+const PEXELS_API_KEY =
+  "p4VqT6asTRkRiLQZEaWabx14UQmR0P6Owm1RLS4GpN9iQU6ObazuNl1l"; // Replace with your actual Pexels API key
+
+const ServiceSkeleton = () => (
+  <Card className="p-4">
+    <Skeleton className="h-32 w-full" />
+    <Skeleton className="mt-2 h-4 w-3/4" />
+    <Skeleton className="mt-2 h-3 w-full" />
+    <div className="mt-2 flex items-center justify-between">
+      <Skeleton className="h-6 w-20" />
+      <Skeleton className="h-4 w-24" />
+    </div>
+  </Card>
+);
+
+const PopularServices: React.FC<PopularServicesProps> = ({ services }) => {
+  const { isLoading, error } = useServices();
+
+  const [images, setImages] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    if (services) {
+      void fetchImages(services);
+    }
+  }, [isLoading, services]);
+
+  //TODO: Remove this function and use the actual images from the API
+  const fetchImages = async (services: Service[]) => {
+    const imagePromises = services.map((service) =>
+      fetch(
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(service.name)}&per_page=1`,
+        {
+          headers: {
+            Authorization: PEXELS_API_KEY,
+          },
+        },
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (data.photos && data.photos.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            return { id: service.id, url: data.photos[0].src.medium };
+          }
+          return null;
+        })
+        .catch((error) => {
+          console.error("Error fetching image:", error);
+          return null;
+        })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch image");
+          }
+          return response.json() as Promise<PexelsResponse>;
+        })
+        .then((data) => {
+          // Add null/undefined check for `data` and `data.photos`
+          if (data?.photos && data.photos.length > 0) {
+            return {
+              id: service.id,
+              url: data!.photos[0]!.src.medium,
+            } as ImageResult;
+          }
+          return null;
+        })
+        .catch((error) => {
+          console.error("Error fetching image:", error);
+          return null;
+        }),
+    );
+
+    const imageResults = await Promise.all(imagePromises);
+
+    // Use a more specific type for imageResults
+    const newImages = imageResults.reduce(
+      (acc: { [key: number]: string }, result) => {
+        if (result) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          acc[result.id] = result.url;
+        }
+        return acc;
+      },
+      {} as Record<number, string>,
+    );
+
+    setImages(newImages);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {[...Array<number>(8)].map((_, index) => (
+          <ServiceSkeleton key={index} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {services.map((service: Service) => (
+        <Card key={service.id} className="">
+          <div className="relative h-44 overflow-hidden rounded-lg bg-gray-200">
+            {images[service.id] && (
+              <Image
+                src={images[service.id]!}
+                alt={service.name}
+                layout="fill"
+                objectFit="cover"
+              />
+            )}
+          </div>
+          <CardContent>
+            <h4 className="mt-2 text-xl font-medium">{service.name}</h4>
+            <p className="text-xs text-gray-600">{service.description}</p>
+            <div className="mt-2 flex items-center justify-between">
+              <p className="text-lg font-bold text-primary">
+                Rs. {service.price}
+              </p>
+              <div className="flex items-center text-xs text-gray-600">
+                <StarIcon className="h-4 w-4" />
+                <span className="ml-1">4.9 | 6182 reviews</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+export default PopularServices;

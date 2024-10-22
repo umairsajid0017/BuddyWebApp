@@ -9,6 +9,7 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import QueryClientWrapper from "@/components/client-query/clientQueryWrapper";
 import NavBar from "@/components/ui/navbar";
 import NavbarWrapper from "@/components/ui/navbar-wrapper";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Buddy Customer",
@@ -31,6 +32,8 @@ export default function RootLayout({
             {children}
 
           {/* </AuthProvider> */}
+          <Toaster />
+
       </QueryClientWrapper>
       </body>
     </html>
