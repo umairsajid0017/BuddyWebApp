@@ -62,6 +62,7 @@ export interface Service {
   name: string;
   description: string;
   price: string;
+  image: string;
   category_id: number;
   long: number | null;
   lat: number | null;
@@ -87,4 +88,16 @@ interface InboxItemInterface {
   read: boolean;
 }
 
-export type InboxItem = Partial<Record<keyof InboxItemInterface, any>>;
+export interface SearchServicesResponse {
+  service_name: string;
+  image: string;
+  price: string;
+  user_name: string;
+  address: string;
+  average_rating: number;
+  is_favorite: number;
+  total_reviews: number;
+  tag_line: string;
+}
+
+export type InboxItem = Partial<Record<keyof InboxItemInterface, unknown>>;
