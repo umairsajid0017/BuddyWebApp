@@ -1,3 +1,5 @@
+import { Category } from "./types/services-types";
+
 export interface User {
   id: number;
   name: string;
@@ -70,11 +72,17 @@ export interface Service {
   created_at: string | null;
   updated_at: string | null;
   user: User;
+  category: Category;
   ratings: unknown[];
 }
 
 export interface ServicesResponse extends ApiResponse<Service[]> {
   data: Service[];
+  message?: string;
+  success: boolean;
+}
+export interface ServiceResponse extends ApiResponse<Service> {
+  data: Service;
   message?: string;
   success: boolean;
 }
@@ -89,6 +97,7 @@ interface InboxItemInterface {
 }
 
 export interface SearchServicesResponse {
+  service_id: number;
   service_name: string;
   image: string;
   price: string;

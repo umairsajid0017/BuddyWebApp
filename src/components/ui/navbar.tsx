@@ -1,48 +1,77 @@
-'use client'
+"use client";
 
-import Image from "next/image"
-import React, { useEffect, useState, useRef } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Bookmark, Calendar, LogOut, SearchIcon, SettingsIcon, Tag, User, X } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuth } from "@/store/authStore"
-import { useRouter } from "next/navigation"
-import TooltipWrapper from "./tooltip-wrapper"
-import InboxComponent from "../inbox/inbox-component"
-import Link from "next/link"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu"
-import { SearchComponent } from "../services/search-services/search-component"
+import Image from "next/image";
+import React, { useEffect, useState, useRef } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Bookmark,
+  Calendar,
+  LogOut,
+  SearchIcon,
+  SettingsIcon,
+  Tag,
+  User,
+  X,
+} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import useAuthStore, { useAuth } from "@/store/authStore";
+import { useRouter } from "next/navigation";
+import TooltipWrapper from "./tooltip-wrapper";
+import InboxComponent from "../inbox/inbox-component";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
+import { SearchComponent } from "../services/search-services/search-component";
 
-type NavBarProps = object
+type NavBarProps = object;
 
 const NavBar: React.FC<NavBarProps> = () => {
-  const { user } = useAuth()
-  const [isOpenAccount, setIsOpenAccount] = useState(false)
-  const [isSearchVisible, setIsSearchVisible] = useState(false)
-  const router = useRouter()
+  const { user, logoutUser } = useAuth();
+  const [isOpenAccount, setIsOpenAccount] = useState(false);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const router = useRouter();
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node)
+      ) {
         setIsSearchVisible(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   useEffect(() => {
-    console.log("User:", user)
-  }, [user])
+    console.log("User:", user);
+  }, [user]);
 
   const toggleSearch = () => {
-    setIsSearchVisible(!isSearchVisible)
-  }
+    setIsSearchVisible(!isSearchVisible);
+  };
+
+  const handleLogout = async () => {
+    console.log("Logout");
+    await logoutUser()
+      .then(() => {
+        console.log("Logged out successfully");
+        router.push("/login");
+      })
+      .catch((error) => {
+        console.log("Error logging out", error);
+      });
+  };
 
   return (
     <header className="flex justify-center bg-white shadow">
@@ -52,9 +81,12 @@ const NavBar: React.FC<NavBarProps> = () => {
             <Image src={"/assets/logo.jpg"} alt="logo" width={48} height={48} />
           </Link>
         )}
-        <div ref={searchContainerRef} className={`flex items-center space-x-4 ${isSearchVisible ? 'w-full' : ''}`}>
+        <div
+          ref={searchContainerRef}
+          className={`flex items-center space-x-4 ${isSearchVisible ? "w-full" : ""}`}
+        >
           {isSearchVisible ? (
-            <div className="w-full flex items-center">
+            <div className="flex w-full items-center">
               <SearchComponent onClose={() => setIsSearchVisible(false)} />
               <Button
                 variant="ghost"
@@ -67,7 +99,7 @@ const NavBar: React.FC<NavBarProps> = () => {
             </div>
           ) : (
             <>
-              <div className="hidden md:block w-80">
+              <div className="hidden w-80 md:block">
                 <SearchComponent />
               </div>
               <TooltipWrapper content={"Search for services"}>
@@ -90,7 +122,7 @@ const NavBar: React.FC<NavBarProps> = () => {
                   variant="ghost"
                   size="icon"
                   className="relative"
-                  onClick={() => router.push('/bookings')}
+                  onClick={() => router.push("/bookings")}
                 >
                   <Calendar className="h-5 w-5" />
                 </Button>
@@ -100,14 +132,21 @@ const NavBar: React.FC<NavBarProps> = () => {
                   variant="ghost"
                   size="icon"
                   className="relative"
-                  onClick={() => router.push('/bookings/offers')}
+                  onClick={() => router.push("/bookings/offers")}
                 >
                   <Tag className="h-5 w-5" />
                 </Button>
               </TooltipWrapper>
               <InboxComponent />
-              <TooltipWrapper key={"account-settings"} content="Account Settings">
-                <Button variant="ghost" size="icon" onClick={() => router.push('/settings')}>
+              <TooltipWrapper
+                key={"account-settings"}
+                content="Account Settings"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => router.push("/settings")}
+                >
                   <SettingsIcon className="h-5 w-5" />
                 </Button>
               </TooltipWrapper>
@@ -117,34 +156,40 @@ const NavBar: React.FC<NavBarProps> = () => {
           {!isSearchVisible && (
             <div className="flex items-center">
               {user ? (
-                <DropdownMenu open={isOpenAccount} onOpenChange={setIsOpenAccount}>
+                <DropdownMenu
+                  open={isOpenAccount}
+                  onOpenChange={setIsOpenAccount}
+                >
                   <DropdownMenuTrigger asChild>
                     <Button
                       className="flex items-center justify-start px-2"
                       size={"lg"}
                       variant={"ghost"}
-                      onClick={() => router.push('/profile')}
+                      onClick={() => router.push("/profile")}
                     >
                       <Avatar className="cursor-pointer">
-                        <AvatarImage src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny" alt="User" />
+                        <AvatarImage
+                          src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny"
+                          alt="User"
+                        />
                         <AvatarFallback>LC</AvatarFallback>
                       </Avatar>
                       <div className="ml-3 hidden flex-col items-start justify-start p-2 md:flex">
                         <p className="text-sm font-medium">{user?.name}</p>
-                        <p className="text-[#619EFF] text-xs">{user?.email}</p>
+                        <p className="text-xs text-[#619EFF]">{user?.email}</p>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                    <DropdownMenuItem onClick={() => router.push("/profile")}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/profile')}>
+                    <DropdownMenuItem onClick={() => router.push("/profile")}>
                       <Bookmark className="mr-2 h-4 w-4" />
                       <span>Bookmarks</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push('/bookings')}>
+                    <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>
                     </DropdownMenuItem>
@@ -158,7 +203,7 @@ const NavBar: React.FC<NavBarProps> = () => {
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default NavBar
+export default NavBar;

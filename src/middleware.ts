@@ -1,49 +1,37 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from "next/server";
 
-// Define protected routes
-const protectedRoutes = ['/dashboard', '/settings'];
+const PROTECTED_ROUTES = ["/", "/dashboard", "/settings"];
+const PUBLIC_ROUTES = ["/login", "/register", "/about", "/contact"];
+const LOGIN_URL = "/login";
+const HOME_URL = "/";
 
-// Define public routes (login must be here to prevent redirect loops)
-const publicRoutes = ['/login','/',  '/register', '/about', '/contact'];
-
-function isProtectedRoute(path: string): boolean {
-  return protectedRoutes.some(route => path.startsWith(route));
-}
-
-function isPublicRoute(path: string): boolean {
-  return publicRoutes.some(route => path.startsWith(route));
-}
+const matchesPattern = (path: string, patterns: string[]): boolean =>
+  patterns.some((pattern) => path.startsWith(pattern));
 
 export function middleware(req: NextRequest): NextResponse {
-  console.log('Middleware called for:', req.nextUrl.pathname);
+  const { pathname } = req.nextUrl;
+  const token = req.cookies.get("token")?.value;
 
-  // Get the token from the cookies
-  const token = req.cookies.get('token')?.value;
-
-  // Check if the user is trying to access a protected route
-  if (!token && isProtectedRoute(req.nextUrl.pathname) && !isPublicRoute(req.nextUrl.pathname)) {
-    // If there's no token and it's a protected route, redirect to the login page
-    // But first, check if we're already on the login page to prevent redirect loops
-    if (req.nextUrl.pathname !== '/login') {
-      const loginUrl = new URL('/login', req.url);
-      return NextResponse.redirect(loginUrl);
-    }
+  console.log("Middleware:", pathname, token);
+  // Allow access to public routes
+  if (matchesPattern(pathname, PUBLIC_ROUTES)) {
+    return NextResponse.next();
   }
 
-  // If there's a token or the route is public, continue
+  // Redirect to dashboard if logged in user tries to access login page
+  if (token && pathname === LOGIN_URL) {
+    return NextResponse.redirect(new URL(HOME_URL, req.url));
+  }
+
+  // Redirect to login if unauthenticated user tries to access protected route
+  if (!token && matchesPattern(pathname, PROTECTED_ROUTES)) {
+    return NextResponse.redirect(new URL(LOGIN_URL, req.url));
+  }
+
+  // Allow the request to continue for authenticated users or non-protected routes
   return NextResponse.next();
 }
 
-// Configure which routes use this middleware
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

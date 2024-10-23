@@ -145,7 +145,7 @@ export function SearchComponent({ onClose }: SearchComponentProps) {
   const handleSelect = (service: SearchServicesResponse) => {
     setSearchTerm(service.service_name);
     setShowDropdown(false);
-    router.push(`/services/${service.service_name}`);
+    router.push(`/services/${service.service_id}`);
   };
 
   const handleClear = () => {
