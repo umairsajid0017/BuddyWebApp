@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ZodError, ZodIssue } from "zod";
+import { ZodError } from "zod";
 import {
   Card,
   CardContent,
@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import useAuthStore from "@/store/authStore";
 import { loginSchema } from "@/lib/schemas";
-import { User, type LoginCredentials } from "@/lib/types";
+import { type LoginCredentials } from "@/lib/types";
 import { useLogin } from "@/lib/api";
 import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -53,7 +53,7 @@ export default function Login() {
         console.log("User logged in:", user, token);
         useAuthStore.getState().setUser(user);
         useAuthStore.getState().setToken(token);
-        void setAuthCookie(token);
+        await setAuthCookie(token);
         void router.push("/");
       } else {
         throw new Error(data.message ?? "Login failed");

@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/store/authStore";
+import useAuthStore, { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import TooltipWrapper from "./tooltip-wrapper";
 import InboxComponent from "../inbox/inbox-component";
@@ -31,7 +31,7 @@ import { SearchComponent } from "../services/search-services/search-component";
 type NavBarProps = object;
 
 const NavBar: React.FC<NavBarProps> = () => {
-  const { user } = useAuth();
+  const { user, logoutUser } = useAuth();
   const [isOpenAccount, setIsOpenAccount] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const router = useRouter();
@@ -59,6 +59,18 @@ const NavBar: React.FC<NavBarProps> = () => {
 
   const toggleSearch = () => {
     setIsSearchVisible(!isSearchVisible);
+  };
+
+  const handleLogout = async () => {
+    console.log("Logout");
+    await logoutUser()
+      .then(() => {
+        console.log("Logged out successfully");
+        router.push("/login");
+      })
+      .catch((error) => {
+        console.log("Error logging out", error);
+      });
   };
 
   return (
@@ -177,7 +189,7 @@ const NavBar: React.FC<NavBarProps> = () => {
                       <Bookmark className="mr-2 h-4 w-4" />
                       <span>Bookmarks</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push("/bookings")}>
+                    <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>
                     </DropdownMenuItem>

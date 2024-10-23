@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
@@ -12,6 +12,8 @@ import PopularServices from "@/components/services/popular-services-component";
 import useServicesStore from "@/store/servicesStore";
 import Main from "@/components/ui/main";
 import PopularServicesSection from "@/components/services/popular-services-section";
+import { Service } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
 
 interface ServiceDetailsProps {
   params: {
@@ -43,12 +45,14 @@ const ServiceDetailsSkeleton: React.FC = () => (
 
 const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
   const { services, setServices } = useServicesStore();
-  const { data: service, isLoading, error } = useService(+params.id);
+  const { data: serviceResponse, isLoading, error } = useService(+params.id);
   const {
     data: servicesResponse,
     isLoading: allServicesLoading,
     error: allServicesError,
   } = useServices();
+
+  const [service, setService] = useState<Service>();
 
   useEffect(() => {
     if (servicesResponse) {
@@ -57,68 +61,76 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
     console.log("servicesResponse", services);
   }, [servicesResponse, allServicesLoading]);
 
+  useEffect(() => {
+    if (serviceResponse) {
+      console.log("service", serviceResponse);
+      setService(serviceResponse.data);
+    }
+  }, [service, isLoading]);
   if (isLoading) {
     return <ServiceDetailsSkeleton />;
   }
 
-  if (error || !service) {
+  if (error || !serviceResponse) {
     notFound();
+    return null;
   }
 
   return (
     <Main>
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-8 md:flex-row">
-            <div className="md:w-1/2">
-              <Image
-                src="/placeholder.svg?height=400&width=400"
-                alt={service.name}
-                width={400}
-                height={400}
-                className="w-full rounded-lg"
-              />
-            </div>
-            <div className="md:w-1/2">
-              <h1 className="mb-2 text-3xl font-bold">{service.name}</h1>
-              <div className="mb-4 flex items-center">
-                <span className="mr-2 text-lg font-semibold">{"Joh Doe"}</span>
-                <div className="flex items-center">
-                  <Star className="h-5 w-5 fill-current text-yellow-400" />
-                  <span className="ml-1">
-                    {Array.isArray(service.ratings)
-                      ? service.ratings.join(", ")
-                      : service.ratings}
+      {service && (
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-8 md:flex-row">
+              <div className="md:w-1/2">
+                {service.image && (
+                  <Image
+                    src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
+                    alt={service.name || "Service image"}
+                    width={400}
+                    height={400}
+                    className="max-h-[400px] w-full rounded-lg object-cover"
+                  />
+                )}
+              </div>
+              <div className="md:w-1/2">
+                <h1 className="mb-2 text-3xl font-bold">
+                  {service.name || "Service Name"}
+                </h1>
+                <div className="mb-4 flex items-center">
+                  <span className="mr-2 text-lg font-semibold">
+                    {service.user.name || "User Name"}
                   </span>
-                  {/* <span className="ml-2 text-muted-foreground">({service.} reviews)</span> */}
+                  <div className="flex items-center">
+                    <Star className="h-5 w-5 fill-current text-yellow-400" />
+                    <span className="ml-1">
+                      {Array.isArray(service.ratings)
+                        ? service.ratings.join(", ")
+                        : service.ratings || "No ratings"}
+                    </span>
+                  </div>
                 </div>
+                <div className="mb-4">
+                  <Badge variant="secondary">
+                    {service.category.title || "Category"}
+                  </Badge>
+                </div>
+                <p className="mb-4 text-2xl font-bold">Rs. {service.price} </p>
+                <h2 className="mb-2 text-xl font-semibold">About me</h2>
+                <p className="mb-4 text-muted-foreground">
+                  {service.description || "No description available."}
+                </p>
+                <Button
+                  size="lg"
+                  onClick={() => console.log(`Booking service: ${service.id}`)}
+                >
+                  Book Now
+                </Button>
               </div>
-              <div className="mb-4">
-                <span className="mr-2 inline-block rounded-full bg-secondary px-3 py-1 text-sm font-semibold text-secondary-foreground">
-                  {service.category_id}
-                </span>
-                {/* <span className="text-muted-foreground">{service.location}</span> */}
-              </div>
-              <p className="mb-4 text-2xl font-bold">
-                ${service.price}{" "}
-                <span className="text-sm font-normal text-muted-foreground">
-                  (Floor price)
-                </span>
-              </p>
-              <h2 className="mb-2 text-xl font-semibold">About me</h2>
-              <p className="mb-4 text-muted-foreground">
-                {service.description}
-              </p>
-              <Button
-                size="lg"
-                onClick={() => console.log(`Booking service: ${service.id}`)}
-              >
-                Book Now
-              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
       <PopularServicesSection services={services} />
     </Main>
   );

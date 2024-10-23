@@ -12,6 +12,7 @@ import {
   type VerifyOtpData,
   type Service,
   type ServicesResponse,
+  ServiceResponse,
 } from "./types";
 import {
   useMutation,
@@ -21,6 +22,7 @@ import {
   type UseQueryOptions,
 } from "react-query";
 import useAuthStore from "@/store/authStore";
+import { deleteCookie } from "./cookies";
 
 interface ServerResponse {
   status: boolean;
@@ -99,12 +101,13 @@ export const useLogout = () => {
         // Clear any auth-related items from localStorage
         localStorage.removeItem("auth-storage");
 
-        //TODO: Add API integration later
-        /* Add API integration later
-        const response = await api.post<LogoutResponse>('/logout');
-        return response.data;
-        */
-
+        //Delete Cookie
+        try {
+          const cookieRes = await deleteCookie("token");
+          console.log("Cookie deleted:", cookieRes);
+        } catch (error) {
+          console.log("Error deleting cookie:", error);
+        }
         return { success: true };
       } catch (error) {
         console.error("Logout error:", error);
@@ -169,12 +172,17 @@ export const useServices = (
 //It takes the service ID as an argument and returns the service data.
 export const useService = (
   id: number,
-  options?: UseQueryOptions<Service, AxiosError>,
+  options?: UseQueryOptions<ServiceResponse, AxiosError>,
 ) => {
-  return useQuery<Service, AxiosError>(
+  return useQuery<ServiceResponse, AxiosError>(
     ["service", id],
     async () => {
-      const response = await api.get<Service>(`/getServices/${id}`);
+      const formData = new FormData();
+      formData.append("service_id", id.toString());
+      const response = await api.post<ServiceResponse>(
+        `/getServiceDetails`,
+        formData,
+      );
       return response.data;
     },
     options,

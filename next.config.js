@@ -7,7 +7,7 @@ await import("./src/env.js");
 /** @type {import("next").NextConfig} */
 const config = {
   images: {
-    domains: ["images.pexels.com"], // Add 'images.pexels.com' here
+    domains: ["images.pexels.com", "18.136.228.207"], // Add 'images.pexels.com' here
   },
   async rewrites() {
     return [
@@ -25,7 +25,6 @@ const config = {
         "https://symmetrical-fishstick-9v79vr94vj7h79vg-3000.app.github.dev/",
       ],
     },
-    missingSuspenseWithCSRBailout: false,
   },
 };
 
