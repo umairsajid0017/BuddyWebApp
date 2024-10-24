@@ -7,7 +7,12 @@ await import("./src/env.js");
 /** @type {import("next").NextConfig} */
 const config = {
   images: {
-    domains: ["images.pexels.com", "18.136.228.207"], // Add 'images.pexels.com' here
+    domains: [
+      "images.pexels.com",
+      "18.136.228.207",
+      "images.unsplash.com",
+      "plus.unsplash.com",
+    ], // Add 'images.pexels.com' here
   },
   async rewrites() {
     return [

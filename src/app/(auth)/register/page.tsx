@@ -1,11 +1,17 @@
-'use client'
+"use client";
 import React, { useState } from "react";
 import { useRegister, useVerifyOtp } from "@/lib/api";
 import { VerifyOtpError, type RegisterData } from "@/lib/types";
 import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
 import { registerSchema } from "@/lib/schemas";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Image from "next/image";
 
 import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
@@ -16,7 +22,7 @@ import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 
 const Register: React.FC = () => {
-  const {toast} = useToast();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<RegisterData>({
     name: "",
@@ -24,8 +30,12 @@ const Register: React.FC = () => {
     password: "",
     phone: "",
   });
-  const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
-  const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof RegisterData, string>>
+  >({});
+  const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>(
+    {},
+  );
   const router = useRouter();
   const registerMutation = useRegister();
 
@@ -49,7 +59,9 @@ const Register: React.FC = () => {
 
   const validateStep1 = () => {
     try {
-      registerSchema.pick({ name: true, email: true, phone: true }).parse(formData);
+      registerSchema
+        .pick({ name: true, email: true, phone: true })
+        .parse(formData);
       setErrors({});
       return true;
     } catch (error) {
@@ -74,11 +86,11 @@ const Register: React.FC = () => {
       console.log("Validating data...");
       const validatedData = registerSchema.parse(formData);
       console.log("Data validated successfully:", validatedData);
-      
+
       console.log("Calling registerMutation.mutateAsync...");
       const response = await registerMutation.mutateAsync(validatedData);
       console.log("API call completed. Response:", response);
-      
+
       console.log("Setting step to 3...");
       setStep(3);
     } catch (error) {
@@ -92,27 +104,33 @@ const Register: React.FC = () => {
           }
         });
         setErrors(newErrors);
-      } else if (error instanceof Error && 'errors' in error) {
-
+      } else if (error instanceof Error && "errors" in error) {
         //This method required a lot of changes to work properly
         //I needed to change the Error to ServerError by extending the Error class
         //to accomodate the errors comming from the server
-        const serverError = error as Error & { errors?: Record<string, string[]> }
-        const errorMessages = serverError.errors 
-          ? Object.values(serverError.errors).flat().join(', ')
-          : serverError.message
-        
+        const serverError = error as Error & {
+          errors?: Record<string, string[]>;
+        };
+        const errorMessages = serverError.errors
+          ? Object.values(serverError.errors).flat().join(", ")
+          : serverError.message;
+
         if (serverError.errors) {
-          setErrors(Object.fromEntries(
-            Object.entries(serverError.errors).map(([key, value]) => [key, value[0]])
-          ))
+          setErrors(
+            Object.fromEntries(
+              Object.entries(serverError.errors).map(([key, value]) => [
+                key,
+                value[0],
+              ]),
+            ),
+          );
         }
         console.log("Server error:", serverError.message, serverError.errors);
         toast({
           title: serverError.message,
           description: errorMessages,
           variant: "destructive",
-        })
+        });
       } else {
         console.log("Unknown error:", error);
         setBackendErrors({ general: ["An unexpected error occurred"] });
@@ -152,7 +170,7 @@ const Register: React.FC = () => {
 
   return (
     <main
-      className="min-h-screen min-w-screen w-full flex items-center justify-center p-4"
+      className="min-w-screen flex min-h-screen w-full items-center justify-center p-4"
       style={{
         backgroundImage: `url(${backgroundImageUrl})`,
         backgroundSize: "cover",
@@ -162,24 +180,41 @@ const Register: React.FC = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="pb-2">
           <div className="mb-4 flex justify-center">
-            <Image src="/assets/logo.png" alt="App Icon" className="h-16 w-16" width={'64'} height={'64'} />
+            <Image
+              src="/assets/logo.jpg"
+              alt="App Icon"
+              className="h-16 w-16"
+              width={"64"}
+              height={"64"}
+            />
           </div>
           <CardTitle className="text-center text-2xl font-bold">
-            {step === 1 ? "Welcome to Buddy" : step === 2 ? "Create Password" : "Verify your Email"}
+            {step === 1
+              ? "Welcome to Buddy"
+              : step === 2
+                ? "Create Password"
+                : "Verify your Email"}
           </CardTitle>
           <p className="text-center text-sm text-gray-600">
-            {step === 1 ? "Get started for free" : 
-             step === 2 ? "Your password must have at least one symbol & 8 or more characters." :
-             `We texted you a code to verify your email ${formData.email}`}
+            {step === 1
+              ? "Get started for free"
+              : step === 2
+                ? "Your password must have at least one symbol & 8 or more characters."
+                : `We texted you a code to verify your email ${formData.email}`}
           </p>
-              {step === 3 && (
-                <div className="flex justify-center items-center  pointer-events-none">
-                  <Image src="/assets/verify-email.svg" alt="Verify Email" className="h-[180px] w-[180px]" width={'180'} height={'180'} />
-                </div>
-              )}
-
+          {step === 3 && (
+            <div className="pointer-events-none flex items-center justify-center">
+              <Image
+                src="/assets/verify-email.svg"
+                alt="Verify Email"
+                className="h-[180px] w-[180px]"
+                width={"180"}
+                height={"180"}
+              />
+            </div>
+          )}
         </CardHeader>
-        <CardContent >
+        <CardContent>
           {step === 1 && (
             <StepOne
               formData={formData}
@@ -189,26 +224,25 @@ const Register: React.FC = () => {
             />
           )}
           {step === 2 && (
-           <StepTwo
-           formData={formData}
-           errors={errors}
-           backendErrors={backendErrors}
-           handleChange={handleChange}
-           handleSubmit={handleSubmit}
-           handleBackStep={handleBackStep}
-           isLoading={registerMutation.isLoading}
-         />
-          )}
-          {step === 3 && (
-            <StepThree
-              handleVerifyEmail={handleVerifyEmail}
+            <StepTwo
+              formData={formData}
+              errors={errors}
+              backendErrors={backendErrors}
+              handleChange={handleChange}
+              handleSubmit={handleSubmit}
+              handleBackStep={handleBackStep}
+              isLoading={registerMutation.isLoading}
             />
           )}
+          {step === 3 && <StepThree handleVerifyEmail={handleVerifyEmail} />}
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <a href="/login" className="font-medium text-primary hover:underline">
+            <a
+              href="/login"
+              className="font-medium text-primary hover:underline"
+            >
               Sign in
             </a>
           </p>
@@ -217,6 +251,5 @@ const Register: React.FC = () => {
     </main>
   );
 };
-
 
 export default Register;

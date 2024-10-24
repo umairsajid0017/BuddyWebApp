@@ -10,17 +10,26 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
+import Image from "next/image";
 
 const categories = [
-  { icon: Monitor, label: "Programming & Tech" },
-  { icon: PenTool, label: "Graphics & Design" },
-  { icon: Smartphone, label: "Digital Marketing" },
-  { icon: FileText, label: "Writing & Translation" },
-  { icon: Video, label: "Video & Animation" },
-  { icon: Cpu, label: "AI Services" },
-  { icon: Music, label: "Music & Audio" },
-  { icon: Briefcase, label: "Business" },
-  { icon: HelpCircle, label: "Consulting" },
+  { icon: "/assets/icons/mason.svg", label: "Mason" },
+  { icon: "/assets/icons/electrician.svg", label: "Electrician" },
+  { icon: "/assets/icons/plumber.svg", label: "Plumber" },
+  { icon: "/assets/icons/painter.svg", label: "Painter" },
+  { icon: "/assets/icons/carpenter.svg", label: "Carpenter" },
+  { icon: "/assets/icons/mechanic.svg", label: "Mechanic" },
+  { icon: "/assets/icons/helper.svg", label: "Helper" },
+  { icon: "/assets/icons/maid.svg", label: "Maid" },
+  { icon: "/assets/icons/servant.svg", label: "Servant" },
+  // { icon: "/assets/icons/cook.svg", label: "Cook" },
+  // { icon: "/assets/icons/driver.svg", label: "Driver" },
+  // { icon: "/assets/icons/security-guard.svg", label: "Security Guard" },
+  // { icon: "/assets/icons/gardener.svg", label: "Gardener" },
+  // { icon: "/assets/icons/tent-service.svg", label: "Tent Service" },
+  // { icon: "/assets/icons/food-catering.svg", label: "Food Catering" },
+  // { icon: "/assets/icons/party-planner.svg", label: "Party Planner" },
+  // { icon: "/assets/icons/decorator.svg", label: "Decorator" },
 ];
 
 export function ServiceCategories() {
@@ -34,7 +43,13 @@ export function ServiceCategories() {
               className="hover-radial-gradient flex cursor-pointer flex-col items-start text-start text-text-700 shadow-md"
             >
               <CardContent className="flex flex-col items-start p-4 text-start">
-                <category.icon className="mb-4 h-8 w-8" />
+                <Image
+                  src={category.icon}
+                  alt={category.label}
+                  width={32}
+                  height={32}
+                  className="mb-4 h-12 w-12"
+                />{" "}
                 <span className="text-sm font-semibold">{category.label}</span>
               </CardContent>
             </Card>
