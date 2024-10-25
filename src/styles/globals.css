@@ -46,11 +46,6 @@
     --text-100: 210, 20%, 98%;
     --text-foreground: 210, 20%, 98%;
 
-
-
-
-
-
     --muted: 220 14.3% 95.9%;
     --muted-foreground: 220 8.9% 46.1%;
     --accent: 220 14.3% 95.9%;
@@ -118,4 +113,12 @@ body,
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+}
+
+.hover-radial-gradient:hover {
+  background: radial-gradient(
+    63.44% 63.44% at 50% 50%,
+    #ffe3df 0%,
+    #ffffff 100%
+  );
 }
