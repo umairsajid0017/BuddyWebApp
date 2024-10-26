@@ -1,4 +1,4 @@
-import { Category } from "./types/services-types";
+import { Category } from "./types/category-types";
 
 export interface User {
   id: number;
