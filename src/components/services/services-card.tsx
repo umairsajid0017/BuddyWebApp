@@ -16,9 +16,9 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
         />
       </div>
       <CardContent>
-        <h4 className="mt-2 text-xl font-medium">{service.name}</h4>
+        <h4 className="mt-2 text-lg font-medium">{service.name}</h4>
         <p className="text-xs text-gray-600">
-          {service.description.slice(0, 50)}
+          {service.description.slice(0, 50) + "..."}
         </p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-lg font-bold text-primary">Rs. {service.price}</p>

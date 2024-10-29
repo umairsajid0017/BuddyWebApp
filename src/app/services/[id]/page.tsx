@@ -98,11 +98,11 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                   {service.name || "Service Name"}
                 </h1>
                 <div className="mb-4 flex items-center">
-                  <span className="mr-2 text-lg font-semibold">
-                    {service.user.name || "User Name"}
+                  <span className="font-regular mr-2 text-base font-bold">
+                    {service.user.name ?? "User Name"}
                   </span>
                   <div className="flex items-center">
-                    <Star className="h-5 w-5 fill-current text-yellow-400" />
+                    {/* <Star className="h-5 w-5 fill-current text-yellow-400" /> */}
                     <span className="ml-1">
                       {Array.isArray(service.ratings)
                         ? service.ratings.join(", ")
@@ -111,7 +111,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                   </div>
                 </div>
                 <div className="mb-4">
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="bg-secondary-800">
                     {service.category.title || "Category"}
                   </Badge>
                 </div>

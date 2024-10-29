@@ -35,7 +35,7 @@ const SearchResult: React.FC<SearchResultProps> = ({ service, onSelect }) => (
       <div className="flex-grow">
         <h4 className="font-medium text-foreground">{service.service_name}</h4>
         <div className="mt-1 flex items-center justify-between">
-          <p className="font-bold text-primary">
+          <p className="font-regular text-primary">
             Rs. {parseFloat(service.price).toLocaleString()}
           </p>
           <div className="flex items-center px-8 text-sm text-muted-foreground">

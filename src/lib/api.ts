@@ -177,12 +177,13 @@ export const useService = (
   return useQuery<ServiceResponse, AxiosError>(
     ["service", id],
     async () => {
-      const formData = new FormData();
-      formData.append("service_id", id.toString());
-      const response = await api.post<ServiceResponse>(
-        `/getServiceDetails`,
-        formData,
-      );
+      //const formData = new FormData();
+      // formData.append("service_id", id.toString());
+      const response = await api.get<ServiceResponse>(`/getServiceDetails`, {
+        params: {
+          service_id: id,
+        },
+      });
       return response.data;
     },
     options,
