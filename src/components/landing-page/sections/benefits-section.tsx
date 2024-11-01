@@ -1,63 +1,70 @@
 import Image from "next/image";
-import { Code2, Clock, Wand2, Layout } from "lucide-react";
+import { Hammer, Wrench, PartyPopper, Clock } from "lucide-react"; // Replace with relevant icons
 
 export function BenefitsSection() {
   const benefits = [
     {
-      icon: Code2,
-      title: "Development",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      color: "#00b286",
+      icon: Hammer,
+      title: "Masonry",
+      description:
+        "Expert masonry services for all your home construction and repair needs.",
+      bgColor: "#CCF0E7",
+      color: "#00B286",
     },
     {
-      icon: Layout,
-      title: "Web Design",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      color: "#fbbf24",
+      icon: Wrench,
+      title: "Mechanic",
+      description:
+        "Reliable mechanics to keep your appliances and vehicles running smoothly.",
+      bgColor: "#FFF2D9",
+      color: "#FFC041",
     },
     {
-      icon: Wand2,
-      title: "Do Magic",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      color: "#ef4444",
+      icon: PartyPopper,
+      title: "Party Planning",
+      description:
+        "Make your events unforgettable with professional party planning services.",
+      bgColor: "#CFF4FC",
+      color: "#0DCAF0",
     },
     {
       icon: Clock,
       title: "Save Time",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      color: "#3b82f6",
+      description: "Efficient service delivery to save you time and effort.",
+      bgColor: "#DDD6FF",
+      color: "#7A5FFF",
     },
   ];
 
   return (
-    <section className="py-12 md:py-24">
+    <section className="py-12">
       <div className="container">
         <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
           <div className="flex items-center justify-center">
-            <div className="relative">
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-25">
-                <div
-                  className="rounded-full bg-sky-100 shadow-lg"
-                  style={{ width: "600px", height: "600px" }}
-                />
-              </div>
-            </div>
+            <div className="relative"></div>
             <div className="relative h-[500px] w-[300px] md:h-[600px] md:w-[400px]">
               <Image
                 src="/assets/landing-page/benefits.png"
                 alt="Mobile app interface"
                 fill
-                className="object-contain"
+                className="z-10 object-contain"
               />
+              <div className="absolute left-1/2 top-1/2 z-0 -translate-x-1/2 -translate-y-1/2 opacity-30">
+                <div
+                  className="rounded-full bg-[#FF9183] shadow-lg"
+                  style={{ width: "600px", height: "600px" }}
+                />
+              </div>
             </div>
           </div>
           <div className="flex flex-col justify-center space-y-8">
             <div>
-              <h2 className="mb-4 text-4xl font-bold tracking-tight lg:text-5xl">
-                Ton of benefits
+              <h2 className="font-regular mb-8 leading-relaxed text-text-800 lg:text-5xl">
+                Discover the Buddy Advantage
               </h2>
               <p className="text-lg text-muted-foreground">
-                DashCore will maximize your time and money
+                Your one-stop solution for all home services, delivered with
+                expertise and care.
               </p>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
@@ -65,7 +72,7 @@ export function BenefitsSection() {
                 <div key={benefit.title} className="space-y-3">
                   <div
                     className="inline-flex h-12 w-12 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: benefit.color }}
+                    style={{ backgroundColor: benefit.bgColor }}
                   >
                     <benefit.icon
                       className="h-6 w-6 text-primary"

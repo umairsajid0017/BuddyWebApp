@@ -34,13 +34,13 @@ const categories = [
 
 export function ServiceCategories() {
   return (
-    <section className="">
+    <section className="my-8">
       <div className="container">
         <div className="grid grid-cols-3 gap-4 md:grid-cols-9">
           {categories.map((category) => (
             <Card
               key={category.label}
-              className="hover-radial-gradient flex cursor-pointer flex-col items-start text-start text-text-700 shadow-md"
+              className="hover-radial-gradient flex cursor-pointer flex-col items-center text-start text-text-700 shadow-md"
             >
               <CardContent className="flex flex-col items-start p-4 text-start">
                 <Image

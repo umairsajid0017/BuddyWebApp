@@ -27,7 +27,7 @@ export function StatsSection() {
   return (
     <section className="relative py-12 md:py-24">
       <div className="absolute inset-0 bg-[#5850EC] [clip-path:polygon(0_10%,100%_0%,100%_90%,0%_100%)]" />
-      <div className="container relative">
+      <div className="container relative flex flex-col justify-center">
         <div className="mx-auto max-w-2xl text-center text-white">
           <h2 className="mb-4 text-3xl font-bold sm:text-4xl md:text-5xl">
             Millions business rely on DashCore

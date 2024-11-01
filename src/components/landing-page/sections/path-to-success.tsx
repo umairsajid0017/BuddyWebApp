@@ -1,25 +1,25 @@
 import Image from "next/image";
-import { Mail, Users, BarChart3, Shield } from "lucide-react";
+import { Hammer, UserCheck, BarChart, ShieldCheck } from "lucide-react"; // Replace with relevant icons
 
 export function PathToSuccess() {
   const features = [
     {
-      icon: Mail,
-      title: "Mail Management",
+      icon: Hammer,
+      title: "Skilled Professionals",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet aut autem eum laudantium quas recusandae.",
+        "Access a network of trusted experts for any home service, from repairs to renovations.",
     },
     {
-      icon: Users,
-      title: "Customers Tracking",
+      icon: UserCheck,
+      title: "Customer Satisfaction",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet aut autem eum laudantium quas recusandae.",
+        "We prioritize quality and ensure every job is completed to your satisfaction.",
     },
     {
-      icon: BarChart3,
-      title: "Advanced Reporting",
+      icon: BarChart,
+      title: "Performance Insights",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Amet aut autem eum laudantium quas recusandae.",
+        "Track service quality and performance to make informed decisions and improvements.",
     },
   ];
 
@@ -30,13 +30,13 @@ export function PathToSuccess() {
           <div className="flex flex-col justify-center space-y-8">
             <div className="space-y-6">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <Shield className="h-6 w-6 text-primary" />
+                <ShieldCheck className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <p className="mb-2 text-lg font-medium text-primary">
-                  We are your only
+                  Your Trusted Partner
                 </p>
-                <h2 className="text-4xl font-bold tracking-tight lg:text-5xl">
+                <h2 className="font-regular mb-8 leading-relaxed text-text-800 lg:text-5xl">
                   Path to Success
                 </h2>
               </div>
@@ -62,7 +62,7 @@ export function PathToSuccess() {
           <div className="flex items-center justify-center">
             <div className="relative h-[500px] w-[300px] md:h-[600px] md:w-[400px]">
               <Image
-                src=""
+                src="/assets/landing-page/success.png"
                 alt="Mobile app interface"
                 fill
                 className="object-contain"

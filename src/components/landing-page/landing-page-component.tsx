@@ -13,7 +13,7 @@ export default function LandingPageComponent() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <main className="flex-1">
-        <div className="max-w-8xl container mx-auto space-y-8 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <Hero />
           <ServiceCategories />
           <PopularServices />
@@ -21,7 +21,9 @@ export default function LandingPageComponent() {
           <BenefitsSection />
           <PathToSuccess />
           <QuickStartSection />
-          <StatsSection />
+        </div>
+        {/* <StatsSection />   */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <DownloadSection />
         </div>
       </main>
