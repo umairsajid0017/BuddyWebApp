@@ -1,4 +1,4 @@
-import { Category } from "@/lib/types/services-types";
+import { Category } from "@/lib/types/category-types";
 import { create } from "zustand";
 
 interface CategoriesState {

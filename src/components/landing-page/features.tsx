@@ -25,18 +25,19 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-12">
+    <section className="py-10">
       <div className="container">
-        <h2 className="mb-8 text-3xl font-bold">
-          A whole world of freelance talent at your fingertips
+        <h2 className="font-regular mb-8 leading-relaxed text-text-800 lg:text-5xl">
+          A whole world of freelance <br />
+          talent at your fingertips
         </h2>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="my-16 grid grid-cols-1 gap-8 py-8 md:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => (
             <div
               key={feature.title}
               className="flex flex-col items-center text-center"
             >
-              <feature.icon className="mb-4 h-12 w-12 text-green-500" />
+              <feature.icon className="mb-4 h-12 w-12 text-secondary-800" />
               <h3 className="mb-2 text-xl font-semibold">{feature.title}</h3>
               <p className="text-muted-foreground">{feature.description}</p>
             </div>

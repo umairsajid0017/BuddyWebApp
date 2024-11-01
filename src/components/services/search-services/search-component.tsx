@@ -8,7 +8,7 @@ import { useServices } from "@/lib/api";
 import { SearchServicesResponse, type Service } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { StarIcon, Search, X } from "lucide-react";
+import { StarIcon, Search, X, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TooltipWrapper from "@/components/ui/tooltip-wrapper";
 import { useSearchServices } from "@/lib/apis/search-services";
@@ -20,28 +20,27 @@ type SearchResultProps = {
 
 const SearchResult: React.FC<SearchResultProps> = ({ service, onSelect }) => (
   <Card
-    className="cursor-pointer hover:bg-gray-100"
+    className="cursor-pointer transition-colors hover:bg-accent"
     onClick={() => onSelect(service)}
   >
-    <CardContent className="flex items-center p-2">
-      <div className="relative mr-4 h-16 w-16 overflow-hidden rounded-md bg-gray-200">
+    <CardContent className="flex items-center gap-4 p-3">
+      <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md">
         <Image
-          src={`/placeholder.svg?height=64&width=64`}
+          src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${service.image}`}
           alt={service.service_name}
           layout="fill"
           objectFit="cover"
         />
       </div>
-      <div>
-        <h4 className="text-sm font-medium">{service.service_name}</h4>
-        <p className="truncate text-xs text-gray-600">{service.tag_line}</p>
-        <div className="mt-1 flex items-center">
-          <p className="mr-2 text-xs font-bold text-primary">
-            Rs. {service.price}
+      <div className="flex-grow">
+        <h4 className="font-medium text-foreground">{service.service_name}</h4>
+        <div className="mt-1 flex items-center justify-between">
+          <p className="font-regular text-primary">
+            Rs. {parseFloat(service.price).toLocaleString()}
           </p>
-          <div className="flex items-center text-xs text-gray-600">
-            <StarIcon className="mr-1 h-3 w-3" />
-            <span>4.9</span>
+          <div className="flex items-center px-8 text-sm text-muted-foreground">
+            <Star className="mr-1 h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <span>{"4.8"}</span>
           </div>
         </div>
       </div>
@@ -185,7 +184,7 @@ export function SearchComponent({ onClose }: SearchComponentProps) {
         </div>
       </form>
       {showDropdown && (
-        <div className="absolute z-10 mt-1 max-h-96 w-full overflow-y-auto rounded-md bg-white shadow-lg">
+        <div className="absolute z-10 mt-1 max-h-96 w-full overflow-y-auto rounded-md bg-transparent shadow-lg">
           {isLoading ? (
             Array(3)
               .fill(0)

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const PROTECTED_ROUTES = ["/", "/dashboard", "/settings"];
+const PROTECTED_ROUTES = ["/dashboard", "/settings", "/services", "/bookings"];
 const PUBLIC_ROUTES = ["/login", "/register", "/about", "/contact"];
 const LOGIN_URL = "/login";
 const HOME_URL = "/";
@@ -24,9 +24,9 @@ export function middleware(req: NextRequest): NextResponse {
   }
 
   // Redirect to login if unauthenticated user tries to access protected route
-  // if (!token && matchesPattern(pathname, PROTECTED_ROUTES)) {
-  //   return NextResponse.redirect(new URL(LOGIN_URL, req.url));
-  // }
+  if (!token && matchesPattern(pathname, PROTECTED_ROUTES)) {
+    return NextResponse.redirect(new URL(HOME_URL, req.url));
+  }
 
   // Allow the request to continue for authenticated users or non-protected routes
   return NextResponse.next();

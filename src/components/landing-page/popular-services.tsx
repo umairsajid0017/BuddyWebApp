@@ -82,20 +82,20 @@ export function PopularServices() {
 
   const scrollRight = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
+      carouselRef.current.scrollBy({ left: 600, behavior: "smooth" });
     }
   };
 
   const scrollLeft = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
+      carouselRef.current.scrollBy({ left: -600, behavior: "smooth" });
     }
   };
 
   return (
     <section className="py-8">
       <div className="container mx-auto">
-        <h2 className="mb-8 text-4xl font-medium text-gray-800">
+        <h2 className="font-regular mb-8 leading-relaxed text-text-800 lg:text-5xl">
           Popular services
         </h2>
         <div className="relative">

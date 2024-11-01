@@ -66,7 +66,7 @@ const NavBar: React.FC<NavBarProps> = () => {
     await logoutUser()
       .then(() => {
         console.log("Logged out successfully");
-        router.push("/login");
+        router.push("/");
       })
       .catch((error) => {
         console.log("Error logging out", error);

@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from "react-query";
-import { CategoryResponse } from "../types/services-types";
+import { CategoryResponse } from "../types/category-types";
 import { AxiosError } from "axios";
 import { api } from "../api";
 
