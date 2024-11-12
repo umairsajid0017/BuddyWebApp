@@ -1,24 +1,26 @@
-"use client";
+'use client'
 
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { notFound } from "next/navigation";
-import { Star } from "lucide-react";
-import { useService, useServices } from "@/lib/api";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import PopularServices from "@/components/services/popular-services-component";
-import useServicesStore from "@/store/servicesStore";
-import Main from "@/components/ui/main";
-import PopularServicesSection from "@/components/services/popular-services-section";
-import { Service } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
+import React, { useEffect, useState } from "react"
+import Image from "next/image"
+import { notFound } from "next/navigation"
+import { Star } from "lucide-react"
+import { useService, useServices } from "@/lib/api"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import useServicesStore from "@/store/servicesStore"
+import Main from "@/components/ui/main"
+import PopularServicesSection from "@/components/services/popular-services-section"
+import { Service } from "@/lib/types"
+import { Badge } from "@/components/ui/badge"
+import { ServiceRating } from "@/lib/types/service-types"
+import ReviewsSection from "@/components/services/reviews-section"
+import UserProfileCard from "@/components/services/user-profile-card"
 
 interface ServiceDetailsProps {
   params: {
-    id: string;
-  };
+    id: string
+  }
 }
 
 const ServiceDetailsSkeleton: React.FC = () => (
@@ -41,99 +43,135 @@ const ServiceDetailsSkeleton: React.FC = () => (
       </div>
     </div>
   </div>
-);
+)
 
 const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
-  const { services, setServices } = useServicesStore();
-  const { data: serviceResponse, isLoading, error } = useService(+params.id);
+  const { services, setServices } = useServicesStore()
+  const { data: serviceResponse, isLoading, error } = useService(+params.id)
   const {
     data: servicesResponse,
     isLoading: allServicesLoading,
     error: allServicesError,
-  } = useServices();
+  } = useServices()
 
-  const [service, setService] = useState<Service>();
+  const [service, setService] = useState<Service>()
 
   useEffect(() => {
     if (servicesResponse) {
-      setServices(servicesResponse.data);
+      setServices(servicesResponse.data)
     }
-    console.log("servicesResponse", services);
-  }, [servicesResponse, allServicesLoading]);
+  }, [servicesResponse, allServicesLoading, setServices])
 
   useEffect(() => {
     if (serviceResponse) {
-      console.log("service", serviceResponse);
-      setService(serviceResponse.data);
+      setService(serviceResponse.data)
     }
-  }, [service, isLoading]);
+  }, [serviceResponse])
+
+  const averageRating =
+    service && service.ratings.length > 0
+      ? (
+        service.ratings.reduce(
+          (acc: number, rating: ServiceRating) => acc + rating.rating,
+          0
+        ) / service.ratings.length
+      ).toFixed(1)
+      : null
+
+  const renderStars = (rating: number) => {
+    const fullStars = Math.ceil(rating)
+    const halfStar = rating % 1 >= 0.5 ? 1 : 0
+    const emptyStars = 5 - fullStars - halfStar
+
+    return (
+      <>
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={i} className="text-gray-900" size={16} fill={"#111827"} />
+        ))}
+
+
+      </>
+    )
+  }
+
   if (isLoading) {
-    return <ServiceDetailsSkeleton />;
+    return <ServiceDetailsSkeleton />
   }
 
   if (error || !serviceResponse) {
-    notFound();
-    return null;
+    notFound()
   }
 
   return (
     <Main>
       {service && (
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col gap-8 md:flex-row">
-              <div className="md:w-1/2">
-                {service.image && (
-                  <Image
-                    src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
-                    alt={service.name || "Service image"}
-                    width={400}
-                    height={400}
-                    className="max-h-[400px] w-full rounded-lg object-cover"
-                  />
-                )}
-              </div>
-              <div className="md:w-1/2">
-                <h1 className="mb-2 text-3xl font-bold">
-                  {service.name || "Service Name"}
-                </h1>
-                <div className="mb-4 flex items-center">
-                  <span className="font-regular mr-2 text-base font-bold">
-                    {service.user.name ?? "User Name"}
-                  </span>
-                  <div className="flex items-center">
-                    {/* <Star className="h-5 w-5 fill-current text-yellow-400" /> */}
-                    <span className="ml-1">
-                      {Array.isArray(service.ratings)
-                        ? service.ratings.join(", ")
-                        : service.ratings || "No ratings"}
-                    </span>
+        <div className="space-y-6">
+          <section className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
+            <Card className="w-full">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row">
+                  <div className="md:w-1/2 h-[400px]">
+                    {service.image && (
+                      <Image
+                        src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
+                        alt={service.name || "Service image"}
+                        width={400}
+                        height={400}
+                        className="w-full h-full rounded-lg object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="md:w-1/2 md:pl-6 mt-6 md:mt-0">
+                    <h1 className="mb-2 text-3xl font-bold">
+                      {service.name || "Service Name"}
+                    </h1>
+                    <div className="mb-4 flex items-center">
+                      <span className="font-regular mr-2 text-base font-bold">
+                        {service.user.name ?? "User Name"}
+                      </span>
+                      <div className="flex items-center">
+                        <span className="ml-1">
+                          {averageRating ? (
+                            <span className="flex items-center">
+                              <span className="mr-2 font-bold">{averageRating}</span>
+                              {renderStars(parseFloat(averageRating))}
+                            </span>
+                          ) : (
+                            "No ratings"
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <Badge variant="secondary" className="bg-secondary-800">
+                        {service.category.title || "Category"}
+                      </Badge>
+                    </div>
+                    <p className="mb-4 text-2xl font-bold">
+                      Rs. {service.price}{" "}
+                    </p>
+                    <h2 className="mb-2 text-xl font-semibold">About me</h2>
+                    <p className="mb-4 text-muted-foreground">
+                      {service.description || "No description available."}
+                    </p>
+                    <Button
+                      size="lg"
+                      onClick={() => console.log(`Booking service: ${service.id}`)}
+                    >
+                      Book Now
+                    </Button>
                   </div>
                 </div>
-                <div className="mb-4">
-                  <Badge variant="secondary" className="bg-secondary-800">
-                    {service.category.title || "Category"}
-                  </Badge>
-                </div>
-                <p className="mb-4 text-2xl font-bold">Rs. {service.price} </p>
-                <h2 className="mb-2 text-xl font-semibold">About me</h2>
-                <p className="mb-4 text-muted-foreground">
-                  {service.description || "No description available."}
-                </p>
-                <Button
-                  size="lg"
-                  onClick={() => console.log(`Booking service: ${service.id}`)}
-                >
-                  Book Now
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+            <UserProfileCard user={service.user} />
+          </section>
+          <PopularServicesSection services={services} />
+          <ReviewsSection ratings={service.ratings} />
+        </div>
       )}
-      <PopularServicesSection services={services} />
     </Main>
-  );
-};
+  )
+}
 
-export default ServiceDetails;
+export default ServiceDetails

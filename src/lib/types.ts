@@ -1,4 +1,5 @@
-import { Category } from "./types/category-types";
+import { type Category } from "./types/category-types";
+import { type ServiceRating } from "./types/service-types";
 
 export interface User {
   id: number;
@@ -73,7 +74,7 @@ export interface Service {
   updated_at: string | null;
   user: User;
   category: Category;
-  ratings: unknown[];
+  ratings: ServiceRating[];
 }
 
 export interface ServicesResponse extends ApiResponse<Service[]> {

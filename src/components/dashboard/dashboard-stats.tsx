@@ -10,8 +10,8 @@ interface StatCardProps {
 }
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, iconSrc, bgColor }) => (
-  <Card className={`col-span-1 py-2 lg:p-4 ${bgColor} place-items-center`}>
-    <CardContent className='flex items-center justify-between p-6'>
+  <Card className={`col-span-1 py-2 lg:p-2 ${bgColor} place-items-center`}>
+    <CardContent className='flex items-center justify-between p-4'>
     <div className="w-full flex flex-col-reverse items-center lg:flex-row  lg:justify-between gap-4">
     <div className="flex flex-col items-start gap-2">
           <h3 className="text-sm lg:text-base font-regular ">{title}</h3>
@@ -24,7 +24,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, iconSrc, bgColor }) =
 );
 
 const DashboardStats = () => (
-  <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+  <section className="grid grid-cols-2  gap-4">
     <StatCard 
       title="Total Spend" 
       value="Rs. 3.4k" 
