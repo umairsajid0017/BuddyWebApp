@@ -2,20 +2,10 @@
 
 import Image from "next/image";
 import React, { useEffect, useState, useRef } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Bookmark,
-  Calendar,
-  LogOut,
-  SearchIcon,
-  SettingsIcon,
-  Tag,
-  User,
-  X,
-} from "lucide-react";
+import { LogOut, Menu, SearchIcon, User, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import useAuthStore, { useAuth } from "@/store/authStore";
+import { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import TooltipWrapper from "./tooltip-wrapper";
 import InboxComponent from "../inbox/inbox-component";
@@ -27,13 +17,14 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 import { SearchComponent } from "../services/search-services/search-component";
+import { CreateBookingDialog } from "../bookings/create-booking-dialogue";
+import { NewBookingDialog } from "../bookings/create-booking";
 
-type NavBarProps = object;
-
-const NavBar: React.FC<NavBarProps> = () => {
+export default function NavBar() {
   const { user, logoutUser } = useAuth();
   const [isOpenAccount, setIsOpenAccount] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
@@ -53,24 +44,18 @@ const NavBar: React.FC<NavBarProps> = () => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log("User:", user);
-  }, [user]);
-
   const toggleSearch = () => {
     setIsSearchVisible(!isSearchVisible);
   };
 
   const handleLogout = async () => {
-    console.log("Logout");
-    await logoutUser()
-      .then(() => {
-        console.log("Logged out successfully");
-        router.push("/");
-      })
-      .catch((error) => {
-        console.log("Error logging out", error);
-      });
+    try {
+      await logoutUser();
+      console.log("Logged out successfully");
+      router.push("/");
+    } catch (error) {
+      console.log("Error logging out", error);
+    }
   };
 
   return (
@@ -78,7 +63,7 @@ const NavBar: React.FC<NavBarProps> = () => {
       <div className="container flex items-center justify-between px-6 py-4 md:mx-auto">
         {!isSearchVisible && (
           <Link href={"/"} className="flex items-center gap-2">
-            <Image src={"/assets/logo.jpg"} alt="logo" width={48} height={48} />
+            <Image src="/assets/logo.png" alt="logo" width={64} height={64} />
           </Link>
         )}
         <div
@@ -102,7 +87,7 @@ const NavBar: React.FC<NavBarProps> = () => {
               <div className="hidden w-80 md:block">
                 <SearchComponent />
               </div>
-              <TooltipWrapper content={"Search for services"}>
+              <TooltipWrapper content="Search for services">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -117,39 +102,23 @@ const NavBar: React.FC<NavBarProps> = () => {
 
           {!isSearchVisible && user && (
             <>
-              <TooltipWrapper key={"Bookings"} content={"My Bookings"}>
+              <div className="hidden font-bold md:flex md:items-center md:space-x-4">
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="relative"
                   onClick={() => router.push("/bookings")}
+                  className="font-semibold"
                 >
-                  <Calendar className="h-5 w-5" />
+                  Bookings
                 </Button>
-              </TooltipWrapper>
-              <TooltipWrapper key={"offers"} content={"Offers"}>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="relative"
+                  className="font-semibold"
                   onClick={() => router.push("/bookings/offers")}
                 >
-                  <Tag className="h-5 w-5" />
+                  Offers
                 </Button>
-              </TooltipWrapper>
-              <InboxComponent />
-              <TooltipWrapper
-                key={"account-settings"}
-                content="Account Settings"
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => router.push("/settings")}
-                >
-                  <SettingsIcon className="h-5 w-5" />
-                </Button>
-              </TooltipWrapper>
+                <NewBookingDialog />
+              </div>
             </>
           )}
 
@@ -163,9 +132,8 @@ const NavBar: React.FC<NavBarProps> = () => {
                   <DropdownMenuTrigger asChild>
                     <Button
                       className="flex items-center justify-start px-2"
-                      size={"lg"}
-                      variant={"ghost"}
-                      onClick={() => router.push("/profile")}
+                      size="lg"
+                      variant="ghost"
                     >
                       <Avatar className="cursor-pointer">
                         <AvatarImage
@@ -185,9 +153,9 @@ const NavBar: React.FC<NavBarProps> = () => {
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push("/profile")}>
-                      <Bookmark className="mr-2 h-4 w-4" />
-                      <span>Bookmarks</span>
+                    <DropdownMenuItem onClick={() => router.push("/settings")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
@@ -198,12 +166,42 @@ const NavBar: React.FC<NavBarProps> = () => {
               ) : (
                 <Button onClick={() => router.push("/login")}>Login</Button>
               )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-2 md:hidden"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
             </div>
           )}
         </div>
       </div>
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-white p-4 md:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </Button>
+          <div className="mt-16 flex flex-col space-y-4">
+            <Button variant="ghost" onClick={() => router.push("/bookings")}>
+              Bookings
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/bookings/offers")}
+            >
+              Offers
+            </Button>
+            <NewBookingDialog />
+          </div>
+        </div>
+      )}
     </header>
   );
-};
-
-export default NavBar;
+}

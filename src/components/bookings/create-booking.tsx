@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react'
-import { Button } from "@/components/ui/button"
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,53 +10,53 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
-import { PlaceOrderSheet } from './create-booking/place-order-sheet'
-import { StartBookingDialog } from './create-booking/offer-bid'
-import { BookingConfirmation } from './create-booking/booking-create-confirmation'
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { PlaceOrderSheet } from "./create-booking/place-order-sheet";
+import { StartBookingDialog } from "./create-booking/offer-bid";
+import { BookingConfirmation } from "./create-booking/booking-create-confirmation";
 
 export function NewBookingDialog() {
-    const [date, setDate] = useState<Date>()
-    const [service, setService] = useState('')
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [isPlaceOrderOpen, setIsPlaceOrderOpen] = useState(false)
-    const [isStartBookingOpen, setIsStartBookingOpen] = useState(false)
-    const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
-    
+  const [date, setDate] = useState<Date>();
+  const [service, setService] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPlaceOrderOpen, setIsPlaceOrderOpen] = useState(false);
+  const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+
   const handleSaveBooking = () => {
-    setIsDialogOpen(false)
-    setIsPlaceOrderOpen(true)
-  }
+    setIsDialogOpen(false);
+    setIsPlaceOrderOpen(true);
+  };
 
   const handlePlaceOrderContinue = () => {
-    setIsPlaceOrderOpen(false)
-    setIsStartBookingOpen(true)
-  }
+    setIsPlaceOrderOpen(false);
+    setIsStartBookingOpen(true);
+  };
 
   const handleFindWorker = (budget: number) => {
-    setIsStartBookingOpen(false)
-    setIsConfirmationOpen(true)
+    setIsStartBookingOpen(false);
+    setIsConfirmationOpen(true);
     // Here you would typically send the booking data to your backend
-    console.log('Booking placed with budget:', budget)
-  }
+    console.log("Booking placed with budget:", budget);
+  };
 
   return (
     <>
-   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="default">Make New Booking</Button>
+          <Button variant="default">Create a Bid</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -101,39 +101,26 @@ export function NewBookingDialog() {
               mode="single"
               selected={date}
               onSelect={setDate}
-              className="flex items-center justify-center rounded-md border w-full"
+              className="flex w-full items-center justify-center rounded-md border"
             />
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="time" className="text-right">
                 Time
               </Label>
-              <Input
-                id="time"
-                type="time"
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="location" className="text-right">
-                Location
-              </Label>
-              <Input
-                id="location"
-                placeholder="Enter address"
-                className="col-span-3"
-              />
+              <Input id="time" type="time" className="col-span-3" />
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" onClick={handleSaveBooking}>Save Booking</Button>
+            <Button type="submit" onClick={handleSaveBooking}>
+              Save Booking
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    <PlaceOrderSheet
+      <PlaceOrderSheet
         isOpen={isPlaceOrderOpen}
         onClose={() => setIsPlaceOrderOpen(false)}
         onContinue={handlePlaceOrderContinue}
-        service={service}
       />
 
       <StartBookingDialog
@@ -145,13 +132,12 @@ export function NewBookingDialog() {
       <BookingConfirmation
         isOpen={isConfirmationOpen}
         onClose={() => {
-          setIsConfirmationOpen(false)
+          setIsConfirmationOpen(false);
           // Reset all states here
-          setDate(undefined)
-          setService('')
+          setDate(undefined);
+          setService("");
         }}
       />
     </>
-    
-  )
+  );
 }

@@ -1,26 +1,27 @@
-'use client'
+"use client";
 
-import React, { useEffect, useState } from "react"
-import Image from "next/image"
-import { notFound } from "next/navigation"
-import { Star } from "lucide-react"
-import { useService, useServices } from "@/lib/api"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import useServicesStore from "@/store/servicesStore"
-import Main from "@/components/ui/main"
-import PopularServicesSection from "@/components/services/popular-services-section"
-import { Service } from "@/lib/types"
-import { Badge } from "@/components/ui/badge"
-import { ServiceRating } from "@/lib/types/service-types"
-import ReviewsSection from "@/components/services/reviews-section"
-import UserProfileCard from "@/components/services/user-profile-card"
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { Star } from "lucide-react";
+import { useService, useServices } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import useServicesStore from "@/store/servicesStore";
+import Main from "@/components/ui/main";
+import PopularServicesSection from "@/components/services/popular-services-section";
+import { Service } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import { ServiceRating } from "@/lib/types/service-types";
+import ReviewsSection from "@/components/services/reviews-section";
+import UserProfileCard from "@/components/services/user-profile-card";
+import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
 
 interface ServiceDetailsProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 const ServiceDetailsSkeleton: React.FC = () => (
@@ -43,85 +44,83 @@ const ServiceDetailsSkeleton: React.FC = () => (
       </div>
     </div>
   </div>
-)
+);
 
 const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
-  const { services, setServices } = useServicesStore()
-  const { data: serviceResponse, isLoading, error } = useService(+params.id)
+  const { services, setServices } = useServicesStore();
+  const { data: serviceResponse, isLoading, error } = useService(+params.id);
   const {
     data: servicesResponse,
     isLoading: allServicesLoading,
     error: allServicesError,
-  } = useServices()
+  } = useServices();
 
-  const [service, setService] = useState<Service>()
+  const [service, setService] = useState<Service>();
 
   useEffect(() => {
     if (servicesResponse) {
-      setServices(servicesResponse.data)
+      setServices(servicesResponse.data);
     }
-  }, [servicesResponse, allServicesLoading, setServices])
+  }, [servicesResponse, allServicesLoading, setServices]);
 
   useEffect(() => {
     if (serviceResponse) {
-      setService(serviceResponse.data)
+      setService(serviceResponse.data);
     }
-  }, [serviceResponse])
+  }, [serviceResponse]);
 
   const averageRating =
     service && service.ratings.length > 0
       ? (
-        service.ratings.reduce(
-          (acc: number, rating: ServiceRating) => acc + rating.rating,
-          0
-        ) / service.ratings.length
-      ).toFixed(1)
-      : null
+          service.ratings.reduce(
+            (acc: number, rating: ServiceRating) => acc + rating.rating,
+            0,
+          ) / service.ratings.length
+        ).toFixed(1)
+      : null;
 
   const renderStars = (rating: number) => {
-    const fullStars = Math.ceil(rating)
-    const halfStar = rating % 1 >= 0.5 ? 1 : 0
-    const emptyStars = 5 - fullStars - halfStar
+    const fullStars = Math.ceil(rating);
+    const halfStar = rating % 1 >= 0.5 ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStar;
 
     return (
       <>
         {[...Array(fullStars)].map((_, i) => (
           <Star key={i} className="text-gray-900" size={16} fill={"#111827"} />
         ))}
-
-
       </>
-    )
-  }
+    );
+  };
 
   if (isLoading) {
-    return <ServiceDetailsSkeleton />
+    return <ServiceDetailsSkeleton />;
   }
 
   if (error || !serviceResponse) {
-    notFound()
+    notFound();
   }
 
   return (
     <Main>
       {service && (
         <div className="space-y-6">
-          <section className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
+          <section className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_300px]">
             <Card className="w-full">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row">
-                  <div className="md:w-1/2 h-[400px]">
+                  <div className="h-[400px] md:w-1/2">
                     {service.image && (
                       <Image
                         src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
                         alt={service.name || "Service image"}
                         width={400}
                         height={400}
-                        className="w-full h-full rounded-lg object-cover"
+                        className="h-full w-full rounded-lg object-cover"
                       />
                     )}
                   </div>
-                  <div className="md:w-1/2 md:pl-6 mt-6 md:mt-0">
+                  <div className="mt-6 md:mt-0 md:w-1/2 md:pl-6">
                     <h1 className="mb-2 text-3xl font-bold">
                       {service.name || "Service Name"}
                     </h1>
@@ -133,7 +132,9 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                         <span className="ml-1">
                           {averageRating ? (
                             <span className="flex items-center">
-                              <span className="mr-2 font-bold">{averageRating}</span>
+                              <span className="mr-2 font-bold">
+                                {averageRating}
+                              </span>
                               {renderStars(parseFloat(averageRating))}
                             </span>
                           ) : (
@@ -154,12 +155,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                     <p className="mb-4 text-muted-foreground">
                       {service.description || "No description available."}
                     </p>
-                    <Button
-                      size="lg"
-                      onClick={() => console.log(`Booking service: ${service.id}`)}
-                    >
-                      Book Now
-                    </Button>
+                    <CreateBookingDialog initialService={service} />
                   </div>
                 </div>
               </CardContent>
@@ -171,7 +167,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
         </div>
       )}
     </Main>
-  )
-}
+  );
+};
 
-export default ServiceDetails
+export default ServiceDetails;
