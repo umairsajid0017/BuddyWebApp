@@ -24,7 +24,17 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
           <p className="text-lg font-bold text-primary">Rs. {service.price}</p>
           <div className="flex items-center text-xs text-gray-600">
             <StarIcon className="h-4 w-4" />
-            <span className="ml-1">4.9 | 6182 reviews</span>
+            <span className="ml-1">
+              {service.ratings.length > 0
+                ? (
+                    service.ratings.reduce(
+                      (acc, curr) => acc + curr.rating,
+                      0,
+                    ) / service.ratings.length
+                  ).toFixed(1)
+                : "0.0"}
+              | {service.ratings.length} reviews
+            </span>
           </div>
         </div>
       </CardContent>
