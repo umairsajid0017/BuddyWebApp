@@ -206,12 +206,12 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
       </div>
-      <span className="text-[10px] text-muted-foreground">
+      {/* <span className="text-[10px] text-muted-foreground">
         {timestamp.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         })}
-      </span>
+      </span> */}
     </div>
   );
 };

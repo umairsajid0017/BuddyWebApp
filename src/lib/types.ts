@@ -111,3 +111,13 @@ export interface SearchServicesResponse {
 }
 
 export type InboxItem = Partial<Record<keyof InboxItemInterface, unknown>>;
+
+export interface ChangePasswordData {
+  current_password: string;
+  new_password: string;
+}
+
+export interface ChangePasswordResponse {
+  status: boolean;
+  message: string;
+}
