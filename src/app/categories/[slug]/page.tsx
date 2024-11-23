@@ -10,6 +10,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useServicesByCategory } from "@/hooks/useServicesByCategories";
+import FilterBar from "@/components/services/filter-bar";
+import useFiltersStore from "@/store/filterStore";
 
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
   <Link href={`/services/${service.id}`} className="block">
@@ -74,8 +76,61 @@ const NoResultsFound: React.FC<{ categoryId: string }> = ({ categoryId }) => (
 const CategoryPage: React.FC = () => {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("id") ?? "";
+  const { filters } = useFiltersStore();
 
   const { services, isLoading, error } = useServicesByCategory(categoryId);
+
+  const filteredAndSortedServices = React.useMemo(() => {
+    if (!services) return [];
+
+    let filtered = [...services];
+
+    // // Apply service options filter
+    // if (filters.serviceOptions) {
+    //   filtered = filtered.filter(
+    //     (service) => service.type === filters.serviceOptions
+    //   );
+    // }
+
+    // // Apply budget filter
+    // if (filters.budget) {
+    //   const [min, max] = filters.budget.split("-").map(Number);
+    //   filtered = filtered.filter((service) => {
+    //     const price = Number(service.price);
+    //     if (max === undefined) return price >= min;
+    //     return price >= min && price <= max;
+    //   });
+    // }
+
+    // // Apply delivery time filter
+    // if (filters.deliveryTime) {
+    //   filtered = filtered.filter(
+    //     (service) => Number(service.delivery_time) <= Number(filters.deliveryTime)
+    //   );
+    // }
+
+    // Apply sorting
+    switch (filters.sortBy) {
+      case "newest":
+        filtered.sort(
+          (a, b) =>
+            new Date(b.created_at || 0).getTime() -
+            new Date(a.created_at || 0).getTime(),
+        );
+        break;
+      case "price_asc":
+        filtered.sort((a, b) => Number(a.price) - Number(b.price));
+        break;
+      case "price_desc":
+        filtered.sort((a, b) => Number(b.price) - Number(a.price));
+        break;
+      default:
+        // best_selling - you might want to implement your own logic here
+        break;
+    }
+
+    return filtered;
+  }, [services, filters]);
 
   if (isLoading) {
     return (
@@ -99,9 +154,10 @@ const CategoryPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {services && services.length > 0 ? (
+      <FilterBar />
+      {filteredAndSortedServices.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {services.map((service: Service) => (
+          {filteredAndSortedServices.map((service: Service) => (
             <ServiceCard key={service.id} service={service} />
           ))}
         </div>
