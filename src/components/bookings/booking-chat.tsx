@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mic, Image as ImageIcon, Send, ArrowLeft } from "lucide-react";
+import { AudioRecorder, AudioPlayer } from "@/components/audio/audio-recorder";
 
 type Message = {
   id: string;
@@ -86,6 +87,19 @@ export const BookingChat: React.FC<BookingChatProps> = ({
     }
   };
 
+  const handleAudioRecording = (audioBlob: Blob) => {
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const message: Message = {
+      id: Date.now().toString(),
+      text: "",
+      sender: "user",
+      timestamp: new Date(),
+      type: "audio",
+      content: audioUrl,
+    };
+    setMessages([...messages, message]);
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="right" className="w-full p-0 sm:w-[400px]">
@@ -132,7 +146,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
                 <div
                   className={`rounded-2xl p-3 ${
                     message.sender === "user"
-                      ? "rounded-tr-none bg-primary text-primary-foreground"
+                      ? "rounded-tr-none bg-secondary-200 text-text-900"
                       : "rounded-tl-none bg-muted"
                   }`}
                 >
@@ -146,12 +160,20 @@ export const BookingChat: React.FC<BookingChatProps> = ({
                       className="max-w-[200px] rounded-lg"
                     />
                   )}
-                  <span className="mt-1 block text-[10px] opacity-70">
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
+                  {message.type === "audio" && message.content && (
+                    <AudioPlayer
+                      audioUrl={message.content}
+                      timestamp={message.timestamp}
+                    />
+                  )}
+                  {message.type !== "audio" && (
+                    <span className="mt-1 block text-[10px] text-text-600">
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -162,37 +184,41 @@ export const BookingChat: React.FC<BookingChatProps> = ({
         {/* Chat Input */}
         <div className="border-t p-4">
           <div className="flex items-center gap-2">
-            <Input
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
-              className="rounded-full"
-              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+            {!isRecording && (
+              <>
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="rounded-full"
+                  onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <ImageIcon className="h-5 w-5" />
+                </Button>
+              </>
+            )}
+            <AudioRecorder
+              onRecordingComplete={handleAudioRecording}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
             />
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-            />
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <ImageIcon className="h-5 w-5" />
-            </Button>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setIsRecording(!isRecording)}
-            >
-              <Mic className={`h-5 w-5 ${isRecording ? "text-red-500" : ""}`} />
-            </Button>
-            <Button size="default" className="" onClick={sendMessage}>
-              <Send className="h-5 w-5" />
-            </Button>
+            {!isRecording && (
+              <Button size="default" onClick={sendMessage}>
+                <Send className="h-5 w-5" />
+              </Button>
+            )}
           </div>
         </div>
       </SheetContent>
