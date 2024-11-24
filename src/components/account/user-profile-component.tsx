@@ -1,11 +1,11 @@
-import React from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from '../ui/button'
-import { CameraIcon, Router } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { User } from '@/lib/types'
-import { splitFullName } from '@/utils/helper-functions'
+import React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "../ui/button";
+import { CameraIcon, Router } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { User } from "@/lib/types";
+import { splitFullName } from "@/utils/helper-functions";
 
 // type UserInfo = {
 //   firstName: string
@@ -22,53 +22,126 @@ import { splitFullName } from '@/utils/helper-functions'
 
 const UserProfile: React.FC<{ user: User }> = ({ user }) => {
   const router = useRouter();
+
   return (
-
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader className="flex flex-col items-center justify-center gap-0">
-        <div className="relative">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny" alt="Profile picture" />
-            <AvatarFallback>FC</AvatarFallback>
+    <div className="space-y-8">
+      <Card className="w-full">
+        <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+          <div className="relative">
+            <Avatar className="h-24 w-24">
+              <AvatarImage
+                src={
+                  user.image ||
+                  "https://api.dicebear.com/9.x/dylan/svg?seed=Destiny"
+                }
+                alt="Profile picture"
+              />
+              <AvatarFallback>
+                {splitFullName(user.name).firstName[0]}
+                {splitFullName(user.name).lastName[0]}
+              </AvatarFallback>
             </Avatar>
-          <Button size="sm" className="absolute bottom-0 right-0 rounded-full" variant="outline">
-            <CameraIcon className="h-4 w-4 text-primary" />
-          </Button>
-        </div>
-        <div className='flex flex-col items-center justify-between gap-2'>
-        <CardTitle className="mt-4 text-2xl font-bold">{user.name}</CardTitle>
-        <Button className='text-xs text-text-600' variant={"outline"} onClick={()=> router.push('/settings/profile') }>
-          Edit Profile
-        </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <InfoItem label="First Name" value={splitFullName(user.name).firstName} />
-            <InfoItem label="Date of Birth" value={user.dob ?? "11/27/95"} />
-            <InfoItem label="Country" value={user.country ?? "United States"} />
-            <InfoItem label="National ID No" value={user.company_id?.toString() ?? "3922-5657995-01"} />
-            <InfoItem label="Address" value={user.address ?? "267 New Avenue Park, New York"} />
+            <Button
+              size="sm"
+              className="absolute bottom-0 right-0 rounded-full"
+              variant="outline"
+            >
+              <CameraIcon className="h-4 w-4 text-primary" />
+            </Button>
           </div>
-          <div className="space-y-2">
-            <InfoItem label="Last Name" value={splitFullName(user.name).lastName} />
-            <InfoItem label="Email" value={user.email} />
-            <InfoItem label="Number" value={user.phone} />
-            <InfoItem label="Gender" value={user.gender ?? ""} />
+          <div className="flex-1">
+            <CardTitle className="text-2xl font-bold">{user.name}</CardTitle>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
+            <div className="mt-4 flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/settings/profile")}
+              >
+                Edit Profile
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+        </CardHeader>
 
-const InfoItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+        <CardContent>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            <div className="space-y-4">
+              <h3 className="font-semibold">Personal Information</h3>
+              <div className="grid gap-4">
+                <InfoItem
+                  label="First Name"
+                  value={splitFullName(user.name).firstName}
+                />
+                <InfoItem
+                  label="Last Name"
+                  value={splitFullName(user.name).lastName}
+                />
+                <InfoItem
+                  label="Date of Birth"
+                  value={user.dob ?? "Not specified"}
+                />
+                <InfoItem
+                  label="Gender"
+                  value={user.gender ?? "Not specified"}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-semibold">Contact Information</h3>
+              <div className="grid gap-4">
+                <InfoItem label="Email" value={user.email} />
+                <InfoItem label="Phone" value={user.phone ?? "Not specified"} />
+                <InfoItem
+                  label="Country"
+                  value={user.country ?? "Not specified"}
+                />
+                <InfoItem
+                  label="Address"
+                  value={user.address ?? "Not specified"}
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Statistics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatItem label="Total Bookings" value="12" />
+            <StatItem label="Completed" value="8" />
+            <StatItem label="In Progress" value="2" />
+            <StatItem label="Cancelled" value="2" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const InfoItem: React.FC<{ label: string; value: string }> = ({
+  label,
+  value,
+}) => (
   <div>
-    <span className="text-sm font-medium text-text-600">{label}</span>
-    <p className="mt-1 ">{value}</p>
+    <span className="text-sm font-medium text-muted-foreground">{label}</span>
+    <p className="mt-1 text-sm">{value}</p>
   </div>
-)
+);
 
+const StatItem: React.FC<{ label: string; value: string }> = ({
+  label,
+  value,
+}) => (
+  <div className="text-center">
+    <p className="text-2xl font-semibold">{value}</p>
+    <p className="text-sm text-muted-foreground">{label}</p>
+  </div>
+);
 
 export default UserProfile;
