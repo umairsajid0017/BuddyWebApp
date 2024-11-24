@@ -3,7 +3,6 @@
 import Image from "next/image";
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu, SearchIcon, User, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
@@ -19,6 +18,19 @@ import {
 import { SearchComponent } from "../services/search-services/search-component";
 import { CreateBookingDialog } from "../bookings/create-booking-dialogue";
 import { NewBookingDialog } from "../bookings/create-booking";
+import {
+  LayoutDashboard,
+  UserCircle,
+  Briefcase,
+  BookMarked,
+  LifeBuoy,
+  Settings,
+  LogOut,
+  Menu,
+  SearchIcon,
+  User,
+  X,
+} from "lucide-react";
 
 export default function NavBar() {
   const { user, logoutUser } = useAuth();
@@ -130,36 +142,65 @@ export default function NavBar() {
                   onOpenChange={setIsOpenAccount}
                 >
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      className="flex items-center justify-start px-2"
-                      size="lg"
-                      variant="ghost"
-                    >
-                      <Avatar className="cursor-pointer">
+                    <Button variant="ghost" size="icon" className="relative">
+                      <Avatar className="h-9 w-9">
                         <AvatarImage
                           src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny"
                           alt="User"
                         />
-                        <AvatarFallback>LC</AvatarFallback>
+                        <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
                       </Avatar>
-                      <div className="ml-3 hidden flex-col items-start justify-start p-2 md:flex">
-                        <p className="text-sm font-medium">{user?.name}</p>
-                        <p className="text-xs text-[#619EFF]">{user?.email}</p>
-                      </div>
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => router.push("/profile")}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="border-b px-2 py-2">
+                      <p className="font-medium">{user.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/profile")}
+                      className="gap-2 py-2"
+                    >
+                      <UserCircle className="h-4 w-4" />
+                      My Account
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push("/settings")}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/bookmarks")}
+                      className="gap-2 py-2"
+                    >
+                      <BookMarked className="h-4 w-4" />
+                      Saved
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/helpdesk")}
+                      className="gap-2 py-2"
+                    >
+                      <LifeBuoy className="h-4 w-4" />
+                      Helpdesk
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => router.push("/settings")}
+                      className="gap-2 py-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+
+                    <div className="my-1 h-px bg-muted" />
+
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="gap-2 py-2 text-red-600 focus:text-red-600"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Log out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
