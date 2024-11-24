@@ -16,6 +16,8 @@ import {
   Star,
   Forward,
   Info,
+  CircleCheck,
+  Circle,
 } from "lucide-react";
 import { AudioRecorder, AudioPlayer } from "@/components/audio/audio-recorder";
 import {
@@ -38,17 +40,23 @@ type Message = {
   replyTo?: { id: string; sender: "user" | "provider"; content: string };
 };
 
+type Provider = {
+  id: number;
+  name: string;
+  image: string;
+};
+
 type BookingChatProps = {
   isOpen: boolean;
   onClose: () => void;
   taskId: string;
-  providerName: string;
+  provider: Provider;
 };
 
 export const BookingChat: React.FC<BookingChatProps> = ({
   isOpen,
   onClose,
-  providerName,
+  provider,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -187,8 +195,10 @@ export const BookingChat: React.FC<BookingChatProps> = ({
           >
             {message.sender === "provider" && (
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/assets/provider-avatar.png" />
-                <AvatarFallback>{providerName[0]}</AvatarFallback>
+                <AvatarImage
+                  src={process.env.NEXT_PUBLIC_IMAGE_URL + provider.image}
+                />
+                <AvatarFallback>{provider.name[0]}</AvatarFallback>
               </Avatar>
             )}
             <div
@@ -279,12 +289,17 @@ export const BookingChat: React.FC<BookingChatProps> = ({
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/assets/provider-avatar.png" />
-            <AvatarFallback>{providerName[0]}</AvatarFallback>
+            <AvatarImage
+              src={process.env.NEXT_PUBLIC_IMAGE_URL + provider.image}
+            />
+            <AvatarFallback>{provider.name[0]}</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-semibold">{providerName}</h3>
-            <p className="text-sm text-muted-foreground">Online</p>
+            <h3 className="font-semibold">{provider.name}</h3>
+            <div className="flex items-center gap-2">
+              <Circle className="h-2 w-2 text-green-500" fill="#22c55e" />
+              <p className="text-sm text-muted-foreground">Online</p>
+            </div>
           </div>
         </div>
 
@@ -313,7 +328,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
                     <p className="font-medium">
                       {message.replyTo?.sender === "user"
                         ? "You"
-                        : providerName}
+                        : provider.name}
                     </p>
                     <p className="truncate">{message.replyTo?.content}</p>
                   </div>

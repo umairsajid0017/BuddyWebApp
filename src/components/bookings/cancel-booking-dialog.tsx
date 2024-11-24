@@ -1,22 +1,30 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import Image from 'next/image'
-import { Card, CardContent, CardHeader } from '../ui/card'
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { Card, CardContent, CardHeader } from "../ui/card";
+import { Booking } from "@/lib/types/booking-types";
 
 type CancelBookingDialogProps = {
-  task: {
-    title: string
-    person: string
-    image: string
-  }
-  onConfirm: () => void
-  onCancel: () => void
-}
+  booking: Booking;
+  onConfirm: () => void;
+  onCancel: () => void;
+};
 
-export function CancelBookingDialog({ task, onConfirm, onCancel }: CancelBookingDialogProps) {
+export const CancelBookingDialog: React.FC<CancelBookingDialogProps> = ({
+  booking,
+  onConfirm,
+  onCancel,
+}) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -31,25 +39,26 @@ export function CancelBookingDialog({ task, onConfirm, onCancel }: CancelBooking
           </DialogTitle>
         </DialogHeader>
         <Card className="flex items-center justify-start">
-            <CardHeader>
-          <Image
-            src={task.image}
-            alt={task.title}
-            width={96}
-            height={96}
-            className="rounded-lg"
+          <CardHeader>
+            <Image
+              src={process.env.NEXT_PUBLIC_IMAGE_URL + booking.service.image}
+              alt={booking.service.name}
+              width={96}
+              height={96}
+              className="rounded-lg"
             />
-            </CardHeader>
-          <CardContent className='h-full flex flex-col justify-center p-0'>
-            <h3 className="font-semibold">{task.title}</h3>
-            <p className="text-sm text-text-700">{task.person}</p>
+          </CardHeader>
+          <CardContent className="flex h-full flex-col justify-center p-0">
+            <h3 className="font-semibold">{booking.service.name}</h3>
+            <p className="text-sm text-text-700">{booking.worker.name}</p>
           </CardContent>
         </Card>
-        <DialogDescription className="text-center mb-4">
+        <DialogDescription className="mb-4 text-center">
           Are you sure want to cancel your service booking?
         </DialogDescription>
-        <p className="text-sm text-destructive text-center mb-6">
-          Only 80% of the money you can refund from your payment according to our policy
+        <p className="mb-6 text-center text-sm text-destructive">
+          Only 80% of the money you can refund from your payment according to
+          our policy
         </p>
         <div className="flex justify-between space-x-4">
           <Button variant="outline" onClick={onCancel} className="flex-1">
@@ -61,5 +70,5 @@ export function CancelBookingDialog({ task, onConfirm, onCancel }: CancelBooking
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};

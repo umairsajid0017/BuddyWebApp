@@ -15,27 +15,19 @@ import { MapPin, Calendar, Clock, MessageCircle, XCircle } from "lucide-react";
 import Image from "next/image";
 import { CancelBookingDialog } from "./cancel-booking-dialog";
 import { BookingChat } from "./booking-chat";
-
-type Task = {
-  id: string;
-  title: string;
-  image: string;
-  person: string;
-  status: "Upcoming" | "Completed" | "Cancelled";
-  date?: string;
-  time?: string;
-  location?: string;
-};
+import { Booking } from "@/lib/types/booking-types";
 
 type BookingDetailsSheetProps = {
-  task: Task;
+  booking: Booking;
 };
 
-const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({ task }) => {
+const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
+  booking,
+}) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const handleCancel = () => {
-    console.log("Cancelling booking:", task.id);
+    console.log("Cancelling booking:", booking.id);
     // Implement cancellation logic here
   };
 
@@ -53,13 +45,13 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({ task }) => {
         </SheetTrigger>
         <SheetContent className="w-[400px] sm:w-[540px]">
           <SheetHeader>
-            <SheetTitle>{task.title}</SheetTitle>
-            <SheetDescription>{task.person}</SheetDescription>
+            <SheetTitle>{booking.service.name}</SheetTitle>
+            <SheetDescription>{booking.worker.name}</SheetDescription>
           </SheetHeader>
           <div className="mt-6 space-y-6">
             <Image
-              src={task.image}
-              alt={task.title}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL + booking.service.image}
+              alt={booking.service.name}
               width={500}
               height={300}
               className="w-full rounded-lg"
@@ -67,27 +59,34 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({ task }) => {
             <div className="space-y-2">
               <Badge
                 variant={
-                  task.status === "Upcoming"
+                  booking.status === "pending"
                     ? "default"
-                    : task.status === "Completed"
+                    : booking.status === "completed"
                       ? "default"
                       : "destructive"
                 }
-                className={`${task.status === "Completed" ? "bg-green-500 hover:bg-green-400" : ""}`}
+                className={`${booking.status === "completed" ? "bg-green-500 hover:bg-green-400" : ""}`}
               >
-                {task.status}
+                {booking.status}
               </Badge>
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4" />
-                <span>{task.date || "Date not specified"}</span>
+                <span>
+                  {booking.updated_at.split("T")[0] || "Date not specified"}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4" />
-                <span>{task.time || "Time not specified"}</span>
+                <span>
+                  {booking.updated_at?.split("T")[1]?.split(".")[0] ||
+                    "Time not specified"}
+                </span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4" />
-                <span>{task.location || "Location not specified"}</span>
+                <span>
+                  {booking.service.address || "Location not specified"}
+                </span>
               </div>
             </div>
             <div className="flex space-x-4">
@@ -96,14 +95,14 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({ task }) => {
                 Chat
               </Button>
 
-              {task.status === "Upcoming" && (
+              {booking.status === "pending" && (
                 <CancelBookingDialog
-                  task={task}
+                  booking={booking}
                   onConfirm={handleCancel}
                   onCancel={() => console.log("Cancellation aborted")}
                 />
               )}
-              {task.status === "Completed" && (
+              {booking.status === "completed" && (
                 <Button className="flex-1">Book Again</Button>
               )}
             </div>
@@ -114,8 +113,8 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({ task }) => {
       <BookingChat
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        taskId={task.id}
-        providerName={task.person}
+        taskId={booking.id.toString()}
+        provider={booking.worker}
       />
     </>
   );
