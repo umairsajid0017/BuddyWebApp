@@ -15,6 +15,7 @@ import {
   HelpCircleIcon,
   ChevronRightIcon,
   Loader2Icon,
+  Home,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -69,7 +70,9 @@ export default function SettingsLayout({
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">home</BreadcrumbLink>
+              <BreadcrumbLink href="/">
+                <Home className="h-4 w-4" />
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator>
               <ChevronRightIcon className="h-4 w-4" />
@@ -80,7 +83,9 @@ export default function SettingsLayout({
                   {index === breadcrumbItems.length - 1 ? (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>
                   ) : (
-                    <BreadcrumbLink href={item.href}>{kebabCase(item.label)}</BreadcrumbLink>
+                    <BreadcrumbLink href={item.href}>
+                      {kebabCase(item.label)}
+                    </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
                 {index < breadcrumbItems.length - 1 && (
@@ -120,8 +125,8 @@ export default function SettingsLayout({
         <div className="w-full md:w-3/4">
           <div className="rounded-lg bg-white p-6 shadow">
             {isLoading ? (
-              <div className="flex p-16 items-center justify-center">
-                <Loading/>
+              <div className="flex items-center justify-center p-16">
+                <Loading />
               </div>
             ) : (
               children
