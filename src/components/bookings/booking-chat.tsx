@@ -7,7 +7,8 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface BookingChatProps {
   isOpen: boolean;
@@ -32,6 +33,14 @@ export const BookingChat: React.FC<BookingChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [chatRoomId, setChatRoomId] = useState<string | null>(null);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   useEffect(() => {
     const initializeChat = async () => {
       if (user && provider) {
@@ -47,12 +56,10 @@ export const BookingChat: React.FC<BookingChatProps> = ({
   }, [user, provider]);
 
   useEffect(() => {
-    console.log("chatRoomId", chatRoomId);
     if (chatRoomId) {
       const unsubscribe = chatService.subscribeToMessages(
         chatRoomId,
         (newMessages) => {
-          console.log("Received messages:", newMessages);
           setMessages(newMessages);
         },
       );
@@ -102,35 +109,47 @@ export const BookingChat: React.FC<BookingChatProps> = ({
           </Avatar>
           <div>
             <h3 className="font-semibold">{provider.name}</h3>
+            <div className="flex items-center gap-2">
+              <Circle className="h-2 w-2 text-green-500" fill="currentColor" />
+              <p className="text-sm text-muted-foreground">Online</p>
+            </div>
           </div>
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`mb-4 flex ${
-                message.sender === user?.id.toString()
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
-            >
+        <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent flex-1 overflow-y-auto">
+          <div className="space-y-4 p-4">
+            {messages.map((message) => (
               <div
-                className={`max-w-[70%] rounded-lg p-3 ${
+                key={message.id}
+                className={cn(
+                  "animate-slide-in flex",
                   message.sender === user?.id.toString()
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
+                    ? "justify-end"
+                    : "justify-start",
+                )}
               >
-                <p>{message.text}</p>
-                <span className="mt-1 block text-xs opacity-70">
-                  {message.timestamp?.toLocaleTimeString()}
-                </span>
+                <div
+                  className={cn(
+                    "max-w-[70%] rounded-lg p-3 transition-all",
+                    message.sender === user?.id.toString()
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted",
+                    "hover:shadow-md",
+                  )}
+                >
+                  <p className="text-sm">{message.text}</p>
+                  <span className="mt-1 block text-[10px] opacity-70">
+                    {message.timestamp?.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
 
         {/* Chat Input */}
@@ -140,9 +159,15 @@ export const BookingChat: React.FC<BookingChatProps> = ({
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type a message..."
+              className="rounded-full"
               onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             />
-            <Button onClick={sendMessage}>
+            <Button
+              size="icon"
+              className="rounded-full"
+              onClick={sendMessage}
+              disabled={!newMessage.trim()}
+            >
               <Send className="h-5 w-5" />
             </Button>
           </div>
