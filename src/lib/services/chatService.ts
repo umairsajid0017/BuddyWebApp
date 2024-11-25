@@ -9,6 +9,8 @@ import {
   serverTimestamp,
   getDocs,
   Timestamp,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
 
 export interface ChatMessage {
@@ -19,6 +21,11 @@ export interface ChatMessage {
   type: string;
   timestamp?: Date;
   chatRoomId: string;
+  replyTo?: {
+    id: string;
+    text: string;
+    sender: string;
+  } | null;
 }
 
 export const chatService = {
@@ -91,5 +98,15 @@ export const chatService = {
       });
       callback(messages);
     });
+  },
+
+  // Delete a message
+  async deleteMessage(messageId: string) {
+    try {
+      await deleteDoc(doc(db, "messages", messageId));
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      throw error;
+    }
   },
 };
