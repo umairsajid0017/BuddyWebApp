@@ -117,7 +117,7 @@ export function NewBookingDialog() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <PlaceOrderSheet
+      {/* <PlaceOrderSheet
         isOpen={isPlaceOrderOpen}
         onClose={() => setIsPlaceOrderOpen(false)}
         onContinue={handlePlaceOrderContinue}
@@ -127,7 +127,7 @@ export function NewBookingDialog() {
         isOpen={isStartBookingOpen}
         onClose={() => setIsStartBookingOpen(false)}
         onFindWorker={handleFindWorker}
-      />
+      /> */}
 
       <BookingConfirmation
         isOpen={isConfirmationOpen}

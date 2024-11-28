@@ -38,9 +38,11 @@ export interface BookingsResponse {
 }
 
 export interface CreateBookingData {
+  customer_id: number;
   service_id: number;
+  worker_id: number;
   description?: string;
-  budget: number;
+  price: string;
   images?: File[];
   videos?: File[];
   audio?: File;

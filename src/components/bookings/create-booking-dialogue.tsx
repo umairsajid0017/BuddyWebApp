@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -18,38 +20,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useServices } from "@/lib/api";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { format, setDate } from "date-fns";
 import { Service } from "@/lib/types";
 import { PlaceOrderSheet } from "./create-booking/place-order-sheet";
 import { StartBookingDialog } from "./create-booking/offer-bid";
 import { BookingConfirmation } from "./create-booking/booking-create-confirmation";
 import { ServiceCard } from "./create-booking/booking-service-card";
+import { useServices } from "@/lib/api";
+import { useCreateBid, useDirectBooking } from "@/lib/api/bookings";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { BookingFormData, MediaFiles } from "@/lib/types/common";
+import { useAuth } from "@/store/authStore";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
+  mode?: "book" | "bid";
 }
 
 export function CreateBookingDialog({
   initialService,
+  mode = "bid",
 }: CreateBookingDialogProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const createBid = useCreateBid();
+  const directBooking = useDirectBooking();
+
+  const [formData, setFormData] = useState<BookingFormData>({
+    service: initialService || null,
+    description: "",
+    budget: 200,
+    time: "",
+    date: undefined,
+  });
+
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service | undefined>(
-    initialService,
-  );
-  const [description, setDescription] = useState("");
-  const [budget, setBudget] = useState(200);
   const [isPlaceOrderOpen, setIsPlaceOrderOpen] = useState(false);
   const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [bidDetails, setBidDetails] = useState<any>(null);
 
-  const { data: servicesResponse, isLoading, error } = useServices();
-
-  useEffect(() => {
-    if (initialService) {
-      setSelectedService(initialService);
-    }
-  }, [initialService]);
+  const { data: servicesResponse, isLoading } = useServices();
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -59,30 +73,101 @@ export function CreateBookingDialog({
   };
 
   const resetForm = () => {
-    setSelectedService(initialService);
-    setDescription("");
-    setBudget(200);
+    setFormData({
+      service: initialService || null,
+      description: "",
+      budget: 200,
+      time: "",
+      date: undefined,
+    });
   };
 
-  const handleContinue = () => {
+  const handleSaveBooking = () => {
+    if (!formData.service || !formData.date || !formData.time) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
     setIsOpen(false);
     setIsPlaceOrderOpen(true);
   };
 
-  const handlePlaceOrderContinue = () => {
+  const handlePlaceOrderContinue = (
+    description: string,
+    mediaFiles?: MediaFiles,
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      description,
+      mediaFiles,
+    }));
     setIsPlaceOrderOpen(false);
-    setIsStartBookingOpen(true);
+
+    if (mode === "bid") {
+      setIsStartBookingOpen(true);
+    } else {
+      handleDirectBooking();
+    }
   };
 
-  const handleFindWorker = (newBudget: number) => {
-    setBudget(newBudget);
-    setIsStartBookingOpen(false);
-    setIsConfirmationOpen(true);
+  const handleDirectBooking = async () => {
+    if (!user || !formData.service) return;
+
+    try {
+      const response = await directBooking.mutateAsync({
+        customer_id: Number(user.id),
+        worker_id: Number(formData.service.user_id),
+        service_id: formData.service.id,
+        price: formData.budget.toString(),
+        description: formData.description,
+        images: formData.mediaFiles?.images,
+        videos: formData.mediaFiles?.videos,
+        audio: formData.mediaFiles?.audio,
+      });
+
+      if (response.status) {
+        toast.success("Booking created successfully");
+        router.push("/bookings");
+      } else {
+        toast.error(response.message || "Failed to create booking");
+      }
+    } catch (error) {
+      toast.error("Error creating booking");
+      console.error("Booking error:", error);
+    }
   };
 
-  const handleConfirmationClose = () => {
-    setIsConfirmationOpen(false);
-    resetForm();
+  const handleBidPlacement = async (bidAmount: number) => {
+    if (!user || !formData.service) return;
+
+    try {
+      const response = await createBid.mutateAsync({
+        customer_id: user.id,
+        service_id: formData.service.id,
+        worker_id: formData.service.user_id,
+        description: formData.description,
+        price: bidAmount.toString(),
+        images: formData.mediaFiles?.images,
+        audio: formData.mediaFiles?.audio,
+      });
+
+      if (response.status) {
+        setBidDetails({ id: response.data?.booking_id, price: bidAmount });
+        setIsStartBookingOpen(false);
+        setIsConfirmationOpen(true);
+      } else {
+        toast.error(response.message || "Failed to create bid");
+      }
+    } catch (error) {
+      toast.error("Error creating bid");
+      console.error("Bid creation error:", error);
+    }
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      time: e.target.value,
+    }));
   };
 
   return (
@@ -90,39 +175,49 @@ export function CreateBookingDialog({
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button variant="default">
-            {initialService ? "Book Now" : "Create a Bid"}
+            {mode === "book" ? "Book Now" : "Create a Bid"}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px] md:max-w-3xl">
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {initialService ? "Book Service" : "Create New Booking"}
+              {mode === "book" ? "Book Service" : "New Bid"}
             </DialogTitle>
+            <DialogDescription>
+              {mode === "book"
+                ? "Book this service directly."
+                : "Create a new bid for a service."}
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {!initialService && (
+            {initialService ? (
+              <ServiceCard service={initialService} compact />
+            ) : (
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="service" className="text-right">
                   Service
                 </Label>
                 <Select
-                  value={selectedService?.id.toString()}
-                  onValueChange={(value) =>
-                    setSelectedService(
-                      servicesResponse?.data.find(
-                        (s) => s.id.toString() === value,
-                      ),
-                    )
-                  }
+                  onValueChange={(value) => {
+                    const service = servicesResponse?.data.find(
+                      (s) => s.id.toString() === value,
+                    );
+                    setFormData((prev) => ({
+                      ...prev,
+                      service: service || null,
+                    }));
+                  }}
+                  value={formData.service?.id.toString()}
                 >
-                  <SelectTrigger className="col-span-3">
+                  <SelectTrigger className="col-span-3 w-full bg-background">
                     <SelectValue placeholder="Select a service" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[200px] overflow-y-auto">
                     {servicesResponse?.data.map((service) => (
                       <SelectItem
                         key={service.id}
                         value={service.id.toString()}
+                        className="cursor-pointer"
                       >
                         {service.name}
                       </SelectItem>
@@ -131,30 +226,93 @@ export function CreateBookingDialog({
                 </Select>
               </div>
             )}
-            {selectedService && <ServiceCard service={selectedService} />}
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="date" className="text-right">
+                Date
+              </Label>
+              <div className="col-span-3">
+                <Button
+                  variant={"outline"}
+                  className={`w-full justify-start text-left font-normal ${
+                    !formData.date && "text-muted-foreground"
+                  }`}
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      date: new Date(),
+                    }));
+                  }}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.date ? (
+                    format(formData.date, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </div>
+            </div>
+            <Calendar
+              mode="single"
+              selected={formData.date}
+              onSelect={(date) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  date: date,
+                }))
+              }
+              className="flex w-full items-center justify-center rounded-md border"
+            />
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="time" className="text-right">
+                Time
+              </Label>
+              <Input
+                id="time"
+                type="time"
+                className="col-span-3"
+                value={formData.time}
+                onChange={handleTimeChange}
+              />
+            </div>
           </div>
-          <Button onClick={handleContinue} disabled={!selectedService}>
-            Continue
-          </Button>
+          <DialogFooter>
+            <Button
+              type="submit"
+              onClick={handleSaveBooking}
+              disabled={!formData.service || !formData.date || !formData.time}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <PlaceOrderSheet
         isOpen={isPlaceOrderOpen}
         onClose={() => setIsPlaceOrderOpen(false)}
-        onContinue={handlePlaceOrderContinue}
-        service={selectedService}
+        onContinue={(description: string, mediaFiles?: MediaFiles) =>
+          handlePlaceOrderContinue(description, mediaFiles)
+        }
+        service={formData.service || undefined}
       />
 
       <StartBookingDialog
         isOpen={isStartBookingOpen}
         onClose={() => setIsStartBookingOpen(false)}
-        onFindWorker={handleFindWorker}
+        onFindWorker={handleBidPlacement}
+        service={formData.service || undefined}
+        description={formData.description}
       />
 
       <BookingConfirmation
         isOpen={isConfirmationOpen}
-        onClose={handleConfirmationClose}
+        onClose={() => {
+          setIsConfirmationOpen(false);
+          resetForm();
+        }}
+        bidDetails={bidDetails}
       />
     </>
   );

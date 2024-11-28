@@ -32,7 +32,7 @@ export const useCreateBooking = () => {
 
       // Append basic booking data
       formData.append("service_id", bookingData.service_id.toString());
-      formData.append("budget", bookingData.budget.toString());
+      formData.append("price", bookingData.price);
       if (bookingData.description) {
         formData.append("description", bookingData.description);
       }
@@ -93,5 +93,84 @@ export const useBookingDetails = (
       return response.data;
     },
     options,
+  );
+};
+
+// Create a new bid
+export const useCreateBid = () => {
+  return useMutation<CreateBookingResponse, AxiosError, CreateBookingData>(
+    async (bookingData) => {
+      const formData = new FormData();
+
+      // Append required fields
+      formData.append("service_id", bookingData.service_id.toString());
+      formData.append("worker_id", bookingData.worker_id.toString());
+      formData.append("price", bookingData.price);
+
+      // Append optional fields
+      if (bookingData.description) {
+        formData.append("description", bookingData.description);
+      }
+
+      // Append media files if they exist
+      if (bookingData.images) {
+        bookingData.images.forEach((image) => {
+          formData.append("images[]", image);
+        });
+      }
+
+      if (bookingData.videos) {
+        bookingData.videos.forEach((video) => {
+          formData.append("videos[]", video);
+        });
+      }
+
+      if (bookingData.audio) {
+        formData.append("audio", bookingData.audio);
+      }
+
+      const response = await api.post<CreateBookingResponse>("/bid", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data;
+    },
+  );
+};
+
+// Direct booking
+export const useDirectBooking = () => {
+  return useMutation<CreateBookingResponse, AxiosError, CreateBookingData>(
+    async (bookingData) => {
+      const formData = new FormData();
+
+      // Append booking data
+      formData.append("service_id", bookingData.service_id.toString());
+      formData.append("price", bookingData.price);
+      if (bookingData.description) {
+        formData.append("description", bookingData.description);
+      }
+
+      // Handle media files
+      if (bookingData.images) {
+        bookingData.images.forEach((image) => {
+          formData.append("images[]", image);
+        });
+      }
+
+      const response = await api.post<CreateBookingResponse>(
+        "/bookings/direct",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      return response.data;
+    },
   );
 };

@@ -17,7 +17,6 @@ import {
 } from "./dropdown-menu";
 import { SearchComponent } from "../services/search-services/search-component";
 import { CreateBookingDialog } from "../bookings/create-booking-dialogue";
-import { NewBookingDialog } from "../bookings/create-booking";
 import {
   LayoutDashboard,
   UserCircle,
@@ -129,7 +128,7 @@ export default function NavBar() {
                 >
                   Offers
                 </Button>
-                <NewBookingDialog />
+                <CreateBookingDialog />
               </div>
             </>
           )}
@@ -239,7 +238,7 @@ export default function NavBar() {
             >
               Offers
             </Button>
-            <NewBookingDialog />
+            <CreateBookingDialog />
           </div>
         </div>
       )}

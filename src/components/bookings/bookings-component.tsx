@@ -3,7 +3,7 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBookings } from "@/lib/api/bookings";
-import { NewBookingDialog } from "./create-booking";
+import { CreateBookingDialog } from "./create-booking-dialogue";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import TaskCard from "./task-card";
@@ -44,7 +44,7 @@ const NoBookingsView: React.FC<{ status: string }> = ({ status }) => (
       You do not have any {status} booking. Make a new booking by clicking the
       button below.
     </p>
-    <NewBookingDialog />
+    <CreateBookingDialog />
   </div>
 );
 const BookingsComponent: React.FC = () => {
@@ -58,7 +58,7 @@ const BookingsComponent: React.FC = () => {
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Bookings</h1>
-        <NewBookingDialog />
+        <CreateBookingDialog />
       </div>
       <Tabs defaultValue="pending">
         <TabsList className="mb-4">

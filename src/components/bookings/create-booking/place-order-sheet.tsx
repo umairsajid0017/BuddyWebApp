@@ -14,11 +14,12 @@ import { Mic, Video, ImageIcon, Pause, Play, Trash2 } from "lucide-react";
 import { ServiceCard } from "./booking-service-card";
 import { Service } from "@/lib/types";
 import { Progress } from "@/components/ui/progress";
+import { MediaFiles } from "@/lib/types/common";
 
 interface PlaceOrderSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  onContinue: () => void;
+  onContinue: (description: string, mediaFiles?: MediaFiles) => void;
   service?: Service;
 }
 
@@ -31,9 +32,12 @@ export function PlaceOrderSheet({
   const [description, setDescription] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [images, setImages] = useState<string[]>([]);
-  const [videos, setVideos] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>([]);
+  const [videos, setVideos] = useState<File[]>([]);
+  const [imageURLs, setImageURLs] = useState<string[]>([]);
+  const [videoURLs, setVideoURLs] = useState<string[]>([]);
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -59,6 +63,9 @@ export function PlaceOrderSheet({
         const audioBlob = new Blob(audioChunks.current, { type: "audio/wav" });
         const audioUrl = URL.createObjectURL(audioBlob);
         setAudioURL(audioUrl);
+        setAudioFile(
+          new File([audioBlob], "audio-recording.wav", { type: "audio/wav" }),
+        );
       };
       audioChunks.current = [];
       mediaRecorder.current.start();
@@ -82,13 +89,15 @@ export function PlaceOrderSheet({
   ) => {
     const files = event.target.files;
     if (files) {
-      const newFiles = Array.from(files).map((file) =>
-        URL.createObjectURL(file),
-      );
+      const fileArray = Array.from(files);
+      const urls = fileArray.map((file) => URL.createObjectURL(file));
+
       if (type === "image") {
-        setImages((prev) => [...prev, ...newFiles]);
+        setImages((prev) => [...prev, ...fileArray]);
+        setImageURLs((prev) => [...prev, ...urls]);
       } else {
-        setVideos((prev) => [...prev, ...newFiles]);
+        setVideos((prev) => [...prev, ...fileArray]);
+        setVideoURLs((prev) => [...prev, ...urls]);
       }
     }
   };
@@ -96,8 +105,10 @@ export function PlaceOrderSheet({
   const removeFile = (index: number, type: "image" | "video" | "audio") => {
     if (type === "image") {
       setImages((prev) => prev.filter((_, i) => i !== index));
+      setImageURLs((prev) => prev.filter((_, i) => i !== index));
     } else if (type === "video") {
       setVideos((prev) => prev.filter((_, i) => i !== index));
+      setVideoURLs((prev) => prev.filter((_, i) => i !== index));
     } else {
       setAudioURL(null);
     }
@@ -181,7 +192,7 @@ export function PlaceOrderSheet({
               />
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {images.map((image, index) => (
+              {imageURLs.map((image, index) => (
                 <div key={index} className="group relative">
                   <img
                     src={image}
@@ -220,7 +231,7 @@ export function PlaceOrderSheet({
               />
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              {videos.map((video, index) => (
+              {videoURLs.map((video, index) => (
                 <div key={index} className="group relative">
                   <video
                     src={video}
@@ -239,8 +250,17 @@ export function PlaceOrderSheet({
             </div>
           </div>
         </div>
-        {!service ? (
-          <Button onClick={onContinue} className="w-full">
+        {service ? (
+          <Button
+            onClick={() =>
+              onContinue(description, {
+                images,
+                videos,
+                audio: audioFile || undefined,
+              })
+            }
+            className="w-full"
+          >
             Continue
           </Button>
         ) : (
