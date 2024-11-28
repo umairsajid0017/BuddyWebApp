@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { BookingFormData, MediaFiles } from "@/lib/types/common";
 import { useAuth } from "@/store/authStore";
+import { CreateBidResponse } from "@/lib/types/booking-types";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -61,7 +62,9 @@ export function CreateBookingDialog({
   const [isPlaceOrderOpen, setIsPlaceOrderOpen] = useState(false);
   const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const [bidDetails, setBidDetails] = useState<any>(null);
+  const [bidDetails, setBidDetails] = useState<
+    CreateBidResponse["data"] | null
+  >(null);
 
   const { data: servicesResponse, isLoading } = useServices();
 
@@ -151,7 +154,18 @@ export function CreateBookingDialog({
       });
 
       if (response.status) {
-        setBidDetails({ id: response.data?.booking_id, price: bidAmount });
+        setBidDetails({
+          id: response?.data?.id,
+          customer_id: response?.data?.customer_id,
+          service_id: response?.data?.service_id,
+          price: response?.data?.price,
+          created_at: response?.data?.created_at,
+          updated_at: response?.data?.updated_at,
+          description: response?.data?.description,
+          status: response?.data?.status,
+          images: response?.data?.images,
+          audio: response?.data?.audio,
+        });
         setIsStartBookingOpen(false);
         setIsConfirmationOpen(true);
       } else {
@@ -207,21 +221,29 @@ export function CreateBookingDialog({
                       service: service || null,
                     }));
                   }}
-                  value={formData.service?.id.toString()}
+                  value={formData.service?.id?.toString()}
                 >
-                  <SelectTrigger className="col-span-3 w-full bg-background">
-                    <SelectValue placeholder="Select a service" />
+                  <SelectTrigger className="col-span-3 w-full">
+                    <SelectValue placeholder="Select a service">
+                      {formData.service?.name || "Select a service"}
+                    </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="max-h-[200px] overflow-y-auto">
-                    {servicesResponse?.data.map((service) => (
-                      <SelectItem
-                        key={service.id}
-                        value={service.id.toString()}
-                        className="cursor-pointer"
-                      >
-                        {service.name}
+                  <SelectContent>
+                    {servicesResponse?.data &&
+                    servicesResponse.data.length > 0 ? (
+                      servicesResponse.data.map((service) => (
+                        <SelectItem
+                          key={service.id}
+                          value={service.id.toString()}
+                        >
+                          {service.name || "Unnamed Service"}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-services" disabled>
+                        No services available
                       </SelectItem>
-                    ))}
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -301,9 +323,9 @@ export function CreateBookingDialog({
       <StartBookingDialog
         isOpen={isStartBookingOpen}
         onClose={() => setIsStartBookingOpen(false)}
-        onFindWorker={handleBidPlacement}
+        onSubmitBid={handleBidPlacement}
         service={formData.service || undefined}
-        description={formData.description}
+        isLoading={createBid.isLoading}
       />
 
       <BookingConfirmation
@@ -312,7 +334,7 @@ export function CreateBookingDialog({
           setIsConfirmationOpen(false);
           resetForm();
         }}
-        bidDetails={bidDetails}
+        bidDetails={bidDetails || undefined}
       />
     </>
   );

@@ -9,13 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { BidResponse } from "@/lib/types/bid-types";
+import { CreateBidResponse } from "@/lib/types/booking-types";
 import { useRouter } from "next/navigation";
 
 interface BookingConfirmationProps {
   isOpen: boolean;
   onClose: () => void;
-  bidDetails?: BidResponse["data"];
+  bidDetails?: CreateBidResponse["data"];
 }
 
 export function BookingConfirmation({

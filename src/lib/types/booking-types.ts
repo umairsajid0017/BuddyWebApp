@@ -52,6 +52,23 @@ export interface CreateBookingResponse {
   status: boolean;
   message: string;
   data?: {
-    booking_id: string;
+    id: string;
+  };
+}
+
+export interface CreateBidResponse {
+  status: boolean;
+  message: string;
+  data: {
+    id: number;
+    customer_id: number;
+    service_id: string;
+    description: string;
+    price: string;
+    status: "open";
+    images: string;
+    audio: string | null;
+    updated_at: string;
+    created_at: string;
   };
 }

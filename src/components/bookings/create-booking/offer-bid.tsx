@@ -18,52 +18,19 @@ import { useCreateBid } from "@/lib/api/bookings";
 interface StartBookingDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onFindWorker: (budget: number, bidId: number) => void;
+  onSubmitBid: (amount: number) => void;
   service?: Service;
-  description?: string;
-  mediaFiles?: {
-    images?: File[];
-    audio?: File;
-  };
+  isLoading?: boolean;
 }
 
 export function StartBookingDialog({
   isOpen,
   onClose,
-  onFindWorker,
+  onSubmitBid,
   service,
-  description,
-  mediaFiles,
+  isLoading = false,
 }: StartBookingDialogProps) {
   const [budget, setBudget] = useState(200);
-  const createBid = useCreateBid();
-  const { user } = useAuth();
-
-  const handleCreateBid = async () => {
-    if (!service || !user) return;
-
-    try {
-      const response = await createBid.mutateAsync({
-        customer_id: Number(user.id),
-        service_id: Number(service.id),
-        worker_id: Number(service.user_id),
-        description: description,
-        price: budget.toString(),
-        images: mediaFiles?.images,
-        audio: mediaFiles?.audio,
-      });
-
-      if (response.status) {
-        toast.success(response.message);
-        onFindWorker(budget, Number(response.data?.booking_id));
-      } else {
-        toast.error(response.message || "Failed to create bid");
-      }
-    } catch (error) {
-      toast.error("Error creating bid");
-      console.error("Bid creation error:", error);
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -89,8 +56,8 @@ export function StartBookingDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleCreateBid} disabled={createBid.isLoading}>
-            {createBid.isLoading ? "Placing Bid..." : "Place Bid"}
+          <Button onClick={() => onSubmitBid(budget)} disabled={isLoading}>
+            {isLoading ? "Placing Bid..." : "Place Bid"}
           </Button>
         </div>
       </DialogContent>

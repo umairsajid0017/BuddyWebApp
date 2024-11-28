@@ -3,6 +3,7 @@ import { useQuery, useMutation, UseQueryOptions } from "react-query";
 import { AxiosError } from "axios";
 import {
   BookingsResponse,
+  CreateBidResponse,
   CreateBookingData,
   CreateBookingResponse,
 } from "../types/booking-types";
@@ -98,7 +99,7 @@ export const useBookingDetails = (
 
 // Create a new bid
 export const useCreateBid = () => {
-  return useMutation<CreateBookingResponse, AxiosError, CreateBookingData>(
+  return useMutation<CreateBidResponse, AxiosError, CreateBookingData>(
     async (bookingData) => {
       const formData = new FormData();
 
@@ -129,7 +130,7 @@ export const useCreateBid = () => {
         formData.append("audio", bookingData.audio);
       }
 
-      const response = await api.post<CreateBookingResponse>("/bid", formData, {
+      const response = await api.post<CreateBidResponse>("/bid", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
