@@ -67,7 +67,7 @@ export function CreateBookingDialog({
   >(null);
 
   const { data: servicesResponse, isLoading } = useServices();
-
+  console.log("servicesResponse", servicesResponse);
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
@@ -223,20 +223,27 @@ export function CreateBookingDialog({
                   }}
                   value={formData.service?.id?.toString()}
                 >
-                  <SelectTrigger className="col-span-3 w-full">
+                  <SelectTrigger
+                    className="col-span-3 w-full"
+                    disabled={isLoading}
+                  >
                     <SelectValue placeholder="Select a service">
-                      {formData.service?.name || "Select a service"}
+                      {formData.service?.service_name || "Select a service"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {servicesResponse?.data &&
-                    servicesResponse.data.length > 0 ? (
+                    {isLoading ? (
+                      <SelectItem value="loading" disabled>
+                        Loading services...
+                      </SelectItem>
+                    ) : servicesResponse?.data &&
+                      servicesResponse.data.length > 0 ? (
                       servicesResponse.data.map((service) => (
                         <SelectItem
                           key={service.id}
                           value={service.id.toString()}
                         >
-                          {service.name || "Unnamed Service"}
+                          {service.service_name || `Service #${service.id}`}
                         </SelectItem>
                       ))
                     ) : (

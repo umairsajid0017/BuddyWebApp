@@ -10,13 +10,13 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
       <div className="relative h-44 overflow-hidden bg-gray-200">
         <Image
           src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
-          alt={service.name}
+          alt={service.service_name}
           layout="fill"
           objectFit="cover"
         />
       </div>
       <CardContent>
-        <h4 className="mt-2 text-lg font-medium">{service.name}</h4>
+        <h4 className="mt-2 text-lg font-medium">{service.service_name}</h4>
         <p className="text-xs text-gray-600">
           {service.description.slice(0, 50) + "..."}
         </p>

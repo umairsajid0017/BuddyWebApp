@@ -62,7 +62,7 @@ export interface VerifyOtpError {
 
 export interface Service {
   id: number;
-  name: string;
+  service_name: string;
   description: string;
   price: string;
   image: string;
