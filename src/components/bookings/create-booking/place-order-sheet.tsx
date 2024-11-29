@@ -260,11 +260,16 @@ export function PlaceOrderSheet({
               })
             }
             className="w-full"
+            disabled={!description.trim()}
           >
             Continue
           </Button>
         ) : (
-          <Button onClick={onClose} className="w-full">
+          <Button
+            onClick={onClose}
+            className="w-full"
+            disabled={!description.trim()}
+          >
             Book Now
           </Button>
         )}
