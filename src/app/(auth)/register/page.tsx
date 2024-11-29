@@ -181,7 +181,7 @@ const Register: React.FC = () => {
         <CardHeader className="pb-2">
           <div className="mb-4 flex justify-center">
             <Image
-              src="/assets/logo.jpg"
+              src="/assets/logo.png"
               alt="App Icon"
               className="h-16 w-16"
               width={"64"}

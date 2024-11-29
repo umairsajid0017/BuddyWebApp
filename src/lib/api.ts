@@ -13,6 +13,8 @@ import {
   type Service,
   type ServicesResponse,
   ServiceResponse,
+  type ChangePasswordData,
+  type ChangePasswordResponse,
 } from "./types";
 import {
   useMutation,
@@ -23,6 +25,7 @@ import {
 } from "react-query";
 import useAuthStore from "@/store/authStore";
 import { deleteCookie } from "./cookies";
+import { CategoryServicesResponse } from "./types/service-types";
 
 interface ServerResponse {
   status: boolean;
@@ -221,4 +224,45 @@ export const useDeleteService = (): UseMutationResult<
   number
 > => {
   return useMutation((id: number) => api.delete(`/getServices/${id}`));
+};
+
+// Add this new hook for fetching services by category
+export const useServicesByCategory = (
+  categoryId: string,
+  options?: UseQueryOptions<CategoryServicesResponse, AxiosError>,
+) => {
+  return useQuery<CategoryServicesResponse, AxiosError>(
+    ["services", "category", categoryId],
+    async () => {
+      const response = await api.get<CategoryServicesResponse>(
+        "/servicesAgainstCategory",
+        {
+          params: { category_id: categoryId },
+        },
+      );
+      return response.data;
+    },
+    options,
+  );
+};
+
+export const useChangePassword = () => {
+  const user = useAuthStore.getState().user;
+
+  return useMutation<ChangePasswordResponse, AxiosError, ChangePasswordData>(
+    async (passwordData: ChangePasswordData) => {
+      if (!user?.id) throw new Error("User not found");
+
+      const response = await api.put<ChangePasswordResponse>(
+        `/users/${user.id}/change-password`,
+        passwordData,
+      );
+
+      if (!response.data.status) {
+        throw new Error(response.data.message);
+      }
+
+      return response.data;
+    },
+  );
 };

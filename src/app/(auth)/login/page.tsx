@@ -101,7 +101,7 @@ export default function Login() {
         <CardHeader>
           <div className="mb-4 flex justify-center">
             <Image
-              src="/assets/logo.jpg"
+              src="/assets/logo.png"
               alt="App Icon"
               width={64}
               height={64}

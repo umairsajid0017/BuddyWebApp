@@ -28,7 +28,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="inline-block">
               <Image
-                src="/assets/logo.jpg"
+                src="/assets/logo.png"
                 alt="Buddy Logo"
                 width={48}
                 height={48}

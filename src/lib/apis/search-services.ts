@@ -107,27 +107,3 @@ export const useSearchServices = (
     },
   );
 };
-
-// Example usage:
-/*
-function ServiceSearchComponent() {
-  const { data: services, isLoading, error, isError } = useSearchServices({
-    name: "cleaning",
-    price_from: 50,
-    price_to: 200
-  });
-
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) {
-    return <div>Error: {error?.response?.data?.message || error.message}</div>;
-  }
-
-  return (
-    <div>
-      {services?.map(service => (
-        <div key={service.id}>{service.name}</div>
-      ))}
-    </div>
-  );
-}
-*/

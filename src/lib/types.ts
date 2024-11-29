@@ -1,4 +1,5 @@
-import { Category } from "./types/category-types";
+import { type Category } from "./types/category-types";
+import { type ServiceRating } from "./types/service-types";
 
 export interface User {
   id: number;
@@ -61,7 +62,7 @@ export interface VerifyOtpError {
 
 export interface Service {
   id: number;
-  name: string;
+  service_name: string;
   description: string;
   price: string;
   image: string;
@@ -73,7 +74,7 @@ export interface Service {
   updated_at: string | null;
   user: User;
   category: Category;
-  ratings: unknown[];
+  ratings: ServiceRating[];
 }
 
 export interface ServicesResponse extends ApiResponse<Service[]> {
@@ -109,4 +110,14 @@ export interface SearchServicesResponse {
   tag_line: string;
 }
 
-export type InboxItem = Partial<Record<keyof InboxItemInterface, any>>;
+export type InboxItem = InboxItemInterface;
+
+export interface ChangePasswordData {
+  current_password: string;
+  new_password: string;
+}
+
+export interface ChangePasswordResponse {
+  status: boolean;
+  message: string;
+}
