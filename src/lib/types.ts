@@ -168,3 +168,19 @@ export interface RegisterResponse {
     id: number;
   };
 }
+
+export interface ResetPasswordOtpResponse {
+  error: boolean;
+  message: string;
+}
+
+export interface ResetPasswordResponse {
+  error: boolean;
+  message: string;
+}
+
+export interface ResetPasswordData {
+  email: string;
+  password: string;
+  otp: string;
+}

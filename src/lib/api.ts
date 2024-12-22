@@ -18,6 +18,9 @@ import {
   type ProfileFormData,
   type ServiceDetailType,
   type RegisterResponse,
+  type ResetPasswordOtpResponse,
+  type ResetPasswordResponse,
+  type ResetPasswordData,
 } from "./types";
 import {
   useMutation,
@@ -312,6 +315,30 @@ export const useUpdateProfile = () => {
         useAuthStore.getState().setUser(data.records);
         queryClient.invalidateQueries(["user"]);
       },
+    },
+  );
+};
+
+export const useRequestResetOtp = () => {
+  return useMutation<ResetPasswordOtpResponse, Error, { email: string }>(
+    async (data) => {
+      const response = await api.post<ResetPasswordOtpResponse>(
+        "/resetPasswordOtp",
+        data,
+      );
+      return response.data;
+    },
+  );
+};
+
+export const useResetPassword = () => {
+  return useMutation<ResetPasswordResponse, Error, ResetPasswordData>(
+    async (data) => {
+      const response = await api.post<ResetPasswordResponse>(
+        "/resetPassword",
+        data,
+      );
+      return response.data;
     },
   );
 };
