@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,10 @@ import { CameraIcon } from "lucide-react";
 import { useAuth } from "@/store/authStore";
 import { splitFullName } from "@/utils/helper-functions";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { useUpdateProfile } from "@/lib/api";
+import { profileSchema } from "@/lib/schemas";
+import { ZodError } from "zod";
+import { Loader2 } from "lucide-react";
 
 interface ProfileFormData {
   name: string;
@@ -31,6 +34,10 @@ interface ProfileFormData {
 
 export default function ProfileComponent() {
   const { user } = useAuth();
+  const updateProfileMutation = useUpdateProfile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<ProfileFormData>({
     name: user?.name || "",
@@ -73,25 +80,47 @@ export default function ProfileComponent() {
     }));
   };
 
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      const response = await api.put(
-        `/users/${user?.id}/update-profile`,
-        formData,
-      );
+      // Validate the form data
+      const validatedData = profileSchema.parse(formData);
 
-      if (response.data.status) {
-        toast.success("Profile updated successfully");
-      } else {
-        throw new Error(response.data.message || "Failed to update profile");
+      const response = await updateProfileMutation.mutateAsync({
+        formData: validatedData,
+        image: selectedImage || undefined,
+      });
+      toast.success(response.message || "Profile updated successfully");
+
+      // Clear image preview
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
-    } finally {
-      setIsLoading(false);
+      setSelectedImage(null);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        // Handle validation errors
+        const errors = error.errors.map((err) => err.message);
+        toast.error(errors.join("\n"));
+      } else {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update profile",
+        );
+      }
     }
   };
 
@@ -102,20 +131,39 @@ export default function ProfileComponent() {
       <h2 className="mb-6 text-2xl font-semibold">Edit Profile</h2>
       <div className="mb-6 flex justify-end">
         <div className="relative">
-          <Avatar className="h-24 w-24">
-            <AvatarImage
-              src={
-                user?.image ||
-                `https://api.dicebear.com/9.x/initials/svg?seed=${formData.name}`
-              }
-              alt="Profile picture"
-            />
+          <Avatar
+            className="h-24 w-24 cursor-pointer"
+            onClick={handleImageClick}
+          >
+            {updateProfileMutation.isLoading ? (
+              <div className="flex h-full w-full items-center justify-center bg-muted">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <AvatarImage
+                src={
+                  previewUrl ||
+                  (user?.image
+                    ? process.env.NEXT_PUBLIC_IMAGE_URL + user.image
+                    : undefined)
+                }
+                alt={user?.name ?? ""}
+              />
+            )}
             <AvatarFallback>{`${firstName[0] ?? ""}${lastName[0] ?? ""}`}</AvatarFallback>
           </Avatar>
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
           <Button
             size="sm"
             className="absolute bottom-0 right-0 rounded-full"
             variant="outline"
+            onClick={handleImageClick}
           >
             <CameraIcon className="h-4 w-4 text-primary" />
           </Button>
@@ -215,8 +263,19 @@ export default function ProfileComponent() {
             onChange={handleInputChange}
           />
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save Changes"}
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={updateProfileMutation.isLoading}
+        >
+          {updateProfileMutation.isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Updating...
+            </>
+          ) : (
+            "Save Changes"
+          )}
         </Button>
       </form>
     </>

@@ -63,7 +63,7 @@ export function CreateBookingDialog({
   const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [bidDetails, setBidDetails] = useState<
-    CreateBidResponse["record"] | null
+    CreateBidResponse["records"] | null
   >(null);
 
   const { data: servicesResponse, isLoading } = useServices();
@@ -155,16 +155,16 @@ export function CreateBookingDialog({
 
       if (!response.error) {
         setBidDetails({
-          id: response?.record?.id,
-          customer_id: response?.record?.customer_id,
-          service_id: response?.record?.service_id,
-          price: response?.record?.price,
-          created_at: response?.record?.created_at,
-          updated_at: response?.record?.updated_at,
-          description: response?.record?.description,
-          status: response?.record?.status ? "open" : "closed",
-          images: response?.record?.images,
-          audio: response?.record?.audio,
+          id: response?.records?.id,
+          customer_id: response?.records?.customer_id,
+          service_id: response?.records?.service_id,
+          price: response?.records?.price,
+          created_at: response?.records?.created_at,
+          updated_at: response?.records?.updated_at,
+          description: response?.records?.description,
+          status: response?.records?.status,
+          images: response?.records?.images,
+          audio: response?.records?.audio,
         });
         setIsStartBookingOpen(false);
         setIsConfirmationOpen(true);
@@ -189,16 +189,16 @@ export function CreateBookingDialog({
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button variant="default">
-            {mode === "book" ? "Book Now" : "Create a Bid"}
+            {initialService ? "Book Now" : "Create a Bid"}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {mode === "book" ? "Book Service" : "New Bid"}
+              {initialService ? "Book Service" : "New Bid"}
             </DialogTitle>
             <DialogDescription>
-              {mode === "book"
+              {initialService
                 ? "Book this service directly."
                 : "Create a new bid for a service."}
             </DialogDescription>

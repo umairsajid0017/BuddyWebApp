@@ -43,6 +43,37 @@ export const registerSchema = z.object({
   phone: z.string().regex(phoneRegex, "Phone number must be in +92 format"),
   otp: z.string().optional(),
 }) satisfies z.ZodType<RegisterData>;
+
+export const profileSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits"),
+  dob: z.string().nullable(),
+  country: z.string().nullable(),
+  gender: z.string().nullable(),
+  address: z.string().nullable(),
+  civil_id_number: z.string().nullable(),
+});
+
+const MAX_FILE_SIZE = 5000000; // 5MB
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+
+export const imageSchema = z.object({
+  image: z
+    .instanceof(File)
+    .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      "Only .jpg, .jpeg, .png and .webp formats are supported.",
+    )
+    .optional(),
+});
+
 // Inferred types from the schemas
 export type UserSchema = z.infer<typeof userSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;

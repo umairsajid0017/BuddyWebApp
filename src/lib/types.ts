@@ -83,11 +83,32 @@ export interface ServicesResponse extends ApiResponse<Service[]> {
   message?: string;
   status: boolean;
 }
-export interface ServiceResponse extends ApiResponse<Service> {
-  record: Service;
-  message?: string;
-  error: boolean;
+
+export interface ServiceDetailType {
+  id: number;
+  name: string;
+  tagline: string;
+  image: string;
+  description: string;
+  price: string;
+  address: string;
+  category_id: number;
+  long: string | null;
+  lat: string | null;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  added_by: string | null;
+  user: User;
+  category: Category;
 }
+
+export interface ServiceResponse {
+  error: boolean;
+  message: string;
+  records: ServiceDetailType;
+}
+
 interface InboxItemInterface {
   id: string;
   senderName: string;
@@ -121,4 +142,15 @@ export interface ChangePasswordData {
 export interface ChangePasswordResponse {
   status: boolean;
   message: string;
+}
+
+export interface ProfileFormData {
+  name: string;
+  email: string;
+  phone: string;
+  dob: string | null;
+  country: string | null;
+  gender: string | null;
+  address: string | null;
+  civil_id_number: string | null;
 }

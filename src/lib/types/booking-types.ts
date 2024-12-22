@@ -59,13 +59,13 @@ export interface CreateBookingResponse {
 export interface CreateBidResponse {
   error: boolean;
   message: string;
-  record: {
+  records: {
     id: number;
     customer_id: number;
     service_id: string;
     description: string;
     price: string;
-    status: "open" | "closed";
+    status: number;
     images: string;
     audio: string | null;
     updated_at: string;

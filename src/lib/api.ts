@@ -15,6 +15,8 @@ import {
   ServiceResponse,
   type ChangePasswordData,
   type ChangePasswordResponse,
+  type ProfileFormData,
+  type ServiceDetailType,
 } from "./types";
 import {
   useMutation,
@@ -176,19 +178,17 @@ export const useServices = (
 //It takes the service ID as an argument and returns the service data.
 export const useService = (
   id: number,
-  options?: UseQueryOptions<ServiceResponse, AxiosError>,
+  options?: UseQueryOptions<ServiceDetailType, AxiosError>,
 ) => {
-  return useQuery<ServiceResponse, AxiosError>(
+  return useQuery<ServiceDetailType, AxiosError>(
     ["service", id],
     async () => {
-      //const formData = new FormData();
-      // formData.append("service_id", id.toString());
       const response = await api.get<ServiceResponse>(`/getServiceDetail`, {
         params: {
           service_id: id,
         },
       });
-      return response.data;
+      return response.data.records;
     },
     options,
   );
@@ -264,6 +264,49 @@ export const useChangePassword = () => {
       }
 
       return response.data;
+    },
+  );
+};
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (data: { formData: ProfileFormData; image?: File }) => {
+      const formDataToSend = new FormData();
+
+      Object.entries(data.formData).forEach(([key, value]) => {
+        if (value !== null) {
+          formDataToSend.append(key, value);
+        }
+      });
+
+      // Append image if exists
+      if (data.image) {
+        formDataToSend.append("image", data.image);
+      }
+
+      const response = await api.post<{
+        error: boolean;
+        message: string;
+        records: User;
+      }>("/updateProfile", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.error) {
+        throw new Error(response.data.message);
+      }
+
+      return response.data;
+    },
+    {
+      onSuccess: (data) => {
+        useAuthStore.getState().setUser(data.records);
+        queryClient.invalidateQueries(["user"]);
+      },
     },
   );
 };

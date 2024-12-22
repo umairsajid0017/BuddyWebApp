@@ -145,10 +145,16 @@ export default function NavBar() {
                     <Button variant="ghost" size="icon" className="relative">
                       <Avatar className="h-9 w-9">
                         <AvatarImage
-                          src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny"
-                          alt="User"
+                          src={
+                            user.image
+                              ? process.env.NEXT_PUBLIC_IMAGE_URL + user.image
+                              : undefined
+                          }
+                          alt={user.name || "User"}
                         />
-                        <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>
+                          {user.name?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
                       </Avatar>
                       <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500" />
                     </Button>
