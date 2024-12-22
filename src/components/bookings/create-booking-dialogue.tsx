@@ -213,7 +213,7 @@ export function CreateBookingDialog({
                 </Label>
                 <Select
                   onValueChange={(value) => {
-                    const service = servicesResponse?.record.find(
+                    const service = servicesResponse?.find(
                       (s) => s.id.toString() === value,
                     );
                     setFormData((prev) => ({
@@ -236,9 +236,8 @@ export function CreateBookingDialog({
                       <SelectItem value="loading" disabled>
                         Loading services...
                       </SelectItem>
-                    ) : servicesResponse?.record &&
-                      servicesResponse.record.length > 0 ? (
-                      servicesResponse.record.map((service) => (
+                    ) : servicesResponse && servicesResponse.length > 0 ? (
+                      servicesResponse.map((service) => (
                         <SelectItem
                           key={service.id}
                           value={service.id.toString()}

@@ -50,7 +50,8 @@ export function DashboardComponent() {
 
   useEffect(() => {
     if (servicesResponse) {
-      setServices(servicesResponse.record);
+      console.log("Services response in dashboard", servicesResponse);
+      setServices(servicesResponse);
     }
     setLoading(isLoading);
     setError(error ? error.message : null);
@@ -66,7 +67,8 @@ export function DashboardComponent() {
 
   useEffect(() => {
     if (categoriesResponse) {
-      setCategories(categoriesResponse.record);
+      setCategories(categoriesResponse);
+      console.log("Categories responsee in dashboard", categoriesResponse);
     }
     setLoading(categoriesLoading);
     setError(categoriesError ? categoriesError.message : null);

@@ -76,7 +76,7 @@ export const useLogin = () =>
       .post<{
         error: boolean;
         token: string;
-        record: User;
+        records: User;
         message?: string;
       }>("/login", credentials)
       .then((response) => {
@@ -159,13 +159,14 @@ export const useVerifyOtp = () => {
 // const { data: services, isLoading, isError } = useServices()
 // This will fetch the services from the API and return the data, loading state, and error state.
 export const useServices = (
-  options?: UseQueryOptions<ServicesResponse, AxiosError>,
+  options?: UseQueryOptions<Service[], AxiosError>,
 ) => {
-  return useQuery<ServicesResponse, AxiosError>(
+  return useQuery<Service[], AxiosError>(
     ["services"],
     async () => {
       const response = await api.get<ServicesResponse>("/getServices");
-      return response.data;
+      console.log("Services Response in the API", response);
+      return response.data.records;
     },
     options,
   );

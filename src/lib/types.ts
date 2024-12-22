@@ -79,7 +79,7 @@ export interface Service {
 }
 
 export interface ServicesResponse extends ApiResponse<Service[]> {
-  record: Service[];
+  records: Service[];
   message?: string;
   status: boolean;
 }

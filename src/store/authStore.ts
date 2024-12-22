@@ -89,7 +89,7 @@ export const useAuth = () => {
   const loginUser = async (credentials: LoginCredentials) => {
     try {
       const result = await loginMutation.mutateAsync(credentials);
-      const parsedUser = userSchema.parse(result.record);
+      const parsedUser = userSchema.parse(result.records);
       setUser(parsedUser);
       setToken(result.token); // Save the token
       setError(null);

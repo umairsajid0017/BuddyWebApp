@@ -49,10 +49,10 @@ export default function Login() {
       const validatedCredentials = loginSchema.parse(credentials);
       const data = await loginMutation.mutateAsync(validatedCredentials);
 
-      if (!data.error && data.token && data.record) {
-        const { record, token } = data;
-        console.log("User logged in:", data.record, token);
-        useAuthStore.getState().setUser(data.record);
+      if (!data.error && data.token && data.records) {
+        const { records, token } = data;
+        console.log("User logged in:", records, token);
+        useAuthStore.getState().setUser(records);
         useAuthStore.getState().setToken(token);
         await setAuthCookie(token);
         void router.push("/");

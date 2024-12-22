@@ -15,7 +15,8 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     if (servicesResponse) {
-      setServices(servicesResponse.record);
+      setServices(servicesResponse);
+      console.log("Service on home:", servicesResponse);
     }
   }, [servicesResponse, setServices]);
 

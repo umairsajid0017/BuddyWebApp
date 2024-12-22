@@ -12,14 +12,6 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service, compact = false }: ServiceCardProps) {
-  const averageRating =
-    service.ratings.length > 0
-      ? (
-          service.ratings.reduce((acc, rating) => acc + rating.rating, 0) /
-          service.ratings.length
-        ).toFixed(1)
-      : null;
-
   return (
     <Card className={`w-full overflow-hidden`}>
       <CardContent className="p-0">
@@ -29,7 +21,7 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
           >
             <Image
               src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
-              alt={service.name}
+              alt={service.service_name}
               layout="fill"
               objectFit="cover"
               className=""
@@ -39,19 +31,9 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
             <h3
               className={`mb-2 ${!compact ? "text-xl" : "text-base"} + font-semibold text-text-900`}
             >
-              {service.name}
+              {service.service_name}
             </h3>
             <div className="space-y-2">
-              {!compact && averageRating && (
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Star className="mr-1 h-4 w-4 text-yellow-400" />
-                  <span className="font-bold">{averageRating}</span>
-                  <span className="ml-1">
-                    ({service.ratings.length}{" "}
-                    {service.ratings.length === 1 ? "review" : "reviews"})
-                  </span>
-                </div>
-              )}
               <p
                 className={`${!compact ? "text-xl" : "text-sm"} text-text-800" font-bold`}
               >

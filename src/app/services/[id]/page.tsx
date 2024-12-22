@@ -60,7 +60,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
 
   useEffect(() => {
     if (servicesResponse) {
-      setServices(servicesResponse.record);
+      setServices(servicesResponse);
     }
   }, [servicesResponse, allServicesLoading, setServices]);
 
@@ -114,7 +114,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                     {service.image && (
                       <Image
                         src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
-                        alt={service.name || "Service image"}
+                        alt={service.service_name || "Service image"}
                         width={400}
                         height={400}
                         className="h-full w-full rounded-lg object-cover"
@@ -123,7 +123,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                   </div>
                   <div className="mt-6 md:mt-0 md:w-1/2 md:pl-6">
                     <h1 className="mb-2 text-3xl font-bold">
-                      {service.name || "Service Name"}
+                      {service.service_name || "Service Name"}
                     </h1>
                     <div className="mb-4 flex items-center">
                       <span className="font-regular mr-2 text-base font-bold">

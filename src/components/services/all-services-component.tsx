@@ -25,7 +25,7 @@ const ServiceSkeleton: React.FC = () => (
 const AllServices: React.FC = () => {
   const { data: servicesResponse, isLoading, error } = useServices();
   const { filters } = useFiltersStore();
-  const services = servicesResponse?.data ?? [];
+  const services = servicesResponse ?? [];
 
   const filteredAndSortedServices = React.useMemo(() => {
     if (!services) return [];

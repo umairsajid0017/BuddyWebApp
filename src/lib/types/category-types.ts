@@ -9,9 +9,10 @@ interface Category {
   updated_at: string;
 }
 
-interface CategoryResponse extends ApiResponse<Category[]> {
-  record: Category[];
-  message?: string;
+export interface CategoryResponse {
   error: boolean;
+  message: string;
+  records: Category[];
 }
-export type { Category, CategoryResponse };
+
+export type { Category };
