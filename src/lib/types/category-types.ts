@@ -10,8 +10,8 @@ interface Category {
 }
 
 interface CategoryResponse extends ApiResponse<Category[]> {
-  data: Category[];
+  record: Category[];
   message?: string;
-  success: boolean;
+  error: boolean;
 }
 export type { Category, CategoryResponse };

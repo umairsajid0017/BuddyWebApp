@@ -33,6 +33,7 @@ export default function Login() {
     email: "",
     password: "",
     loginType: "email",
+    role: "customer",
   });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -48,10 +49,10 @@ export default function Login() {
       const validatedCredentials = loginSchema.parse(credentials);
       const data = await loginMutation.mutateAsync(validatedCredentials);
 
-      if (data.status && data.token && data.user) {
-        const { user, token } = data;
-        console.log("User logged in:", user, token);
-        useAuthStore.getState().setUser(user);
+      if (!data.error && data.token && data.record) {
+        const { record, token } = data;
+        console.log("User logged in:", data.record, token);
+        useAuthStore.getState().setUser(data.record);
         useAuthStore.getState().setToken(token);
         await setAuthCookie(token);
         void router.push("/");

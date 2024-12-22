@@ -17,6 +17,7 @@ import { ServiceRating } from "@/lib/types/service-types";
 import ReviewsSection from "@/components/services/reviews-section";
 import UserProfileCard from "@/components/services/user-profile-card";
 import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
+import { CURRENCY } from "@/utils/constants";
 
 interface ServiceDetailsProps {
   params: {
@@ -59,13 +60,13 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
 
   useEffect(() => {
     if (servicesResponse) {
-      setServices(servicesResponse.data);
+      setServices(servicesResponse.record);
     }
   }, [servicesResponse, allServicesLoading, setServices]);
 
   useEffect(() => {
     if (serviceResponse) {
-      setService(serviceResponse.data);
+      setService(serviceResponse.record);
     }
   }, [serviceResponse]);
 
@@ -149,7 +150,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                       </Badge>
                     </div>
                     <p className="mb-4 text-2xl font-bold">
-                      Rs. {service.price}{" "}
+                      {CURRENCY}. {service.price}{" "}
                     </p>
                     <h2 className="mb-2 text-xl font-semibold">About me</h2>
                     <p className="mb-4 text-muted-foreground">

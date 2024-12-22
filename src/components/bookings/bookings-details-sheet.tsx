@@ -28,7 +28,6 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
 
   const handleCancel = () => {
     console.log("Cancelling booking:", booking.id);
-    // Implement cancellation logic here
   };
 
   const handleChat = () => {
@@ -59,8 +58,8 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
             <div className="space-y-2">
               <Badge
                 variant={
-                  booking.status === "pending"
-                    ? "default"
+                  booking.status === "confirmed"
+                    ? "secondary"
                     : booking.status === "completed"
                       ? "default"
                       : "destructive"
@@ -90,10 +89,12 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
               </div>
             </div>
             <div className="flex space-x-4">
-              <Button onClick={handleChat} className="flex-1">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Chat
-              </Button>
+              {booking.status === "confirmed" && (
+                <Button onClick={handleChat} className="flex-1">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Chat
+                </Button>
+              )}
 
               {booking.status === "pending" && (
                 <CancelBookingDialog
@@ -110,12 +111,14 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
         </SheetContent>
       </Sheet>
 
-      <BookingChat
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        taskId={booking.id.toString()}
-        provider={booking.worker}
-      />
+      {booking.status === "confirmed" && (
+        <BookingChat
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          taskId={booking.id.toString()}
+          provider={booking.worker}
+        />
+      )}
     </>
   );
 };

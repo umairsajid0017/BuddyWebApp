@@ -15,7 +15,7 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     if (servicesResponse) {
-      setServices(servicesResponse.data);
+      setServices(servicesResponse.record);
     }
   }, [servicesResponse, setServices]);
 

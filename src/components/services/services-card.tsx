@@ -3,6 +3,7 @@ import { StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "../ui/card";
+import { CURRENCY } from "@/utils/constants";
 
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
   <Link href={`/services/${service.id}`} className="block">
@@ -21,20 +22,22 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
           {service.description.slice(0, 50) + "..."}
         </p>
         <div className="mt-2 flex items-center justify-between">
-          <p className="text-lg font-bold text-primary">Rs. {service.price}</p>
+          <p className="text-lg font-bold text-primary">
+            {CURRENCY}. {service.price}
+          </p>
           <div className="flex items-center text-xs text-gray-600">
             <StarIcon className="h-4 w-4" />
-            <span className="ml-1">
-              {service.ratings.length > 0
+            {/* <span className="ml-1">
+              {service.ratings?.length > 0
                 ? (
                     service.ratings.reduce(
                       (acc, curr) => acc + curr.rating,
                       0,
-                    ) / service.ratings.length
+                    ) / service.ratings?.length
                   ).toFixed(1)
                 : "0.0"}
-              | {service.ratings.length} reviews
-            </span>
+              | {service.ratings?.length} reviews
+            </span> */}
           </div>
         </div>
       </CardContent>

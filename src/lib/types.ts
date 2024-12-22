@@ -30,6 +30,7 @@ export interface LoginCredentials {
   email: string;
   password: string;
   loginType?: string;
+  role?: string;
 }
 
 export interface RegisterData extends LoginCredentials {
@@ -78,14 +79,14 @@ export interface Service {
 }
 
 export interface ServicesResponse extends ApiResponse<Service[]> {
-  data: Service[];
+  record: Service[];
   message?: string;
-  success: boolean;
+  status: boolean;
 }
 export interface ServiceResponse extends ApiResponse<Service> {
-  data: Service;
+  record: Service;
   message?: string;
-  success: boolean;
+  error: boolean;
 }
 interface InboxItemInterface {
   id: string;

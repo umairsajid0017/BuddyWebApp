@@ -37,7 +37,7 @@ interface BookingChatProps {
   };
 }
 
-const MemoizedMessageComponent = React.memo<{
+const MessageComponent = React.memo<{
   message: ChatMessage;
   onAction: (action: string, message: ChatMessage) => void;
   userId?: string;
@@ -47,7 +47,7 @@ const MemoizedMessageComponent = React.memo<{
   <>
     {message.replyTo && (
       <div
-        className="mb-1 ml-4 cursor-pointer border-l-2 border-primary pl-2 text-sm text-muted-foreground"
+        className="mb-1 ml-4 cursor-pointer rounded-r-sm border-l-4 border-primary bg-muted/30 pl-2 text-sm text-muted-foreground"
         onClick={() => {
           const element = document.getElementById(
             `message-${message.replyTo?.id}`,
@@ -142,6 +142,7 @@ const MemoizedMessageComponent = React.memo<{
     </div>
   </>
 ));
+MessageComponent.displayName = "MessageComponent";
 
 const ChatInput = React.memo<{
   value: string;
@@ -167,6 +168,7 @@ const ChatInput = React.memo<{
     </Button>
   </div>
 ));
+ChatInput.displayName = "ChatInput";
 
 export const BookingChat: React.FC<BookingChatProps> = ({
   isOpen,
@@ -327,7 +329,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
         <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent flex-1 overflow-y-auto">
           <div className="flex flex-col space-y-4 p-4">
             {messages.map((message) => (
-              <MemoizedMessageComponent
+              <MessageComponent
                 key={message.id}
                 message={message}
                 onAction={handleMessageAction}

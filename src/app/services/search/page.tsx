@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useSearchServices } from "@/lib/apis/search-services";
+import { CURRENCY } from "@/utils/constants";
 
 //TODO: This service card component is used in multiple places. It should be moved to a shared component.
 const ServiceCard: React.FC<{ service: SearchServicesResponse }> = ({
@@ -30,7 +31,9 @@ const ServiceCard: React.FC<{ service: SearchServicesResponse }> = ({
         <h4 className="mt-2 text-xl font-medium">{service.service_name}</h4>
         <p className="text-xs text-gray-600">{service.tag_line}</p>
         <div className="mt-2 flex items-center justify-between">
-          <p className="text-lg font-bold text-primary">Rs. {service.price}</p>
+          <p className="text-lg font-bold text-primary">
+            {CURRENCY}. {service.price}
+          </p>
           <div className="flex items-center text-xs text-gray-600">
             <StarIcon className="h-4 w-4" />
             <span className="ml-1">

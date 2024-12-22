@@ -9,7 +9,7 @@ export const useCategories = (
   return useQuery<CategoryResponse, AxiosError>(
     ["categories"],
     async () => {
-      const response = await api.get<CategoryResponse>("/getCategories");
+      const response = await api.get<CategoryResponse>("/getAllCategories");
       return response.data;
     },
     options,

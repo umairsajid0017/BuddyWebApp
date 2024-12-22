@@ -49,7 +49,7 @@ export interface CreateBookingData {
 }
 
 export interface CreateBookingResponse {
-  status: boolean;
+  error: boolean;
   message: string;
   data?: {
     id: string;
@@ -57,15 +57,15 @@ export interface CreateBookingResponse {
 }
 
 export interface CreateBidResponse {
-  status: boolean;
+  error: boolean;
   message: string;
-  data: {
+  record: {
     id: number;
     customer_id: number;
     service_id: string;
     description: string;
     price: string;
-    status: "open";
+    status: "open" | "closed";
     images: string;
     audio: string | null;
     updated_at: string;

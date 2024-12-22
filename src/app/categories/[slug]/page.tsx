@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useServicesByCategory } from "@/hooks/useServicesByCategories";
 import FilterBar from "@/components/services/filter-bar";
 import useFiltersStore from "@/store/filterStore";
+import { CURRENCY } from "@/utils/constants";
 
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
   <Link href={`/services/${service.id}`} className="block">
@@ -28,7 +29,9 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
         <h4 className="mt-2 text-xl font-medium">{service.name}</h4>
         <p className="text-xs text-gray-600">{service.description}</p>
         <div className="mt-2 flex items-center justify-between">
-          <p className="text-lg font-bold text-primary">Rs. {service.price}</p>
+          <p className="text-lg font-bold text-primary">
+            {CURRENCY}. {service.price}
+          </p>
           <div className="flex items-center text-xs text-gray-600">
             <StarIcon className="h-4 w-4" />
             <span className="ml-1">{service.ratings?.length || 0} reviews</span>

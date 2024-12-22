@@ -12,11 +12,12 @@ import {
 import { CreateBidResponse } from "@/lib/types/booking-types";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Clock, IndianRupee, AlertCircle } from "lucide-react"; // Add icons
+import { CURRENCY } from "@/utils/constants";
 
 interface BookingConfirmationProps {
   isOpen: boolean;
   onClose: () => void;
-  bidDetails?: CreateBidResponse["data"];
+  bidDetails?: CreateBidResponse["record"];
 }
 
 export function BookingConfirmation({
@@ -51,7 +52,7 @@ export function BookingConfirmation({
                   Total Bid Amount
                 </span>
                 <div className="flex items-center text-lg font-bold text-green-600">
-                  <span className="mr-1">Rs.</span>
+                  <span className="mr-1">{CURRENCY}.</span>
                   {bidDetails.price}
                 </div>
               </div>
@@ -85,11 +86,11 @@ export function BookingConfirmation({
             {/* Next Steps */}
             <div className="rounded-lg bg-gray-50 p-4">
               <h4 className="mb-2 text-sm font-medium text-gray-700">
-                What's Next?
+                What&apos;s Next?
               </h4>
               <p className="text-sm text-gray-600">
-                We'll notify you when the service provider responds to your bid.
-                You can track all your offers in the offers section.
+                We&apos;ll notify you when the service provider responds to your
+                bid. You can track all your offers in the offers section.
               </p>
             </div>
           </div>

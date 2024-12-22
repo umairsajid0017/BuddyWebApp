@@ -9,6 +9,7 @@ import Image from "next/image";
 import { Search as SearchIcon } from "lucide-react";
 import { useSearchServices } from "@/lib/apis/search-services";
 import { cn } from "@/lib/utils";
+import { CURRENCY } from "@/utils/constants";
 
 const SearchResult = ({
   service,
@@ -34,7 +35,7 @@ const SearchResult = ({
         <h4 className="font-medium text-foreground">{service.service_name}</h4>
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Rs. {parseFloat(service.price).toLocaleString()}
+            {CURRENCY}. {parseFloat(service.price).toLocaleString()}
           </p>
           <div className="flex items-center text-xs text-muted-foreground">
             <svg

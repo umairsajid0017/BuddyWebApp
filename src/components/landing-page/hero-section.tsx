@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import Image from "next/image";
+import { Badge } from "../ui/badge";
 
 export function Hero() {
   return (
@@ -32,11 +33,15 @@ export function Hero() {
           </div>
         </div>
         <div className="mt-8 flex items-center space-x-4 text-sm">
-          <span>Trusted by:</span>
-          {["Meta", "Google", "Netflix", "P&G", "Paypal"].map((company) => (
-            <span key={company} className="font-semibold">
+          <span>Quick Find:</span>
+          {["Mason", "Plumber", "Mechanic", "Decorator"].map((company) => (
+            <Button
+              size={"sm"}
+              key={company}
+              className="border border-white bg-transparent font-semibold hover:bg-secondary-800"
+            >
               {company}
-            </span>
+            </Button>
           ))}
         </div>
         {/* <div className="absolute right-0 top-0 h-full w-1/3">

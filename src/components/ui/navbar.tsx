@@ -74,7 +74,8 @@ export default function NavBar() {
       <div className="container flex items-center justify-between px-6 py-4 md:mx-auto">
         {!isSearchVisible && (
           <Link href={"/"} className="flex items-center gap-2">
-            <Image src="/assets/logo.png" alt="logo" width={64} height={64} />
+            <Image src={"/assets/logo.png"} alt="logo" width={72} height={72} />
+            <span className="text-3xl font-bold text-text-900">Buddy</span>
           </Link>
         )}
         <div

@@ -10,8 +10,9 @@ export function Header() {
     <header className="w-full border-b">
       <div className="max-w-8xl container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4">
-          <Link href="/" className="">
-            <Image src={"/assets/logo.png"} alt="logo" width={54} height={54} />
+          <Link href="/" className="flex items-center">
+            <Image src={"/assets/logo.png"} alt="logo" width={72} height={72} />
+            <span className="text-3xl font-bold text-text-900">Buddy</span>
           </Link>
           <nav className="hidden items-center space-x-6 md:flex">
             <Link
@@ -28,20 +29,20 @@ export function Header() {
               href="#"
               className="text-base font-semibold hover:text-primary"
             >
-              Become a Seller
+              Become a Worker
             </Link>
             <Link
               href="/login"
               className="text-base font-semibold hover:text-primary"
             >
-              Sign In
+              Sign Up
             </Link>
             <Button
               size={"lg"}
               className=""
               onClick={() => router.push("/register")}
             >
-              Join
+              Sign in
             </Button>
           </nav>
         </div>

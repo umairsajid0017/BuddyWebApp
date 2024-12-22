@@ -63,7 +63,7 @@ export function CreateBookingDialog({
   const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [bidDetails, setBidDetails] = useState<
-    CreateBidResponse["data"] | null
+    CreateBidResponse["record"] | null
   >(null);
 
   const { data: servicesResponse, isLoading } = useServices();
@@ -127,7 +127,7 @@ export function CreateBookingDialog({
         audio: formData.mediaFiles?.audio,
       });
 
-      if (response.status) {
+      if (!response.error) {
         toast.success("Booking created successfully");
         router.push("/bookings");
       } else {
@@ -153,18 +153,18 @@ export function CreateBookingDialog({
         audio: formData.mediaFiles?.audio,
       });
 
-      if (response.status) {
+      if (!response.error) {
         setBidDetails({
-          id: response?.data?.id,
-          customer_id: response?.data?.customer_id,
-          service_id: response?.data?.service_id,
-          price: response?.data?.price,
-          created_at: response?.data?.created_at,
-          updated_at: response?.data?.updated_at,
-          description: response?.data?.description,
-          status: response?.data?.status,
-          images: response?.data?.images,
-          audio: response?.data?.audio,
+          id: response?.record?.id,
+          customer_id: response?.record?.customer_id,
+          service_id: response?.record?.service_id,
+          price: response?.record?.price,
+          created_at: response?.record?.created_at,
+          updated_at: response?.record?.updated_at,
+          description: response?.record?.description,
+          status: response?.record?.status ? "open" : "closed",
+          images: response?.record?.images,
+          audio: response?.record?.audio,
         });
         setIsStartBookingOpen(false);
         setIsConfirmationOpen(true);
@@ -213,7 +213,7 @@ export function CreateBookingDialog({
                 </Label>
                 <Select
                   onValueChange={(value) => {
-                    const service = servicesResponse?.data.find(
+                    const service = servicesResponse?.record.find(
                       (s) => s.id.toString() === value,
                     );
                     setFormData((prev) => ({
@@ -236,9 +236,9 @@ export function CreateBookingDialog({
                       <SelectItem value="loading" disabled>
                         Loading services...
                       </SelectItem>
-                    ) : servicesResponse?.data &&
-                      servicesResponse.data.length > 0 ? (
-                      servicesResponse.data.map((service) => (
+                    ) : servicesResponse?.record &&
+                      servicesResponse.record.length > 0 ? (
+                      servicesResponse.record.map((service) => (
                         <SelectItem
                           key={service.id}
                           value={service.id.toString()}

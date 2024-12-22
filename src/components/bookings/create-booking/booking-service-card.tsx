@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import { Service } from "@/lib/types";
+import { CURRENCY } from "@/utils/constants";
 
 interface ServiceCardProps {
   service: Service;
@@ -54,7 +55,7 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
               <p
                 className={`${!compact ? "text-xl" : "text-sm"} text-text-800" font-bold`}
               >
-                Rs. {service.price.toLocaleString()}
+                {CURRENCY}. {service.price.toLocaleString()}
               </p>
 
               <div className="text-sm font-medium text-muted-foreground">

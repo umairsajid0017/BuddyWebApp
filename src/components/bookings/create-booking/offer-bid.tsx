@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Service } from "@/lib/types";
 import { DollarSign, Coins } from "lucide-react";
+import { CURRENCY } from "@/utils/constants";
 
 interface StartBookingDialogProps {
   isOpen: boolean;
@@ -59,8 +60,7 @@ export function StartBookingDialog({
                 onClick={() => handleQuickSelect(amount)}
                 className="relative overflow-hidden"
               >
-                Rs.
-                {amount}
+                {CURRENCY}.{amount}
               </Button>
             ))}
           </div>
@@ -72,7 +72,7 @@ export function StartBookingDialog({
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                Rs.
+                {CURRENCY}.
               </span>
               <Input
                 id="budget"
@@ -91,11 +91,13 @@ export function StartBookingDialog({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground">Average Bid</p>
-                <p className="font-medium">Rs. 250</p>
+                <p className="font-medium">{CURRENCY}. 250</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Recommended</p>
-                <p className="font-medium">Rs. 200 - Rs. 300</p>
+                <p className="font-medium">
+                  {CURRENCY}. 200 - {CURRENCY}. 300
+                </p>
               </div>
             </div>
           </div>
@@ -110,7 +112,7 @@ export function StartBookingDialog({
             disabled={isLoading || budget <= 0}
             className="w-full"
           >
-            {isLoading ? "Placing Bid..." : `Bid Rs. ${budget}`}
+            {isLoading ? "Placing Bid..." : `Bid ${CURRENCY}. ${budget}`}
           </Button>
         </div>
       </DialogContent>

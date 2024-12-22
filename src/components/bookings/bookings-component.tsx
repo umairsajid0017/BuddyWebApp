@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { use, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBookings } from "@/lib/api/bookings";
 import { CreateBookingDialog } from "./create-booking-dialogue";
@@ -10,8 +10,8 @@ import TaskCard from "./task-card";
 import Image from "next/image";
 
 const statusMapping = {
-  pending: "Pending",
-  in_progress: "In Progress",
+  confirmed: "Confirmed",
+  // in_progress: "In Progress",
   completed: "Completed",
   cancelled: "Cancelled",
 } as const;
@@ -50,6 +50,10 @@ const NoBookingsView: React.FC<{ status: string }> = ({ status }) => (
 const BookingsComponent: React.FC = () => {
   const { data: bookingsResponse, isLoading, error } = useBookings();
 
+  useEffect(() => {
+    console.log("Bookings", bookingsResponse);
+  }, [bookingsResponse]);
+  console.log("Bookings", bookingsResponse);
   if (error) {
     return <div>Error loading bookings: {error.message}</div>;
   }
@@ -60,7 +64,7 @@ const BookingsComponent: React.FC = () => {
         <h1 className="text-2xl font-bold">My Bookings</h1>
         <CreateBookingDialog />
       </div>
-      <Tabs defaultValue="pending">
+      <Tabs defaultValue="confirmed">
         <TabsList className="mb-4">
           {Object.entries(statusMapping).map(([value, label]) => (
             <TabsTrigger key={value} value={value}>

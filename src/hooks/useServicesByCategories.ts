@@ -4,7 +4,7 @@ import { Service } from "@/lib/types";
 export const useServicesByCategory = (categoryId: string) => {
   const { data: servicesResponse, isLoading, error } = useServices();
 
-  const filteredServices = servicesResponse?.data?.filter(
+  const filteredServices = servicesResponse?.record?.filter(
     (service: Service) => service.category_id === parseInt(categoryId),
   );
 

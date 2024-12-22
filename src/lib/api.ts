@@ -74,13 +74,13 @@ export const useLogin = () =>
   useMutation((credentials: LoginCredentials) =>
     api
       .post<{
-        status: boolean;
+        error: boolean;
         token: string;
-        user: User;
+        record: User;
         message?: string;
       }>("/login", credentials)
       .then((response) => {
-        if (response.data.status === false) {
+        if (response.data.error) {
           throw new Error(response.data.message ?? "Login failed");
         }
         return response.data;
@@ -182,7 +182,7 @@ export const useService = (
     async () => {
       //const formData = new FormData();
       // formData.append("service_id", id.toString());
-      const response = await api.get<ServiceResponse>(`/getServiceDetails`, {
+      const response = await api.get<ServiceResponse>(`/getServiceDetail`, {
         params: {
           service_id: id,
         },
