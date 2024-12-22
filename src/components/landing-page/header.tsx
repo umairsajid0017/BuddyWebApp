@@ -1,51 +1,73 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Globe } from "lucide-react";
+import { Globe, Menu } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function Header() {
   const router = useRouter();
   return (
-    <header className="w-full border-b">
-      <div className="max-w-8xl container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4">
-          <Link href="/" className="flex items-center">
-            <Image src={"/assets/logo.png"} alt="logo" width={72} height={72} />
-            <span className="text-3xl font-bold text-text-900">Buddy</span>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between px-4">
+        <Link href="/" className="flex items-center space-x-2">
+          <Image src="/assets/logo.png" alt="logo" width={40} height={40} />
+          <span className="text-xl font-bold text-text-900 sm:text-2xl">
+            Buddy
+          </span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center space-x-6 md:flex">
+          <Link href="#" className="text-sm font-medium hover:text-primary">
+            Explore
           </Link>
-          <nav className="hidden items-center space-x-6 md:flex">
-            <Link
-              href="#"
-              className="text-base font-semibold hover:text-primary"
-            >
-              Explore
-            </Link>
-            <div className="flex items-center">
-              <Globe className="mr-1 h-4 w-4" />
-              <span className="text-base font-semibold">English</span>
-            </div>
-            <Link
-              href="#"
-              className="text-base font-semibold hover:text-primary"
-            >
-              Become a Worker
-            </Link>
-            <Link
-              href="/login"
-              className="text-base font-semibold hover:text-primary"
-            >
-              Sign Up
-            </Link>
-            <Button
-              size={"lg"}
-              className=""
-              onClick={() => router.push("/register")}
-            >
-              Sign in
+          <div className="flex items-center space-x-1">
+            <Globe className="h-4 w-4" />
+            <span className="text-sm font-medium">English</span>
+          </div>
+          <Link href="#" className="text-sm font-medium hover:text-primary">
+            Become a Worker
+          </Link>
+          <Link
+            href="/login"
+            className="text-sm font-medium hover:text-primary"
+          >
+            Sign In
+          </Link>
+          <Button onClick={() => router.push("/register")}>Join Now</Button>
+        </nav>
+
+        {/* Mobile Navigation */}
+        <Sheet>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon">
+              <Menu className="h-6 w-6" />
             </Button>
-          </nav>
-        </div>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-64">
+            <nav className="flex flex-col space-y-4">
+              <Link href="#" className="text-sm font-medium hover:text-primary">
+                Explore
+              </Link>
+              <Link href="#" className="text-sm font-medium hover:text-primary">
+                Become a Worker
+              </Link>
+              <Link
+                href="/login"
+                className="text-sm font-medium hover:text-primary"
+              >
+                Sign In
+              </Link>
+              <Button
+                onClick={() => router.push("/register")}
+                className="w-full"
+              >
+                Join Now
+              </Button>
+            </nav>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );
