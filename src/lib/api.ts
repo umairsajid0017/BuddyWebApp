@@ -17,6 +17,7 @@ import {
   type ChangePasswordResponse,
   type ProfileFormData,
   type ServiceDetailType,
+  type RegisterResponse,
 } from "./types";
 import {
   useMutation,
@@ -60,15 +61,19 @@ api.interceptors.request.use((config) => {
 
 //The useRegister hook is a custom hook that uses the useMutation hook from react-query to register a new user.
 //It sends a POST request to the /register endpoint with the user's data and returns the response data.
-export const useRegister = () =>
-  useMutation((userData: RegisterData) =>
-    api.post<ServerResponse>("/register", userData).then((response) => {
-      if (response.data.status === false) {
-        throw new ServerError(response.data.message, response.data.errors);
+export const useRegister = () => {
+  return useMutation<RegisterResponse, Error, RegisterData>(async (data) => {
+    try {
+      const response = await api.post<RegisterResponse>("/register", data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data) {
+        return error.response.data as RegisterResponse;
       }
-      return response.data.data;
-    }),
-  );
+      throw error;
+    }
+  });
+};
 
 //The useLogin hook is a custom hook that uses the useMutation hook from react-query to log in a user.
 //It sends a POST request to the /login endpoint with the user's credentials and returns the response data.

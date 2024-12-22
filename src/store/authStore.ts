@@ -105,10 +105,8 @@ export const useAuth = () => {
     try {
       const result = await registerMutation.mutateAsync(userData);
       if (!result) throw new Error("Registration failed");
-      const parsedUser = userSchema.parse(result.user);
-      setUser(parsedUser);
       setError(null);
-      return parsedUser;
+      return result.records;
     } catch (error: unknown) {
       const errorMessage = handleError(error);
       setError(errorMessage);

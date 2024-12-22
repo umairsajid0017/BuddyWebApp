@@ -154,3 +154,17 @@ export interface ProfileFormData {
   address: string | null;
   civil_id_number: string | null;
 }
+
+export interface RegisterResponse {
+  error: boolean;
+  message: string | Record<string, string[]>;
+  records?: {
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+    updated_at: string;
+    created_at: string;
+    id: number;
+  };
+}
