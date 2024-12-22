@@ -29,6 +29,7 @@ const Register: React.FC = () => {
     email: "",
     password: "",
     phone: "",
+    role: "customer",
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof RegisterData, string>>

@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { BookingFormData, MediaFiles } from "@/lib/types/common";
 import { useAuth } from "@/store/authStore";
 import { CreateBidResponse } from "@/lib/types/booking-types";
+import { CURRENCY } from "@/utils/constants";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -303,6 +304,28 @@ export function CreateBookingDialog({
                 value={formData.time}
                 onChange={handleTimeChange}
               />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="budget" className="text-right">
+                Budget
+              </Label>
+              <div className="relative col-span-3">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  {CURRENCY}
+                </span>
+                <Input
+                  id="budget"
+                  type="number"
+                  value={formData.budget}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      budget: Number(e.target.value),
+                    }))
+                  }
+                  className="pl-14"
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>

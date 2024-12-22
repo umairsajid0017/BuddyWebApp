@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Booking } from "@/lib/types/booking-types";
 import BookingDetailsSheet from "./bookings-details-sheet";
+import { CURRENCY } from "@/utils/constants";
 
 interface TaskCardProps {
   booking: Booking;
@@ -47,7 +48,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
         <div className="mt-2 space-y-1">
           <p className="text-sm text-gray-500">{booking.worker.name}</p>
           <p className="text-sm font-semibold text-primary">
-            OMR {booking.price}
+            {CURRENCY} {booking.price}
           </p>
           <p className="text-sm text-gray-600">
             {new Date(booking.updated_at).toLocaleDateString("en-US", {

@@ -34,11 +34,11 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
               {service.service_name}
             </h3>
             <div className="space-y-2">
-              <p
-                className={`${!compact ? "text-xl" : "text-sm"} text-text-800" font-bold`}
-              >
-                {CURRENCY}. {service.price.toLocaleString()}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">
+                  {CURRENCY} {service.price}
+                </p>
+              </div>
 
               <div className="text-sm font-medium text-muted-foreground">
                 by {service.user.name}

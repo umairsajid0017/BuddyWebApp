@@ -26,44 +26,44 @@ export default {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: {
+  				'100': 'hsl(var(--primary-100))',
+  				'200': 'hsl(var(--primary-200))',
+  				'300': 'hsl(var(--primary-300))',
+  				'400': 'hsl(var(--primary-400))',
+  				'500': 'hsl(var(--primary-500))',
+  				'600': 'hsl(var(--primary-600))',
+  				'700': 'hsl(var(--primary-700))',
+  				'800': 'hsl(var(--primary-800))',
+  				'900': 'hsl(var(--primary-900))',
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))',
-					900: 'hsl(var(--primary-900))',
-					800: 'hsl(var(--primary-800))',
-					700: 'hsl(var(--primary-700))',
-					600: 'hsl(var(--primary-600))',
-					500: 'hsl(var(--primary-500))',
-					400: 'hsl(var(--primary-400))',
-					300: 'hsl(var(--primary-300))',
-					200: 'hsl(var(--primary-200))',
-					100: 'hsl(var(--primary-100))',
-				},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))',
-				  900: 'hsl(var(--secondary-900))',
-				  800: 'hsl(var(--secondary-800))',
-				  700: 'hsl(var(--secondary-700))',
-				  600: 'hsl(var(--secondary-600))',
-				  500: 'hsl(var(--secondary-500))',
-				  400: 'hsl(var(--secondary-400))',
-				  300: 'hsl(var(--secondary-300))',
-				  200: 'hsl(var(--secondary-200))',
-				  100: 'hsl(var(--secondary-100))',
+  				foreground: 'hsl(var(--primary-foreground))'
   			},
-			text: {
-				DEFAULT: 'hsl(var(--text))',
-				foreground: 'hsl(var(--text-foreground))',
-				900: 'hsl(var(--text-900))',
-				800: 'hsl(var(--text-800))',
-				700: 'hsl(var(--text-700))',
-				600: 'hsl(var(--text-600))',
-				500: 'hsl(var(--text-500))',
-				400: 'hsl(var(--text-400))',
-				300: 'hsl(var(--text-300))',
-				200: 'hsl(var(--text-200))',
-				100: 'hsl(var(--text-100))',
-			},
+  			secondary: {
+  				'100': 'hsl(var(--secondary-100))',
+  				'200': 'hsl(var(--secondary-200))',
+  				'300': 'hsl(var(--secondary-300))',
+  				'400': 'hsl(var(--secondary-400))',
+  				'500': 'hsl(var(--secondary-500))',
+  				'600': 'hsl(var(--secondary-600))',
+  				'700': 'hsl(var(--secondary-700))',
+  				'800': 'hsl(var(--secondary-800))',
+  				'900': 'hsl(var(--secondary-900))',
+  				DEFAULT: 'hsl(var(--secondary))',
+  				foreground: 'hsl(var(--secondary-foreground))'
+  			},
+  			text: {
+  				'100': 'hsl(var(--text-100))',
+  				'200': 'hsl(var(--text-200))',
+  				'300': 'hsl(var(--text-300))',
+  				'400': 'hsl(var(--text-400))',
+  				'500': 'hsl(var(--text-500))',
+  				'600': 'hsl(var(--text-600))',
+  				'700': 'hsl(var(--text-700))',
+  				'800': 'hsl(var(--text-800))',
+  				'900': 'hsl(var(--text-900))',
+  				DEFAULT: 'hsl(var(--text))',
+  				foreground: 'hsl(var(--text-foreground))'
+  			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'
@@ -87,15 +87,37 @@ export default {
   				'5': 'hsl(var(--chart-5))'
   			}
   		},
-		  keyframes: {
-			"caret-blink": {
-			  "0%,70%,100%": { opacity: "1" },
-			  "20%,50%": { opacity: "0" },
-			},
-		  },
-		  animation: {
-			"caret-blink": "caret-blink 1.25s ease-out infinite",
-		  },
+  		keyframes: {
+  			'caret-blink': {
+  				'0%,70%,100%': {
+  					opacity: '1'
+  				},
+  				'20%,50%': {
+  					opacity: '0'
+  				}
+  			},
+  			'accordion-down': {
+  				from: {
+  					height: '0'
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
+  			},
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: '0'
+  				}
+  			}
+  		},
+  		animation: {
+  			'caret-blink': 'caret-blink 1.25s ease-out infinite',
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out'
+  		}
   	}
   },
   plugins: [require("tailwindcss-animate")],
