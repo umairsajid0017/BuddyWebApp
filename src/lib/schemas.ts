@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { User, LoginCredentials, RegisterData } from "./types";
+import { LoginType } from "@/utils/constants";
 
 // Regex pattern for validating phone numbers in +92 format
 const phoneRegex = /^(\+92)[0-9]{10}$/;
@@ -15,7 +16,7 @@ export const userSchema = z.object({
   country: z.string().nullable(),
   gender: z.string().nullable(),
   address: z.string().nullable(),
-  loginType: z.string(),
+  login_type: z.string(),
   otp: z.string(),
   otp_expires_at: z.string(),
   long: z.number().nullable(),
@@ -32,7 +33,7 @@ export const userSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, { message: "Password is required" }),
-  loginType: z.literal("email"),
+  login_type: z.literal(LoginType.MANUAL),
   role: z.string(),
 }) satisfies z.ZodType<LoginCredentials>;
 

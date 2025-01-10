@@ -26,6 +26,7 @@ import { Mail, Lock, AlertCircle, AlertTriangle } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { LoginType } from "@/utils/constants";
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
@@ -34,7 +35,7 @@ export default function Login() {
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: "",
     password: "",
-    loginType: "email",
+    login_type: LoginType.MANUAL,
     role: "customer",
   });
   const [errors, setErrors] = useState<LoginErrors>({});

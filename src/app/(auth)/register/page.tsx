@@ -20,6 +20,7 @@ import StepTwo from "@/components/register/step-two";
 import StepThree from "@/components/register/step-three";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import { LoginType } from "@/utils/constants";
 
 const Register: React.FC = () => {
   const { toast } = useToast();
@@ -30,6 +31,7 @@ const Register: React.FC = () => {
     password: "",
     phone: "",
     role: "customer",
+    login_type: LoginType.MANUAL,
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof RegisterData, string>>

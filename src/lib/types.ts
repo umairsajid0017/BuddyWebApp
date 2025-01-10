@@ -12,7 +12,7 @@ export interface User {
   country: string | null;
   gender: string | null;
   address: string | null;
-  loginType: string;
+  login_type: string;
   otp: string;
   otp_expires_at: string;
   long: number | null;
@@ -29,7 +29,7 @@ export interface User {
 export interface LoginCredentials {
   email: string;
   password: string;
-  loginType?: string;
+  login_type?: string;
   role?: string;
 }
 
