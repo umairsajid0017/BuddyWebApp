@@ -20,11 +20,16 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
             className={`relative ${compact ? "h-28 sm:w-40" : "h-56 sm:w-56"}`}
           >
             <Image
-              src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
+              src={
+                service.images?.[0]?.name
+                  ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
+                  : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`
+              }
               alt={service.service_name}
               layout="fill"
               objectFit="cover"
               className=""
+              unoptimized
             />
           </div>
           <div className="flex flex-1 flex-col justify-start p-4">

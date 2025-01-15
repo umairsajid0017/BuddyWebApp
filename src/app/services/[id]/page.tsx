@@ -18,6 +18,7 @@ import ReviewsSection from "@/components/services/reviews-section";
 import UserProfileCard from "@/components/services/user-profile-card";
 import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
 import { CURRENCY } from "@/utils/constants";
+import { ServiceImageGallery } from "@/components/services/service-image-gallery";
 
 interface ServiceDetailsProps {
   params: {
@@ -118,21 +119,12 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
             <Card className="w-full">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row">
-                  <div className="h-[400px] md:w-1/2">
-                    {service.images.length > 0 && (
-                      <Image
-                        src={
-                          service.images?.[0]?.name
-                            ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
-                            : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`
-                        }
-                        alt={service.service_name || "Service image"}
-                        width={400}
-                        height={400}
-                        className="h-full w-full rounded-lg object-cover"
-                        unoptimized
-                      />
-                    )}
+                  <div className="md:w-1/2">
+                    <ServiceImageGallery
+                      mainImage={service.images[0]?.name || ""}
+                      images={service.images.slice(1)}
+                      serviceName={service.service_name}
+                    />
                   </div>
                   <div className="mt-6 md:mt-0 md:w-1/2 md:pl-6">
                     <h1 className="mb-2 text-3xl font-bold">
