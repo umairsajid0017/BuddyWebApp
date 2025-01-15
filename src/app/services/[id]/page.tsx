@@ -74,6 +74,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
         lat: serviceResponse.lat ? Number(serviceResponse.lat) : null,
         fixed_price: serviceResponse.fixed_price,
       });
+      console.log(service);
     }
   }, [serviceResponse]);
 
@@ -118,13 +119,18 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row">
                   <div className="h-[400px] md:w-1/2">
-                    {service.image && (
+                    {service.images.length > 0 && (
                       <Image
-                        src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
+                        src={
+                          service.images?.[0]?.name
+                            ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
+                            : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`
+                        }
                         alt={service.service_name || "Service image"}
                         width={400}
                         height={400}
                         className="h-full w-full rounded-lg object-cover"
+                        unoptimized
                       />
                     )}
                   </div>

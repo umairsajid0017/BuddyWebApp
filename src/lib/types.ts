@@ -67,6 +67,7 @@ export interface Service {
   description: string;
   fixed_price: string;
   image: string;
+  images: ServiceImage[];
   category_id: number;
   long: number | null;
   lat: number | null;
@@ -78,8 +79,25 @@ export interface Service {
   ratings: ServiceRating[];
 }
 
+interface ServiceRecords {
+  id: number;
+  service_name: string;
+  description: string;
+  fixed_price: string;
+  image: string;
+  images: string;
+  category_id: number;
+  long: number | null;
+  lat: number | null;
+  user_id: number;
+  created_at: string | null;
+  updated_at: string | null;
+  user: User;
+  category: Category;
+  ratings: ServiceRating[];
+}
 export interface ServicesResponse extends ApiResponse<Service[]> {
-  records: Service[];
+  records: ServiceRecords[];
   message?: string;
   status: boolean;
 }

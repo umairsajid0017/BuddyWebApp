@@ -32,6 +32,7 @@ import {
 import useAuthStore from "@/store/authStore";
 import { deleteCookie } from "./cookies";
 import { CategoryServicesResponse } from "./types/service-types";
+import { parseServiceImages } from "@/utils/image-helpers";
 
 interface ServerResponse {
   status: boolean;
@@ -175,8 +176,15 @@ export const useServices = (
     ["services"],
     async () => {
       const response = await api.get<ServicesResponse>("/getServices");
-      console.log("Services Response in the API", response);
-      return response.data.records;
+      // Parse images for each service
+      const servicesWithParsedImages = response.data.records.map((service) => ({
+        ...service,
+        images:
+          typeof service.images === "string"
+            ? JSON.parse(service.images)
+            : service.images,
+      }));
+      return servicesWithParsedImages;
     },
     options,
   );
@@ -196,7 +204,14 @@ export const useService = (
           service_id: id,
         },
       });
-      return response.data.records;
+      // Parse images in the service detail
+      return {
+        ...response.data.records,
+        images:
+          typeof response.data.records.images === "string"
+            ? JSON.parse(response.data.records.images)
+            : response.data.records.images,
+      };
     },
     options,
   );

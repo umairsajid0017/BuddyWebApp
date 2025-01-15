@@ -13,6 +13,13 @@ const config = {
       "images.unsplash.com",
       "plus.unsplash.com",
     ], // Add 'images.pexels.com' here
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "18.136.228.207",
+        pathname: "/BuddyAppBackend/media/images/**",
+      },
+    ],
   },
   async rewrites() {
     return [
