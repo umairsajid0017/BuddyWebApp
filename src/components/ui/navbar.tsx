@@ -175,21 +175,21 @@ export default function NavBar() {
                       My Account
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       onClick={() => router.push("/bookmarks")}
                       className="gap-2 py-2"
                     >
                       <BookMarked className="h-4 w-4" />
                       Saved
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
 
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       onClick={() => router.push("/helpdesk")}
                       className="gap-2 py-2"
                     >
                       <LifeBuoy className="h-4 w-4" />
                       Helpdesk
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
 
                     <DropdownMenuItem
                       onClick={() => router.push("/settings")}

@@ -39,10 +39,18 @@ export default function ChangePasswordComponent() {
     }
 
     try {
-      await changePasswordMutation.mutateAsync({
+      const response = await changePasswordMutation.mutateAsync({
         current_password: currentPassword,
         new_password: newPassword,
       });
+
+      if (response.error) {
+        toast({
+          title: response.message || "Failed to change password",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Clear form
       setCurrentPassword("");
@@ -50,12 +58,12 @@ export default function ChangePasswordComponent() {
       setConfirmPassword("");
 
       toast({
-        title: "Password changed successfully",
+        title: response.message || "Password changed successfully",
         variant: "default",
       });
     } catch (error: any) {
       toast({
-        title: error.response?.data?.message || "Failed to change password",
+        title: error?.message || "Failed to change password",
         variant: "destructive",
       });
     }

@@ -258,22 +258,20 @@ export const useServicesByCategory = (
 export const useChangePassword = () => {
   const user = useAuthStore.getState().user;
 
-  return useMutation<ChangePasswordResponse, AxiosError, ChangePasswordData>(
-    async (passwordData: ChangePasswordData) => {
-      if (!user?.id) throw new Error("User not found");
+  return useMutation<
+    { error: boolean; message: string },
+    Error,
+    ChangePasswordData
+  >(async (passwordData: ChangePasswordData) => {
+    if (!user?.id) throw new Error("User not found");
 
-      const response = await api.put<ChangePasswordResponse>(
-        `/changePassword`,
-        passwordData,
-      );
+    const response = await api.put<{ error: boolean; message: string }>(
+      `/changePassword`,
+      passwordData,
+    );
 
-      if (!response.data.status) {
-        throw new Error(response.data.message);
-      }
-
-      return response.data;
-    },
-  );
+    return response.data;
+  });
 };
 
 export const useUpdateProfile = () => {

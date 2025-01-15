@@ -31,7 +31,7 @@ const UserProfile: React.FC<{ user: User }> = ({ user }) => {
             <Avatar className="h-24 w-24">
               <AvatarImage
                 src={
-                  user.image ||
+                  process.env.NEXT_PUBLIC_IMAGE_URL! + user.image ||
                   "https://api.dicebear.com/9.x/dylan/svg?seed=Destiny"
                 }
                 alt="Profile picture"
