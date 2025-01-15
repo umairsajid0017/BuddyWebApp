@@ -263,7 +263,7 @@ export const useChangePassword = () => {
       if (!user?.id) throw new Error("User not found");
 
       const response = await api.put<ChangePasswordResponse>(
-        `/users/${user.id}/change-password`,
+        `/changePassword`,
         passwordData,
       );
 

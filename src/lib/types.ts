@@ -65,7 +65,7 @@ export interface Service {
   id: number;
   service_name: string;
   description: string;
-  price: string;
+  fixed_price: string;
   image: string;
   category_id: number;
   long: number | null;
@@ -84,13 +84,19 @@ export interface ServicesResponse extends ApiResponse<Service[]> {
   status: boolean;
 }
 
+export interface ServiceImage {
+  id: string;
+  name: string;
+}
+
 export interface ServiceDetailType {
   id: number;
   name: string;
   tagline: string;
   image: string;
+  images: ServiceImage[];
   description: string;
-  price: string;
+  fixed_price: string;
   address: string;
   category_id: number;
   long: string | null;

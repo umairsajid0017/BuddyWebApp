@@ -36,7 +36,7 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium">
-                  {CURRENCY} {service.price}
+                  {CURRENCY} {service.fixed_price}
                 </p>
               </div>
 

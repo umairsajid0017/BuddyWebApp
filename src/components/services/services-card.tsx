@@ -23,7 +23,7 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
         </p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-lg font-bold text-primary">
-            {CURRENCY}. {service.price}
+            {CURRENCY}. {service.fixed_price}
           </p>
           <div className="flex items-center text-xs text-gray-600">
             <StarIcon className="h-4 w-4" />

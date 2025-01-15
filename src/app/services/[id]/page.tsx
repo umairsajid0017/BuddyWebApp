@@ -72,6 +72,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
         ratings: [],
         long: serviceResponse.long ? Number(serviceResponse.long) : null,
         lat: serviceResponse.lat ? Number(serviceResponse.lat) : null,
+        fixed_price: serviceResponse.fixed_price,
       });
     }
   }, [serviceResponse]);
@@ -156,7 +157,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                       </Badge>
                     </div>
                     <p className="mb-4 text-2xl font-bold">
-                      {CURRENCY}. {service.price}{" "}
+                      {CURRENCY}. {service.fixed_price}{" "}
                     </p>
                     <h2 className="mb-2 text-xl font-semibold">About me</h2>
                     <p className="mb-4 text-muted-foreground">

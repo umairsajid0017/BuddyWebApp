@@ -30,7 +30,7 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
         <p className="text-xs text-gray-600">{service.description}</p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-lg font-bold text-primary">
-            {CURRENCY}. {service.price}
+            {CURRENCY}. {service.fixed_price}
           </p>
           <div className="flex items-center text-xs text-gray-600">
             <StarIcon className="h-4 w-4" />
@@ -122,10 +122,10 @@ const CategoryPage: React.FC = () => {
         );
         break;
       case "price_asc":
-        filtered.sort((a, b) => Number(a.price) - Number(b.price));
+        filtered.sort((a, b) => Number(a.fixed_price) - Number(b.fixed_price));
         break;
       case "price_desc":
-        filtered.sort((a, b) => Number(b.price) - Number(a.price));
+        filtered.sort((a, b) => Number(b.fixed_price) - Number(a.fixed_price));
         break;
       default:
         // best_selling - you might want to implement your own logic here

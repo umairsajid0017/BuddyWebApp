@@ -36,7 +36,7 @@ const AllServices: React.FC = () => {
     if (filters.budget) {
       const [min, max] = filters.budget.split("-").map(Number);
       filtered = filtered.filter((service) => {
-        const price = Number(service.price);
+        const price = Number(service.fixed_price);
         if (min === undefined || max === undefined) return true;
         if (max === 0) return price >= min;
         return price >= min && price <= max;
@@ -53,10 +53,10 @@ const AllServices: React.FC = () => {
         );
         break;
       case "price_asc":
-        filtered.sort((a, b) => Number(a.price) - Number(b.price));
+        filtered.sort((a, b) => Number(a.fixed_price) - Number(b.fixed_price));
         break;
       case "price_desc":
-        filtered.sort((a, b) => Number(b.price) - Number(a.price));
+        filtered.sort((a, b) => Number(b.fixed_price) - Number(a.fixed_price));
         break;
     }
 
