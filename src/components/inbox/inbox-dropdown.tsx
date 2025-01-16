@@ -75,7 +75,7 @@ export default function InboxDropdown({
           {items.length === 0 ? (
             <DropdownMenuItem disabled>No messages</DropdownMenuItem>
           ) : (
-            items.map((item) => (
+            items.map((item: InboxItem) => (
               <DropdownMenuItem
                 key={item.id}
                 className="flex flex-col items-start p-4"
