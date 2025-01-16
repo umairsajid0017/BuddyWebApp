@@ -20,6 +20,7 @@ import StepTwo from "@/components/register/step-two";
 import StepThree from "@/components/register/step-three";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
+import { LoginType } from "@/utils/constants";
 
 const Register: React.FC = () => {
   const { toast } = useToast();
@@ -29,6 +30,8 @@ const Register: React.FC = () => {
     email: "",
     password: "",
     phone: "",
+    role: "customer",
+    login_type: LoginType.MANUAL,
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof RegisterData, string>>
@@ -79,24 +82,56 @@ const Register: React.FC = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    console.log("Registering user:", formData);
     e.preventDefault();
     setErrors({});
+    setBackendErrors({});
+
     try {
-      console.log("Validating data...");
-      const validatedData = registerSchema.parse(formData);
-      console.log("Data validated successfully:", validatedData);
+      // First validate with Zod
+      registerSchema.parse(formData);
 
-      console.log("Calling registerMutation.mutateAsync...");
-      const response = await registerMutation.mutateAsync(validatedData);
-      console.log("API call completed. Response:", response);
+      const response = await registerMutation.mutateAsync(formData);
 
-      console.log("Setting step to 3...");
+      if (response.error) {
+        // Handle validation errors from API
+        if (typeof response.message === "string") {
+          // Single error message
+          toast({
+            variant: "destructive",
+            title: "Registration Error",
+            description: response.message,
+          });
+        } else {
+          // Handle multiple validation errors
+          const validationErrors: Partial<Record<keyof RegisterData, string>> =
+            {};
+
+          Object.entries(response.message).forEach(([field, messages]) => {
+            if (Array.isArray(messages)) {
+              validationErrors[field as keyof RegisterData] = messages[0];
+
+              // Show toast for each validation error
+              toast({
+                variant: "destructive",
+                title: `${field.charAt(0).toUpperCase() + field.slice(1)} Error`,
+                description: messages[0],
+              });
+            }
+          });
+
+          setErrors(validationErrors);
+        }
+        return; // Don't proceed if there are errors
+      }
+
+      // If successful, proceed to OTP verification
       setStep(3);
+      toast({
+        title: "Verification Required",
+        description: "Please check your email for the OTP code.",
+      });
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
       if (error instanceof ZodError) {
-        console.log("ZodError encountered:", error.errors);
         const newErrors: Partial<Record<keyof RegisterData, string>> = {};
         error.errors.forEach((err) => {
           if (err.path[0]) {
@@ -104,36 +139,19 @@ const Register: React.FC = () => {
           }
         });
         setErrors(newErrors);
-      } else if (error instanceof Error && "errors" in error) {
-        //This method required a lot of changes to work properly
-        //I needed to change the Error to ServerError by extending the Error class
-        //to accomodate the errors comming from the server
-        const serverError = error as Error & {
-          errors?: Record<string, string[]>;
-        };
-        const errorMessages = serverError.errors
-          ? Object.values(serverError.errors).flat().join(", ")
-          : serverError.message;
 
-        if (serverError.errors) {
-          setErrors(
-            Object.fromEntries(
-              Object.entries(serverError.errors).map(([key, value]) => [
-                key,
-                value[0],
-              ]),
-            ),
-          );
-        }
-        console.log("Server error:", serverError.message, serverError.errors);
         toast({
-          title: serverError.message,
-          description: errorMessages,
           variant: "destructive",
+          title: "Validation Error",
+          description: "Please check all required fields.",
         });
       } else {
-        console.log("Unknown error:", error);
-        setBackendErrors({ general: ["An unexpected error occurred"] });
+        console.error("Registration error:", error);
+        toast({
+          variant: "destructive",
+          title: "Registration Failed",
+          description: "An unexpected error occurred. Please try again.",
+        });
       }
     }
   };

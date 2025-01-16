@@ -36,7 +36,7 @@ const settingsItems = [
   { href: "/settings/verify", icon: LockIcon, label: "Verify Account" },
   { href: "/settings/notifications", icon: BellIcon, label: "Notifications" },
   { href: "/settings/privacy", icon: ShieldIcon, label: "Privacy Policy" },
-  { href: "/settings/help", icon: HelpCircleIcon, label: "Help Center" },
+  { href: "/settings/help-center", icon: HelpCircleIcon, label: "Help Center" },
 ];
 
 export default function SettingsLayout({

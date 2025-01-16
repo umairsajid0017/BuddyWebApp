@@ -12,9 +12,9 @@ interface SearchParams {
 
 // API Response type
 interface ApiResponse<T> {
-  data: T;
-  message?: string;
-  status: number;
+  error: boolean;
+  message: string;
+  records: T;
 }
 
 // Error response type
@@ -82,7 +82,7 @@ export const useSearchServices = (
         const response = await api.get<ApiResponse<Service[]>>(
           `/getSearch${queryString}`,
         );
-        return response.data.data; // Access the data property of the API response
+        return response.data.records;
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
           // Handle unauthorized access

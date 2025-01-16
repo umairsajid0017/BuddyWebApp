@@ -12,7 +12,7 @@ export interface User {
   country: string | null;
   gender: string | null;
   address: string | null;
-  loginType: string;
+  login_type: string;
   otp: string;
   otp_expires_at: string;
   long: number | null;
@@ -29,7 +29,8 @@ export interface User {
 export interface LoginCredentials {
   email: string;
   password: string;
-  loginType?: string;
+  login_type?: string;
+  role?: string;
 }
 
 export interface RegisterData extends LoginCredentials {
@@ -64,8 +65,9 @@ export interface Service {
   id: number;
   service_name: string;
   description: string;
-  price: string;
+  fixed_price: string;
   image: string;
+  images: ServiceImage[];
   category_id: number;
   long: number | null;
   lat: number | null;
@@ -77,16 +79,60 @@ export interface Service {
   ratings: ServiceRating[];
 }
 
+interface ServiceRecords {
+  id: number;
+  service_name: string;
+  description: string;
+  fixed_price: string;
+  image: string;
+  images: string;
+  category_id: number;
+  long: number | null;
+  lat: number | null;
+  user_id: number;
+  created_at: string | null;
+  updated_at: string | null;
+  user: User;
+  category: Category;
+  ratings: ServiceRating[];
+}
 export interface ServicesResponse extends ApiResponse<Service[]> {
-  data: Service[];
+  records: ServiceRecords[];
   message?: string;
-  success: boolean;
+  status: boolean;
 }
-export interface ServiceResponse extends ApiResponse<Service> {
-  data: Service;
-  message?: string;
-  success: boolean;
+
+export interface ServiceImage {
+  id: string;
+  name: string;
 }
+
+export interface ServiceDetailType {
+  id: number;
+  name: string;
+  tagline: string;
+  image: string;
+  images: ServiceImage[];
+  description: string;
+  fixed_price: string;
+  address: string;
+  category_id: number;
+  long: string | null;
+  lat: string | null;
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  added_by: string | null;
+  user: User;
+  category: Category;
+}
+
+export interface ServiceResponse {
+  error: boolean;
+  message: string;
+  records: ServiceDetailType;
+}
+
 interface InboxItemInterface {
   id: string;
   senderName: string;
@@ -96,6 +142,8 @@ interface InboxItemInterface {
   date: string;
   read: boolean;
 }
+
+export type InboxItem = InboxItemInterface;
 
 export interface SearchServicesResponse {
   service_id: number;
@@ -110,7 +158,7 @@ export interface SearchServicesResponse {
   tag_line: string;
 }
 
-export type InboxItem = InboxItemInterface;
+export type InboxItem = Partial<Record<keyof InboxItemInterface, unknown>>;
 
 export interface ChangePasswordData {
   current_password: string;
@@ -120,4 +168,45 @@ export interface ChangePasswordData {
 export interface ChangePasswordResponse {
   status: boolean;
   message: string;
+}
+
+export interface ProfileFormData {
+  name: string;
+  email: string;
+  phone: string;
+  dob: string | null;
+  country: string | null;
+  gender: string | null;
+  address: string | null;
+  civil_id_number: string | null;
+}
+
+export interface RegisterResponse {
+  error: boolean;
+  message: string | Record<string, string[]>;
+  records?: {
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+    updated_at: string;
+    created_at: string;
+    id: number;
+  };
+}
+
+export interface ResetPasswordOtpResponse {
+  error: boolean;
+  message: string;
+}
+
+export interface ResetPasswordResponse {
+  error: boolean;
+  message: string;
+}
+
+export interface ResetPasswordData {
+  email: string;
+  password: string;
+  otp: string;
 }

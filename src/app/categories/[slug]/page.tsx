@@ -12,31 +12,44 @@ import { Button } from "@/components/ui/button";
 import { useServicesByCategory } from "@/hooks/useServicesByCategories";
 import FilterBar from "@/components/services/filter-bar";
 import useFiltersStore from "@/store/filterStore";
+import { CURRENCY } from "@/utils/constants";
 
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
-  <Link href={`/services/${service.id}`} className="block">
-    <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
-      <div className="relative h-44 overflow-hidden bg-gray-200">
-        <Image
-          src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
-          alt={service.service_name}
-          layout="fill"
-          objectFit="cover"
-        />
-      </div>
-      <CardContent>
-        <h4 className="mt-2 text-xl font-medium">{service.service_name}</h4>
-        <p className="text-xs text-gray-600">{service.description}</p>
-        <div className="mt-2 flex items-center justify-between">
-          <p className="text-lg font-bold text-primary">Rs. {service.price}</p>
-          <div className="flex items-center text-xs text-gray-600">
-            <StarIcon className="h-4 w-4" />
-            <span className="ml-1">{service.ratings?.length || 0} reviews</span>
-          </div>
+  console.log("Service Card", service),
+  (
+    <Link href={`/services/${service.id}`} className="block">
+      <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+        <div className="relative h-44 overflow-hidden bg-gray-200">
+          <Image
+            src={
+              service.images?.[0]?.name
+                ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
+                : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`
+            }
+            alt={service.service_name}
+            layout="fill"
+            objectFit="cover"
+            unoptimized
+          />
         </div>
-      </CardContent>
-    </Card>
-  </Link>
+        <CardContent>
+          <h4 className="mt-2 text-xl font-medium">{service.service_name}</h4>
+          <p className="text-xs text-gray-600">{service.description}</p>
+          <div className="mt-2 flex items-center justify-between">
+            <p className="text-lg font-bold text-primary">
+              {CURRENCY}. {service.fixed_price}
+            </p>
+            <div className="flex items-center text-xs text-gray-600">
+              <StarIcon className="h-4 w-4" />
+              <span className="ml-1">
+                {service.ratings?.length || 0} reviews
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  )
 );
 
 const ServiceSkeleton: React.FC = () => (
@@ -119,10 +132,10 @@ const CategoryPage: React.FC = () => {
         );
         break;
       case "price_asc":
-        filtered.sort((a, b) => Number(a.price) - Number(b.price));
+        filtered.sort((a, b) => Number(a.fixed_price) - Number(b.fixed_price));
         break;
       case "price_desc":
-        filtered.sort((a, b) => Number(b.price) - Number(a.price));
+        filtered.sort((a, b) => Number(b.fixed_price) - Number(a.fixed_price));
         break;
       default:
         // best_selling - you might want to implement your own logic here

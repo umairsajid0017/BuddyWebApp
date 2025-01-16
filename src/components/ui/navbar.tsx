@@ -74,7 +74,8 @@ export default function NavBar() {
       <div className="container flex items-center justify-between px-6 py-4 md:mx-auto">
         {!isSearchVisible && (
           <Link href={"/"} className="flex items-center gap-2">
-            <Image src="/assets/logo.png" alt="logo" width={64} height={64} />
+            <Image src={"/assets/logo.png"} alt="logo" width={72} height={72} />
+            <span className="text-3xl font-bold text-text-900">Buddy</span>
           </Link>
         )}
         <div
@@ -144,10 +145,16 @@ export default function NavBar() {
                     <Button variant="ghost" size="icon" className="relative">
                       <Avatar className="h-9 w-9">
                         <AvatarImage
-                          src="https://api.dicebear.com/9.x/dylan/svg?seed=Destiny"
-                          alt="User"
+                          src={
+                            user.image
+                              ? process.env.NEXT_PUBLIC_IMAGE_URL + user.image
+                              : undefined
+                          }
+                          alt={user.name || "User"}
                         />
-                        <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>
+                          {user.name?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
                       </Avatar>
                       <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500" />
                     </Button>
@@ -168,21 +175,21 @@ export default function NavBar() {
                       My Account
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       onClick={() => router.push("/bookmarks")}
                       className="gap-2 py-2"
                     >
                       <BookMarked className="h-4 w-4" />
                       Saved
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
 
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       onClick={() => router.push("/helpdesk")}
                       className="gap-2 py-2"
                     >
                       <LifeBuoy className="h-4 w-4" />
                       Helpdesk
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
 
                     <DropdownMenuItem
                       onClick={() => router.push("/settings")}

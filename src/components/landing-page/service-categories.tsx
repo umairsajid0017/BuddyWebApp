@@ -35,22 +35,29 @@ const categories = [
 export function ServiceCategories() {
   return (
     <section className="my-8">
-      <div className="container">
-        <div className="grid grid-cols-3 gap-4 md:grid-cols-9">
+      <div className="container px-4">
+        <h2 className="mb-8 text-2xl font-semibold sm:text-3xl">
+          Popular Categories
+        </h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9">
           {categories.map((category) => (
             <Card
               key={category.label}
-              className="hover-radial-gradient flex cursor-pointer flex-col items-center text-start text-text-700 shadow-md"
+              className="group transition-all duration-300 hover:border-primary hover:shadow-lg"
             >
-              <CardContent className="flex flex-col items-start p-4 text-start">
-                <Image
-                  src={category.icon}
-                  alt={category.label}
-                  width={32}
-                  height={32}
-                  className="mb-4 h-12 w-12"
-                />{" "}
-                <span className="text-sm font-semibold">{category.label}</span>
+              <CardContent className="flex flex-col items-center p-4 text-center">
+                <div className="mb-4 rounded-full bg-primary/10 p-3 transition-colors group-hover:bg-primary/20">
+                  <Image
+                    src={category.icon}
+                    alt={category.label}
+                    width={32}
+                    height={32}
+                    className="h-8 w-8 sm:h-10 sm:w-10"
+                  />
+                </div>
+                <span className="text-sm font-medium sm:text-base">
+                  {category.label}
+                </span>
               </CardContent>
             </Card>
           ))}

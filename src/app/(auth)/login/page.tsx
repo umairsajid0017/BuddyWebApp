@@ -10,6 +10,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +25,8 @@ import { setAuthCookie } from "./authOptions";
 import { Mail, Lock, AlertCircle, AlertTriangle } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
+import { LoginType } from "@/utils/constants";
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
@@ -32,7 +35,8 @@ export default function Login() {
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: "",
     password: "",
-    loginType: "email",
+    login_type: LoginType.MANUAL,
+    role: "customer",
   });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
@@ -48,10 +52,10 @@ export default function Login() {
       const validatedCredentials = loginSchema.parse(credentials);
       const data = await loginMutation.mutateAsync(validatedCredentials);
 
-      if (data.status && data.token && data.user) {
-        const { user, token } = data;
-        console.log("User logged in:", user, token);
-        useAuthStore.getState().setUser(user);
+      if (!data.error && data.token && data.records) {
+        const { records, token } = data;
+        console.log("User logged in:", records, token);
+        useAuthStore.getState().setUser(records);
         useAuthStore.getState().setToken(token);
         await setAuthCookie(token);
         void router.push("/");
@@ -115,7 +119,7 @@ export default function Login() {
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} method="POST">
+          <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -153,7 +157,6 @@ export default function Login() {
                     value={credentials.password}
                     onChange={handleChange}
                     className="pl-10"
-                    // required
                   />
                 </div>
                 {errors.password && (
@@ -163,6 +166,16 @@ export default function Login() {
                     </AlertDescription>
                   </Alert>
                 )}
+                <div className="flex justify-end">
+                  <Button
+                    variant="link"
+                    className="px-0 font-normal text-primary"
+                    type="button"
+                    onClick={() => router.push("/reset-password")}
+                  >
+                    Forgot password?
+                  </Button>
+                </div>
               </div>
               {/* {serverError && (
                 <Alert variant="destructive">
@@ -180,15 +193,15 @@ export default function Login() {
             </div>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex flex-col space-y-4">
           <p className="text-sm text-gray-600">
             Don&apos;t have an account?{" "}
-            <a
+            <Link
               href="/register"
               className="font-medium text-primary hover:underline"
             >
               Sign up
-            </a>
+            </Link>
           </p>
         </CardFooter>
       </Card>

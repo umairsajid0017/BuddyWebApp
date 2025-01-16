@@ -17,6 +17,8 @@ import { ServiceRating } from "@/lib/types/service-types";
 import ReviewsSection from "@/components/services/reviews-section";
 import UserProfileCard from "@/components/services/user-profile-card";
 import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
+import { CURRENCY } from "@/utils/constants";
+import { ServiceImageGallery } from "@/components/services/service-image-gallery";
 
 interface ServiceDetailsProps {
   params: {
@@ -59,13 +61,21 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
 
   useEffect(() => {
     if (servicesResponse) {
-      setServices(servicesResponse.data);
+      setServices(servicesResponse);
     }
   }, [servicesResponse, allServicesLoading, setServices]);
 
   useEffect(() => {
     if (serviceResponse) {
-      setService(serviceResponse.data);
+      setService({
+        ...serviceResponse,
+        service_name: serviceResponse.name,
+        ratings: [],
+        long: serviceResponse.long ? Number(serviceResponse.long) : null,
+        lat: serviceResponse.lat ? Number(serviceResponse.lat) : null,
+        fixed_price: serviceResponse.fixed_price,
+      });
+      console.log(service);
     }
   }, [serviceResponse]);
 
@@ -109,16 +119,12 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
             <Card className="w-full">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row">
-                  <div className="h-[400px] md:w-1/2">
-                    {service.image && (
-                      <Image
-                        src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
-                        alt={service.service_name || "Service image"}
-                        width={400}
-                        height={400}
-                        className="h-full w-full rounded-lg object-cover"
-                      />
-                    )}
+                  <div className="md:w-1/2">
+                    <ServiceImageGallery
+                      mainImage={service.images[0]?.name || ""}
+                      images={service.images.slice(1)}
+                      serviceName={service.service_name}
+                    />
                   </div>
                   <div className="mt-6 md:mt-0 md:w-1/2 md:pl-6">
                     <h1 className="mb-2 text-3xl font-bold">
@@ -149,7 +155,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                       </Badge>
                     </div>
                     <p className="mb-4 text-2xl font-bold">
-                      Rs. {service.price}{" "}
+                      {CURRENCY}. {service.fixed_price}{" "}
                     </p>
                     <h2 className="mb-2 text-xl font-semibold">About me</h2>
                     <p className="mb-4 text-muted-foreground">

@@ -40,7 +40,7 @@ const NoCategories = () => (
 
 const AllCategoriesComponent = () => {
   const { data: categoriesResponse, isLoading, error } = useCategories();
-  const categories = categoriesResponse?.data ?? [];
+  const categories = categoriesResponse ?? [];
 
   if (isLoading) {
     return (

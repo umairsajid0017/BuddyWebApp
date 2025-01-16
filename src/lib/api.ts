@@ -15,6 +15,12 @@ import {
   ServiceResponse,
   type ChangePasswordData,
   type ChangePasswordResponse,
+  type ProfileFormData,
+  type ServiceDetailType,
+  type RegisterResponse,
+  type ResetPasswordOtpResponse,
+  type ResetPasswordResponse,
+  type ResetPasswordData,
 } from "./types";
 import {
   useMutation,
@@ -58,15 +64,19 @@ api.interceptors.request.use((config) => {
 
 //The useRegister hook is a custom hook that uses the useMutation hook from react-query to register a new user.
 //It sends a POST request to the /register endpoint with the user's data and returns the response data.
-export const useRegister = () =>
-  useMutation((userData: RegisterData) =>
-    api.post<ServerResponse>("/register", userData).then((response) => {
-      if (response.data.status === false) {
-        throw new ServerError(response.data.message, response.data.errors);
+export const useRegister = () => {
+  return useMutation<RegisterResponse, Error, RegisterData>(async (data) => {
+    try {
+      const response = await api.post<RegisterResponse>("/register", data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.data) {
+        return error.response.data as RegisterResponse;
       }
-      return response.data.data;
-    }),
-  );
+      throw error;
+    }
+  });
+};
 
 //The useLogin hook is a custom hook that uses the useMutation hook from react-query to log in a user.
 //It sends a POST request to the /login endpoint with the user's credentials and returns the response data.
@@ -74,13 +84,13 @@ export const useLogin = () =>
   useMutation((credentials: LoginCredentials) =>
     api
       .post<{
-        status: boolean;
+        error: boolean;
         token: string;
-        user: User;
+        records: User;
         message?: string;
       }>("/login", credentials)
       .then((response) => {
-        if (response.data.status === false) {
+        if (response.data.error) {
           throw new Error(response.data.message ?? "Login failed");
         }
         return response.data;
@@ -159,13 +169,21 @@ export const useVerifyOtp = () => {
 // const { data: services, isLoading, isError } = useServices()
 // This will fetch the services from the API and return the data, loading state, and error state.
 export const useServices = (
-  options?: UseQueryOptions<ServicesResponse, AxiosError>,
+  options?: UseQueryOptions<Service[], AxiosError>,
 ) => {
-  return useQuery<ServicesResponse, AxiosError>(
+  return useQuery<Service[], AxiosError>(
     ["services"],
     async () => {
       const response = await api.get<ServicesResponse>("/getServices");
-      return response.data;
+      // Parse images for each service
+      const servicesWithParsedImages = response.data.records.map((service) => ({
+        ...service,
+        images:
+          typeof service.images === "string"
+            ? JSON.parse(service.images)
+            : service.images,
+      }));
+      return servicesWithParsedImages;
     },
     options,
   );
@@ -175,19 +193,24 @@ export const useServices = (
 //It takes the service ID as an argument and returns the service data.
 export const useService = (
   id: number,
-  options?: UseQueryOptions<ServiceResponse, AxiosError>,
+  options?: UseQueryOptions<ServiceDetailType, AxiosError>,
 ) => {
-  return useQuery<ServiceResponse, AxiosError>(
+  return useQuery<ServiceDetailType, AxiosError>(
     ["service", id],
     async () => {
-      //const formData = new FormData();
-      // formData.append("service_id", id.toString());
-      const response = await api.get<ServiceResponse>(`/getServiceDetails`, {
+      const response = await api.get<ServiceResponse>(`/getServiceDetail`, {
         params: {
           service_id: id,
         },
       });
-      return response.data;
+      const serviceWithParsedImages = {
+        ...response.data.records,
+        images:
+          typeof response.data.records.images === "string"
+            ? JSON.parse(response.data.records.images)
+            : response.data.records.images,
+      };
+      return serviceWithParsedImages;
     },
     options,
   );
@@ -249,19 +272,84 @@ export const useServicesByCategory = (
 export const useChangePassword = () => {
   const user = useAuthStore.getState().user;
 
-  return useMutation<ChangePasswordResponse, AxiosError, ChangePasswordData>(
-    async (passwordData: ChangePasswordData) => {
-      if (!user?.id) throw new Error("User not found");
+  return useMutation<
+    { error: boolean; message: string },
+    Error,
+    ChangePasswordData
+  >(async (passwordData: ChangePasswordData) => {
+    if (!user?.id) throw new Error("User not found");
 
-      const response = await api.put<ChangePasswordResponse>(
-        `/users/${user.id}/change-password`,
-        passwordData,
-      );
+    const response = await api.put<{ error: boolean; message: string }>(
+      `/changePassword`,
+      passwordData,
+    );
 
-      if (!response.data.status) {
+    return response.data;
+  });
+};
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (data: { formData: ProfileFormData; image?: File }) => {
+      const formDataToSend = new FormData();
+
+      Object.entries(data.formData).forEach(([key, value]) => {
+        if (value !== null) {
+          formDataToSend.append(key, value);
+        }
+      });
+
+      // Append image if exists
+      if (data.image) {
+        formDataToSend.append("image", data.image);
+      }
+
+      const response = await api.post<{
+        error: boolean;
+        message: string;
+        records: User;
+      }>("/updateProfile", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.error) {
         throw new Error(response.data.message);
       }
 
+      return response.data;
+    },
+    {
+      onSuccess: (data) => {
+        useAuthStore.getState().setUser(data.records);
+        queryClient.invalidateQueries(["user"]);
+      },
+    },
+  );
+};
+
+export const useRequestResetOtp = () => {
+  return useMutation<ResetPasswordOtpResponse, Error, { email: string }>(
+    async (data) => {
+      const response = await api.post<ResetPasswordOtpResponse>(
+        "/resetPasswordOtp",
+        data,
+      );
+      return response.data;
+    },
+  );
+};
+
+export const useResetPassword = () => {
+  return useMutation<ResetPasswordResponse, Error, ResetPasswordData>(
+    async (data) => {
+      const response = await api.post<ResetPasswordResponse>(
+        "/resetPassword",
+        data,
+      );
       return response.data;
     },
   );

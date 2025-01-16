@@ -90,7 +90,7 @@ export const useAuth = () => {
   const loginUser = async (credentials: LoginCredentials) => {
     try {
       const result = await loginMutation.mutateAsync(credentials);
-      const parsedUser = userSchema.parse(result.user);
+      const parsedUser = userSchema.parse(result.records);
       setUser(parsedUser);
       setToken(result.token); // Save the token
       setError(null);
@@ -104,12 +104,10 @@ export const useAuth = () => {
 
   const registerUser = async (userData: RegisterData) => {
     try {
-      const data = await registerMutation.mutateAsync(userData);
-
-      const parsedUser = data ? userSchema.parse(data) : null;
-      setUser(parsedUser);
+      const result = await registerMutation.mutateAsync(userData);
+      if (!result) throw new Error("Registration failed");
       setError(null);
-      return parsedUser;
+      return result.records;
     } catch (error: unknown) {
       const errorMessage = handleError(error);
       setError(errorMessage);

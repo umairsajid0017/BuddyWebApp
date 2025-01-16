@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { BookingFormData, MediaFiles } from "@/lib/types/common";
 import { useAuth } from "@/store/authStore";
 import { CreateBidResponse } from "@/lib/types/booking-types";
+import { CURRENCY } from "@/utils/constants";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -63,7 +64,7 @@ export function CreateBookingDialog({
   const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [bidDetails, setBidDetails] = useState<
-    CreateBidResponse["data"] | null
+    CreateBidResponse["records"] | null
   >(null);
 
   const { data: servicesResponse, isLoading } = useServices();
@@ -127,7 +128,7 @@ export function CreateBookingDialog({
         audio: formData.mediaFiles?.audio,
       });
 
-      if (response.status) {
+      if (!response.error) {
         toast.success("Booking created successfully");
         router.push("/bookings");
       } else {
@@ -153,18 +154,18 @@ export function CreateBookingDialog({
         audio: formData.mediaFiles?.audio,
       });
 
-      if (response.status) {
+      if (!response.error) {
         setBidDetails({
-          id: response?.data?.id,
-          customer_id: response?.data?.customer_id,
-          service_id: response?.data?.service_id,
-          price: response?.data?.price,
-          created_at: response?.data?.created_at,
-          updated_at: response?.data?.updated_at,
-          description: response?.data?.description,
-          status: response?.data?.status,
-          images: response?.data?.images,
-          audio: response?.data?.audio,
+          id: response?.records?.id,
+          customer_id: response?.records?.customer_id,
+          service_id: response?.records?.service_id,
+          price: response?.records?.price,
+          created_at: response?.records?.created_at,
+          updated_at: response?.records?.updated_at,
+          description: response?.records?.description,
+          status: response?.records?.status,
+          images: response?.records?.images,
+          audio: response?.records?.audio,
         });
         setIsStartBookingOpen(false);
         setIsConfirmationOpen(true);
@@ -189,16 +190,16 @@ export function CreateBookingDialog({
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button variant="default">
-            {mode === "book" ? "Book Now" : "Create a Bid"}
+            {initialService ? "Book Now" : "Create a Bid"}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {mode === "book" ? "Book Service" : "New Bid"}
+              {initialService ? "Book Service" : "New Bid"}
             </DialogTitle>
             <DialogDescription>
-              {mode === "book"
+              {initialService
                 ? "Book this service directly."
                 : "Create a new bid for a service."}
             </DialogDescription>
@@ -213,7 +214,7 @@ export function CreateBookingDialog({
                 </Label>
                 <Select
                   onValueChange={(value) => {
-                    const service = servicesResponse?.data.find(
+                    const service = servicesResponse?.find(
                       (s) => s.id.toString() === value,
                     );
                     setFormData((prev) => ({
@@ -236,9 +237,8 @@ export function CreateBookingDialog({
                       <SelectItem value="loading" disabled>
                         Loading services...
                       </SelectItem>
-                    ) : servicesResponse?.data &&
-                      servicesResponse.data.length > 0 ? (
-                      servicesResponse.data.map((service) => (
+                    ) : servicesResponse && servicesResponse.length > 0 ? (
+                      servicesResponse.map((service) => (
                         <SelectItem
                           key={service.id}
                           value={service.id.toString()}
@@ -304,6 +304,28 @@ export function CreateBookingDialog({
                 value={formData.time}
                 onChange={handleTimeChange}
               />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="budget" className="text-right">
+                Budget
+              </Label>
+              <div className="relative col-span-3">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  {CURRENCY}
+                </span>
+                <Input
+                  id="budget"
+                  type="number"
+                  value={formData.budget}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      budget: Number(e.target.value),
+                    }))
+                  }
+                  className="pl-14"
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
