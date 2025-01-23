@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useRegister, useVerifyOtp } from "@/lib/api";
+import { useRegister, useVerifyOtp, useCheckCredentials, useSendOtp } from "@/lib/api";
 import { VerifyOtpError, type RegisterData } from "@/lib/types";
 import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
@@ -41,6 +41,8 @@ const Register: React.FC = () => {
   );
   const router = useRouter();
   const registerMutation = useRegister();
+  const checkCredentialsMutation = useCheckCredentials();
+  const sendOtpMutation = useSendOtp();
 
   const backgroundImageUrl = (backgroundSvg as { src: string }).src;
 
@@ -49,9 +51,46 @@ const Register: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     if (validateStep1()) {
-      setStep(2);
+      try {
+        const response = await checkCredentialsMutation.mutateAsync({
+          email: formData.email,
+          phone: formData.phone,
+        });
+
+        if (response.error) {
+          // Handle validation errors
+          const newErrors: Partial<Record<keyof RegisterData, string>> = {};
+          
+          if (response.records.email) {
+            newErrors.email = "This email is already registered";
+          }
+          if (response.records.phone) {
+            newErrors.phone = "This phone number is already registered";
+          }
+          
+          setErrors(newErrors);
+          
+          toast({
+            variant: "destructive",
+            title: "Validation Error",
+            description: response.message,
+          });
+          
+          return;
+        }
+
+        // If credentials are unique, proceed to step 2
+        setStep(2);
+      } catch (error) {
+        console.error("Error checking credentials:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "An error occurred while checking credentials. Please try again.",
+        });
+      }
     }
   };
 
@@ -95,7 +134,6 @@ const Register: React.FC = () => {
       if (response.error) {
         // Handle validation errors from API
         if (typeof response.message === "string") {
-          // Single error message
           toast({
             variant: "destructive",
             title: "Registration Error",
@@ -103,14 +141,11 @@ const Register: React.FC = () => {
           });
         } else {
           // Handle multiple validation errors
-          const validationErrors: Partial<Record<keyof RegisterData, string>> =
-            {};
+          const validationErrors: Partial<Record<keyof RegisterData, string>> = {};
 
           Object.entries(response.message).forEach(([field, messages]) => {
             if (Array.isArray(messages)) {
               validationErrors[field as keyof RegisterData] = messages[0];
-
-              // Show toast for each validation error
               toast({
                 variant: "destructive",
                 title: `${field.charAt(0).toUpperCase() + field.slice(1)} Error`,
@@ -121,15 +156,37 @@ const Register: React.FC = () => {
 
           setErrors(validationErrors);
         }
-        return; // Don't proceed if there are errors
+        return;
       }
 
-      // If successful, proceed to OTP verification
-      setStep(3);
-      toast({
-        title: "Verification Required",
-        description: "Please check your email for the OTP code.",
-      });
+      // If registration successful, send OTP
+      try {
+        const otpResponse = await sendOtpMutation.mutateAsync({
+          email: formData.email,
+          // type: "register"
+        });
+
+        if (!otpResponse.error) {
+          setStep(3);
+          toast({
+            title: "Verification Required",
+            description: "Please check your email for the OTP code.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "OTP Error",
+            description: otpResponse.message,
+          });
+        }
+      } catch (otpError) {
+        console.error("Error sending OTP:", otpError);
+        toast({
+          variant: "destructive",
+          title: "OTP Error",
+          description: "Failed to send verification code. Please try again.",
+        });
+      }
     } catch (error) {
       if (error instanceof ZodError) {
         const newErrors: Partial<Record<keyof RegisterData, string>> = {};
@@ -159,7 +216,6 @@ const Register: React.FC = () => {
   const verifyOtpMutation = useVerifyOtp();
 
   const handleVerifyEmail = async (verificationCode: string) => {
-    console.log("Verifying email with code:", verificationCode);
     try {
       const response = await verifyOtpMutation.mutateAsync({
         email: formData.email,
@@ -167,21 +223,37 @@ const Register: React.FC = () => {
       });
 
       if (response.status) {
-        console.log("Email verified successfully:", response.user);
+        toast({
+          title: "Success",
+          description: "Email verified successfully. You can now log in.",
+        });
         router.push("/login");
       } else {
         setErrors({ otp: response.message });
+        toast({
+          variant: "destructive",
+          title: "Verification Failed",
+          description: response.message,
+        });
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data as VerifyOtpError;
-        if (errorData.errors) {
-          setErrors(errorData.errors);
-        } else {
-          setErrors({ otp: errorData.message });
-        }
+        const errorMessage = errorData.errors?.otp?.[0] || errorData.message || "Verification failed";
+        setErrors({ otp: errorMessage });
+        toast({
+          variant: "destructive",
+          title: "Verification Failed",
+          description: errorMessage,
+        });
       } else {
-        setErrors({ otp: "An unexpected error occurred" });
+        const errorMessage = "An unexpected error occurred";
+        setErrors({ otp: errorMessage });
+        toast({
+          variant: "destructive",
+          title: "Verification Error",
+          description: errorMessage,
+        });
       }
     }
   };

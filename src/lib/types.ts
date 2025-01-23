@@ -53,6 +53,7 @@ export interface VerifyOtpResponse {
   status: boolean;
   message: string;
   user?: User;
+  remaining_attempts: number;
 }
 
 export interface VerifyOtpError {
@@ -193,6 +194,15 @@ export interface RegisterResponse {
   };
 }
 
+export interface CheckCredentialsResponse {
+  error: boolean;
+  message: string;
+  records: {
+    email: boolean;
+    phone: boolean;
+  };
+}
+
 export interface ResetPasswordOtpResponse {
   error: boolean;
   message: string;
@@ -207,4 +217,20 @@ export interface ResetPasswordData {
   email: string;
   password: string;
   otp: string;
+}
+
+export interface SendOtpResponse {
+  error: boolean;
+  message: string;
+  records?: {
+    otp: string;
+    otp_expires_at: string;
+    next_retry_at?: string;
+    remaining_attempts: number;
+  };
+}
+
+export interface SendOtpData {
+  email: string;
+  // type: "register" | "reset" | "verify";
 }

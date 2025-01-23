@@ -26,7 +26,7 @@ interface ProfileFormData {
   email: string;
   phone: string;
   dob: string | null;
-  country: string | null;
+  country: string;
   gender: string | null;
   address: string | null;
   civil_id_number: string | null;
@@ -44,7 +44,7 @@ export default function ProfileComponent() {
     email: user?.email || "",
     phone: user?.phone || "",
     dob: user?.dob || null,
-    country: user?.country || null,
+    country: user?.country || "OM", // Default to Oman
     gender: user?.gender || null,
     address: user?.address || null,
     civil_id_number: user?.civil_id_number || null,
@@ -57,7 +57,7 @@ export default function ProfileComponent() {
         email: user.email || "",
         phone: user.phone || "",
         dob: user.dob || null,
-        country: user.country || null,
+        country: user.country || "OM", // Default to Oman
         gender: user.gender || null,
         address: user.address || null,
         civil_id_number: user.civil_id_number || null,
@@ -67,10 +67,45 @@ export default function ProfileComponent() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
+
+    if (id === "civil_id_number") {
+      // Oman ID format: X-XXXXXX-XXXXXXX-X (e.g., 3-123456-1234567-1)
+      const cleaned = value.replace(/\D/g, "");
+      let formatted = cleaned;
+      if (cleaned.length > 0) {
+        formatted = cleaned.match(/.{1,1}|.+/g)?.join("-") || "";
+        if (cleaned.length > 1) {
+          formatted =
+            formatted +
+              "-" +
+              cleaned
+                .substring(1, 7)
+                .match(/.{1,6}|.+/g)
+                ?.join("-") || "";
+        }
+        if (cleaned.length > 7) {
+          formatted =
+            formatted +
+              "-" +
+              cleaned
+                .substring(7, 14)
+                .match(/.{1,7}|.+/g)
+                ?.join("-") || "";
+        }
+        if (cleaned.length > 14) {
+          formatted = formatted + "-" + cleaned.substring(14, 15) || "";
+        }
+      }
+      setFormData((prev) => ({
+        ...prev,
+        [id]: formatted.substring(0, 17), // Limit to correct length
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
   };
 
   const handleSelectChange = (value: string, field: keyof ProfileFormData) => {
@@ -92,8 +127,38 @@ export default function ProfileComponent() {
     }
   };
 
+  const validateForm = () => {
+    const requiredFields = [
+      "name",
+      "phone",
+      "dob",
+      "country",
+      "gender",
+      "civil_id_number",
+      "address",
+    ];
+    const emptyFields = requiredFields.filter(
+      (field) => !formData[field as keyof ProfileFormData],
+    );
+
+    if (emptyFields.length > 0) {
+      const fieldNames = emptyFields.map((field) =>
+        field.replace(/_/g, " ").toUpperCase(),
+      );
+      toast.error(
+        `Please fill in the following required fields: ${fieldNames.join(", ")}`,
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       // Validate the form data
@@ -172,7 +237,7 @@ export default function ProfileComponent() {
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+            <Label htmlFor="name">Full Name *</Label>
             <Input
               required
               id="name"
@@ -193,18 +258,20 @@ export default function ProfileComponent() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone">Phone Number *</Label>
             <Input
+              required
               id="phone"
               type="tel"
-              placeholder="+1 234 567 890"
+              placeholder="+968 XXXX XXXX"
               value={formData.phone}
               onChange={handleInputChange}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="dob">Date of Birth</Label>
+            <Label htmlFor="dob">Date of Birth *</Label>
             <Input
+              required
               id="dob"
               type="date"
               value={formData.dob || ""}
@@ -212,24 +279,21 @@ export default function ProfileComponent() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
+            <Label htmlFor="country">Country *</Label>
             <Select
-              value={formData.country || ""}
+              value={formData.country}
               onValueChange={(value) => handleSelectChange(value, "country")}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a country" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="PK">Pakistan</SelectItem>
-                <SelectItem value="US">United States</SelectItem>
-                <SelectItem value="UK">United Kingdom</SelectItem>
-                <SelectItem value="CA">Canada</SelectItem>
+                <SelectItem value="OM">Oman</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="gender">Gender</Label>
+            <Label htmlFor="gender">Gender *</Label>
             <Select
               value={formData.gender || ""}
               onValueChange={(value) => handleSelectChange(value, "gender")}
@@ -245,18 +309,21 @@ export default function ProfileComponent() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="civil_id_number">National ID No</Label>
+            <Label htmlFor="civil_id_number">National ID No *</Label>
             <Input
+              required
               id="civil_id_number"
-              placeholder="XXXX-XXXX-XXXX-XXXX"
+              placeholder="3-123456-1234567-1"
               value={formData.civil_id_number || ""}
               onChange={handleInputChange}
+              maxLength={17}
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
+          <Label htmlFor="address">Address *</Label>
           <Input
+            required
             id="address"
             placeholder="123 Main St, City, Country"
             value={formData.address || ""}
