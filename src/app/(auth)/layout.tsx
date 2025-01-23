@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const navigationLinks = [
 //   {
@@ -38,6 +39,13 @@ export default function AuthLayout({
   const isLoginPage = pathname === "/login";
 
   return (
+    <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-background">
       {/* Background with gradient and pattern */}  
       <div className="fixed inset-0 -z-10">
@@ -64,7 +72,7 @@ export default function AuthLayout({
           
           {/* Right Side Actions */}
           <div className="flex items-center space-x-4">
-            <ModeToggle />
+            {/* <ModeToggle /> */}
           <div className="flex items-center space-x-4">
             {isLoginPage ? (
               <Button asChild variant="default" size="sm" className="hidden sm:flex">
@@ -101,5 +109,6 @@ export default function AuthLayout({
         
       </main>
     </div>
+          </ThemeProvider>
   );
 }

@@ -351,7 +351,7 @@ export const useRequestResetOtp = () => {
   return useMutation<ResetPasswordOtpResponse, Error, { email: string }>(
     async (data) => {
       const response = await api.post<ResetPasswordOtpResponse>(
-        "/resetPasswordOtp",
+        "/requestResetOtp",
         data,
       );
       return response.data;
@@ -364,7 +364,11 @@ export const useResetPassword = () => {
     async (data) => {
       const response = await api.post<ResetPasswordResponse>(
         "/resetPassword",
-        data,
+        {
+          email: data.email,
+          password: data.password,
+          // otp: data.
+        },
       );
       return response.data;
     },
