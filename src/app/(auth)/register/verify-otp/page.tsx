@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import Link from "next/link";
 
 const OTPVerification = () => {
   const searchParams = useSearchParams();
@@ -136,14 +136,13 @@ const OTPVerification = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="pb-2">
           <div className="mb-4 flex justify-center">
-            <Link href="/" title="Home">
+            <Link href="/">
               <Image
                 src="/assets/logo.png"
-                alt="App Icon"
+                alt="Buddy Logo"
                 className="h-16 w-16"
                 width={64}
                 height={64}
-                title="Home"
               />
             </Link>
           </div>
