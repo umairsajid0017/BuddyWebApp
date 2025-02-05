@@ -21,6 +21,9 @@ import {
   type ResetPasswordOtpResponse,
   type ResetPasswordResponse,
   type ResetPasswordData,
+  type CheckCredentialsResponse,
+  type SendOtpResponse,
+  type SendOtpData,
 } from "./types";
 import {
   useMutation,
@@ -65,17 +68,21 @@ api.interceptors.request.use((config) => {
 //The useRegister hook is a custom hook that uses the useMutation hook from react-query to register a new user.
 //It sends a POST request to the /register endpoint with the user's data and returns the response data.
 export const useRegister = () => {
-  return useMutation<RegisterResponse, Error, RegisterData>(async (data) => {
-    try {
+  return useMutation<RegisterResponse, AxiosError, RegisterData>(
+    async (data) => {
       const response = await api.post<RegisterResponse>("/register", data);
       return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        return error.response.data as RegisterResponse;
-      }
-      throw error;
-    }
-  });
+    },
+  );
+};
+
+export const useCheckCredentials = () => {
+  return useMutation<CheckCredentialsResponse, AxiosError, { email: string; phone: string }>(
+    async (data) => {
+      const response = await api.post<CheckCredentialsResponse>("/checkCredentials", data);
+      return response.data;
+    },
+  );
 };
 
 //The useLogin hook is a custom hook that uses the useMutation hook from react-query to log in a user.
@@ -142,26 +149,35 @@ export const useLogout = () => {
 //At the current moment this hook is useless for our code
 export const useUser = () => useQuery(["user"], () => api.get<User>("/user"));
 
+//The useSendOtp hook is a custom hook that uses the useMutation hook from react-query to send an OTP code.
+//It sends a POST request to the /sendOtp endpoint with the user's data and returns the response data.
+export const useSendOtp = () => {
+  return useMutation<SendOtpResponse, AxiosError, SendOtpData>(
+    async (data) => {
+      const response = await api.post<SendOtpResponse>("/sendOTP", data);
+      return response.data;
+    },
+  );
+};
+
 //The useVerifyOtp hook is a custom hook that uses the useMutation hook from react-query to verify an OTP code.
-//It sends a POST request to the /verify-otp endpoint with the OTP code and returns the response data.
+//It sends a POST request to the /verifyOtp endpoint with the OTP code and returns the response data.
 //It takes and email and an OTP that was sent to the user and returns the response data.
 export const useVerifyOtp = () => {
-  return useMutation<
-    VerifyOtpResponse,
-    AxiosError<VerifyOtpError>,
-    VerifyOtpData
-  >((data) => api.post("/verify-otp", data), {
-    onSuccess: (data) => {
-      console.log("OTP verified successfully:", data);
+  return useMutation<VerifyOtpResponse, AxiosError<VerifyOtpError>, VerifyOtpData>(
+    async (data) => {
+      const response = await api.post<VerifyOtpResponse>("/verifyOtp", data);
+      return response.data;
     },
-    onError: (error) => {
-      if (error.response) {
-        console.error("OTP verification failed:", error.response.data);
-      } else {
-        console.error("OTP verification failed:", error.message);
-      }
+    {
+      onSuccess: (data) => {
+        if (data.user) {
+          // Update auth store with verified user if available
+          useAuthStore.getState().setUser(data.user);
+        }
+      },
     },
-  });
+  );
 };
 
 // To use the useServices hook in your components, you can import it like this:
@@ -335,7 +351,7 @@ export const useRequestResetOtp = () => {
   return useMutation<ResetPasswordOtpResponse, Error, { email: string }>(
     async (data) => {
       const response = await api.post<ResetPasswordOtpResponse>(
-        "/resetPasswordOtp",
+        "/requestResetOtp",
         data,
       );
       return response.data;
@@ -348,7 +364,11 @@ export const useResetPassword = () => {
     async (data) => {
       const response = await api.post<ResetPasswordResponse>(
         "/resetPassword",
-        data,
+        {
+          email: data.email,
+          password: data.password,
+          // otp: data.
+        },
       );
       return response.data;
     },

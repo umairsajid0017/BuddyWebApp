@@ -161,7 +161,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                     <p className="mb-4 text-muted-foreground">
                       {service.description || "No description available."}
                     </p>
-                    <CreateBookingDialog initialService={service} />
+                    <CreateBookingDialog initialService={service} mode="book" />
                   </div>
                 </div>
               </CardContent>

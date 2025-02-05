@@ -32,15 +32,46 @@ import { useServices } from "@/lib/api";
 import { useCreateBid, useDirectBooking } from "@/lib/api/bookings";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { BookingFormData, MediaFiles } from "@/lib/types/common";
+import { MediaFiles } from "@/lib/types/common";
 import { useAuth } from "@/store/authStore";
 import { CreateBidResponse } from "@/lib/types/booking-types";
 import { CURRENCY } from "@/utils/constants";
+import { useCategories } from "@/lib/apis/get-categories";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
   mode?: "book" | "bid";
 }
+
+type BookFormState = {
+  service: Service | null;
+  description: string;
+  budget: number;
+  time: string;
+  date: Date | undefined;
+  mediaFiles: MediaFiles | undefined;
+  address: string;
+};
+
+type BidFormState = {
+  category: { id: number; title: string } | null;
+  description: string;
+  budget: number;
+  time: string;
+  date: Date | undefined;
+  mediaFiles: MediaFiles | undefined;
+  address: string;
+};
+
+type FormState = BookFormState | BidFormState;
+
+const isBookingForm = (form: FormState): form is BookFormState => {
+  return 'service' in form;
+};
+
+const isBidForm = (form: FormState): form is BidFormState => {
+  return 'category' in form;
+};
 
 export function CreateBookingDialog({
   initialService,
@@ -51,24 +82,38 @@ export function CreateBookingDialog({
   const createBid = useCreateBid();
   const directBooking = useDirectBooking();
 
-  const [formData, setFormData] = useState<BookingFormData>({
-    service: initialService || null,
-    description: "",
-    budget: 200,
-    time: "",
-    date: undefined,
+  const [formState, setFormState] = useState<FormState>(() => {
+    const baseState = {
+      description: "",
+      budget: 200,
+      time: "",
+      date: undefined,
+      mediaFiles: undefined,
+      address: "Oman"
+    };
+
+    if (mode === "book") {
+      return {
+        ...baseState,
+        service: initialService || null,
+      } as BookFormState;
+    }
+
+    return {
+      ...baseState,
+      category: null,
+    } as BidFormState;
   });
 
   const [isOpen, setIsOpen] = useState(false);
   const [isPlaceOrderOpen, setIsPlaceOrderOpen] = useState(false);
   const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const [bidDetails, setBidDetails] = useState<
-    CreateBidResponse["records"] | null
-  >(null);
+  const [bidDetails, setBidDetails] = useState<CreateBidResponse["records"] | null>(null);
 
   const { data: servicesResponse, isLoading } = useServices();
-  console.log("servicesResponse", servicesResponse);
+  const { data: categoriesResponse, isLoading: categoriesLoading } = useCategories();
+
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
@@ -77,17 +122,32 @@ export function CreateBookingDialog({
   };
 
   const resetForm = () => {
-    setFormData({
+    setFormState(mode === "book" ? {
       service: initialService || null,
       description: "",
       budget: 200,
       time: "",
       date: undefined,
-    });
+      mediaFiles: undefined,
+      address: "Oman"
+    } as BookFormState : {
+      category: null,
+      description: "",
+      budget: 200,
+      time: "",
+      date: undefined,
+      mediaFiles: undefined,
+      address: "Oman"
+    } as BidFormState);
   };
 
   const handleSaveBooking = () => {
-    if (!formData.service || !formData.date || !formData.time) {
+    console.log("Form state:", formState);
+    const isValid = mode === "book" 
+      ? isBookingForm(formState) && Boolean(formState.service && formState.date && formState.time)
+      : isBidForm(formState) && Boolean(formState.category && formState.date && formState.time);
+
+    if (!isValid) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -95,18 +155,15 @@ export function CreateBookingDialog({
     setIsPlaceOrderOpen(true);
   };
 
-  const handlePlaceOrderContinue = (
-    description: string,
-    mediaFiles?: MediaFiles,
-  ) => {
-    setFormData((prev) => ({
+  const handlePlaceOrderContinue = (description: string, mediaFiles?: MediaFiles) => {
+    setFormState(prev => ({
       ...prev,
       description,
       mediaFiles,
     }));
     setIsPlaceOrderOpen(false);
-
     if (mode === "bid") {
+      console.log("Bid mode");
       setIsStartBookingOpen(true);
     } else {
       handleDirectBooking();
@@ -114,18 +171,17 @@ export function CreateBookingDialog({
   };
 
   const handleDirectBooking = async () => {
-    if (!user || !formData.service) return;
+    const bookingState = formState as BookFormState;
+    if (!user || !bookingState.service) return;
 
     try {
       const response = await directBooking.mutateAsync({
-        customer_id: Number(user.id),
-        worker_id: Number(formData.service.user_id),
-        service_id: formData.service.id,
-        price: formData.budget.toString(),
-        description: formData.description,
-        images: formData.mediaFiles?.images,
-        videos: formData.mediaFiles?.videos,
-        audio: formData.mediaFiles?.audio,
+        category_id: bookingState.service.category_id,
+        expected_price: bookingState.budget.toString(),
+        description: bookingState.description,
+        images: bookingState.mediaFiles?.images,
+        audio: bookingState.mediaFiles?.audio,
+        address: bookingState.address,
       });
 
       if (!response.error) {
@@ -141,32 +197,23 @@ export function CreateBookingDialog({
   };
 
   const handleBidPlacement = async (bidAmount: number) => {
-    if (!user || !formData.service) return;
+    const bidState = formState as BidFormState;
+    if (!user || !bidState.category) return;
 
     try {
-      const response = await createBid.mutateAsync({
-        customer_id: user.id,
-        service_id: formData.service.id,
-        worker_id: formData.service.user_id,
-        description: formData.description,
-        price: bidAmount.toString(),
-        images: formData.mediaFiles?.images,
-        audio: formData.mediaFiles?.audio,
-      });
+      const payload = {
+        category_id: bidState.category.id,
+        description: bidState.description,
+        expected_price: bidAmount.toString(),
+        images: bidState.mediaFiles?.images,
+        audio: bidState.mediaFiles?.audio,
+        address: bidState.address,
+      };
+
+      const response = await createBid.mutateAsync(payload);
 
       if (!response.error) {
-        setBidDetails({
-          id: response?.records?.id,
-          customer_id: response?.records?.customer_id,
-          service_id: response?.records?.service_id,
-          price: response?.records?.price,
-          created_at: response?.records?.created_at,
-          updated_at: response?.records?.updated_at,
-          description: response?.records?.description,
-          status: response?.records?.status,
-          images: response?.records?.images,
-          audio: response?.records?.audio,
-        });
+        setBidDetails(response.records);
         setIsStartBookingOpen(false);
         setIsConfirmationOpen(true);
       } else {
@@ -179,7 +226,7 @@ export function CreateBookingDialog({
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
+    setFormState(prev => ({
       ...prev,
       time: e.target.value,
     }));
@@ -190,23 +237,21 @@ export function CreateBookingDialog({
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button variant="default">
-            {initialService ? "Book Now" : "Create a Bid"}
+            {mode === "book" ? "Book Now" : "Create a Bid"}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {initialService ? "Book Service" : "New Bid"}
+              {mode === "book" ? "Book Service" : "New Bid"}
             </DialogTitle>
             <DialogDescription>
-              {initialService
-                ? "Book this service directly."
-                : "Create a new bid for a service."}
+              {mode === "book" ? "Book this service directly." : "Create a new bid for a service."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {initialService ? (
-              <ServiceCard service={initialService} compact />
+            {mode === "book" ? (
+              <ServiceCard service={initialService!} compact />
             ) : (
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="service" className="text-right">
@@ -214,42 +259,34 @@ export function CreateBookingDialog({
                 </Label>
                 <Select
                   onValueChange={(value) => {
-                    const service = servicesResponse?.find(
-                      (s) => s.id.toString() === value,
-                    );
-                    setFormData((prev) => ({
-                      ...prev,
-                      service: service || null,
-                    }));
+                    if (isBidForm(formState)) {
+                      const category = categoriesResponse?.find(
+                        (s) => s.id.toString() === value
+                      );
+                      setFormState(prev => ({
+                        ...prev,
+                        category: category || null,
+                      }));
+                    }
                   }}
-                  value={formData.service?.id?.toString()}
+                  value={isBidForm(formState) ? formState.category?.id?.toString() : undefined}
                 >
-                  <SelectTrigger
-                    className="col-span-3 w-full"
-                    disabled={isLoading}
-                  >
-                    <SelectValue placeholder="Select a service">
-                      {formData.service?.service_name || "Select a service"}
+                  <SelectTrigger className="col-span-3 w-full" disabled={isLoading}>
+                    <SelectValue placeholder="Select a category">
+                      {isBidForm(formState) ? formState.category?.title || "Select a category" : "Select a category"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {isLoading ? (
-                      <SelectItem value="loading" disabled>
-                        Loading services...
-                      </SelectItem>
-                    ) : servicesResponse && servicesResponse.length > 0 ? (
-                      servicesResponse.map((service) => (
-                        <SelectItem
-                          key={service.id}
-                          value={service.id.toString()}
-                        >
-                          {service.service_name || `Service #${service.id}`}
+                    {categoriesLoading ? (
+                      <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                    ) : categoriesResponse?.length ? (
+                      categoriesResponse.map((category) => (
+                        <SelectItem key={category.id} value={category.id.toString()}>
+                          {category.title || `Category #${category.id}`}
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="no-services" disabled>
-                        No services available
-                      </SelectItem>
+                      <SelectItem value="no-categories" disabled>No categories available</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
@@ -257,58 +294,39 @@ export function CreateBookingDialog({
             )}
 
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="date" className="text-right">
-                Date
-              </Label>
+              <Label htmlFor="date" className="text-right">Date</Label>
               <div className="col-span-3">
                 <Button
-                  variant={"outline"}
-                  className={`w-full justify-start text-left font-normal ${
-                    !formData.date && "text-muted-foreground"
-                  }`}
-                  onClick={() => {
-                    setFormData((prev) => ({
-                      ...prev,
-                      date: new Date(),
-                    }));
-                  }}
+                  variant="outline"
+                  className={`w-full justify-start text-left font-normal ${!formState.date && "text-muted-foreground"}`}
+                  onClick={() => setFormState(prev => ({ ...prev, date: new Date() }))}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.date ? (
-                    format(formData.date, "PPP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
+                  {formState.date ? format(formState.date, "PPP") : <span>Pick a date</span>}
                 </Button>
               </div>
             </div>
+
             <Calendar
               mode="single"
-              selected={formData.date}
-              onSelect={(date) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  date: date,
-                }))
-              }
+              selected={formState.date}
+              onSelect={(date) => setFormState(prev => ({ ...prev, date }))}
               className="flex w-full items-center justify-center rounded-md border"
             />
+
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="time" className="text-right">
-                Time
-              </Label>
+              <Label htmlFor="time" className="text-right">Time</Label>
               <Input
                 id="time"
                 type="time"
                 className="col-span-3"
-                value={formData.time}
+                value={formState.time}
                 onChange={handleTimeChange}
               />
             </div>
+
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="budget" className="text-right">
-                Budget
-              </Label>
+              <Label htmlFor="budget" className="text-right">Budget</Label>
               <div className="relative col-span-3">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {CURRENCY}
@@ -316,23 +334,21 @@ export function CreateBookingDialog({
                 <Input
                   id="budget"
                   type="number"
-                  value={formData.budget}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      budget: Number(e.target.value),
-                    }))
-                  }
+                  value={formState.budget}
+                  onChange={(e) => setFormState(prev => ({ ...prev, budget: Number(e.target.value) }))}
                   className="pl-14"
                 />
               </div>
             </div>
           </div>
+
           <DialogFooter>
             <Button
               type="submit"
               onClick={handleSaveBooking}
-              disabled={!formData.service || !formData.date || !formData.time}
+              disabled={mode === "book" 
+                ? !initialService || !formState.date || !formState.time
+                : !isBidForm(formState) || !formState.category || !formState.date || !formState.time}
             >
               Continue
             </Button>
@@ -343,17 +359,15 @@ export function CreateBookingDialog({
       <PlaceOrderSheet
         isOpen={isPlaceOrderOpen}
         onClose={() => setIsPlaceOrderOpen(false)}
-        onContinue={(description: string, mediaFiles?: MediaFiles) =>
-          handlePlaceOrderContinue(description, mediaFiles)
-        }
-        service={formData.service || undefined}
+        onContinue={handlePlaceOrderContinue}
+        service={isBookingForm(formState) ? formState.service || undefined : undefined}
       />
 
       <StartBookingDialog
         isOpen={isStartBookingOpen}
         onClose={() => setIsStartBookingOpen(false)}
         onSubmitBid={handleBidPlacement}
-        service={formData.service || undefined}
+        service={isBookingForm(formState) ? formState.service || undefined : undefined}
         isLoading={createBid.isLoading}
       />
 

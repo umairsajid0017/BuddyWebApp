@@ -1,4 +1,5 @@
 import { Service } from "../types";
+import { Category } from "./category-types";
 
 export interface MediaFiles {
   images?: File[];
@@ -13,4 +14,14 @@ export interface BookingFormData {
   description: string;
   budget: number;
   mediaFiles?: MediaFiles;
+
+}
+
+
+export interface BidFormData {
+  category: Category | null;
+  description: string;
+  budget: number;
+  mediaFiles?: MediaFiles;
+  address: string;
 }

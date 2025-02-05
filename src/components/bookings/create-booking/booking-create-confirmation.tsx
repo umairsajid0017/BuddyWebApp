@@ -53,7 +53,7 @@ export function BookingConfirmation({
                 </span>
                 <div className="flex items-center text-lg font-bold text-green-600">
                   <span className="mr-1">{CURRENCY}.</span>
-                  {bidDetails.price}
+                  {bidDetails.expected_price}
                 </div>
               </div>
             </div>

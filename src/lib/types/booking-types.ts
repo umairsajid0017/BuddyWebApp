@@ -38,14 +38,13 @@ export interface BookingsResponse {
 }
 
 export interface CreateBookingData {
-  customer_id: number;
-  service_id: number;
-  worker_id: number;
+  category_id: number;
   description?: string;
-  price: string;
+  expected_price: string;
   images?: File[];
-  videos?: File[];
   audio?: File;
+  address: string;
+
 }
 
 export interface CreateBookingResponse {
@@ -62,12 +61,14 @@ export interface CreateBidResponse {
   records: {
     id: number;
     customer_id: number;
-    service_id: string;
+    category_id: string;
     description: string;
-    price: string;
+    expected_price: string;
     status: number;
-    images: string;
+    images: string[];
     audio: string | null;
+    address: string;
+    expiration_time: string;
     updated_at: string;
     created_at: string;
   };

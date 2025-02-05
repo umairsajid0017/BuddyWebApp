@@ -32,22 +32,17 @@ export const useCreateBooking = () => {
       const formData = new FormData();
 
       // Append basic booking data
-      formData.append("service_id", bookingData.service_id.toString());
-      formData.append("price", bookingData.price);
+      formData.append("category_id", bookingData.category_id.toString());
+      formData.append("expected_price", bookingData.expected_price);
       if (bookingData.description) {
         formData.append("description", bookingData.description);
       }
+
 
       // Append media files if they exist
       if (bookingData.images) {
         bookingData.images.forEach((image) => {
           formData.append("images[]", image);
-        });
-      }
-
-      if (bookingData.videos) {
-        bookingData.videos.forEach((video) => {
-          formData.append("videos[]", video);
         });
       }
 
@@ -104,9 +99,9 @@ export const useCreateBid = () => {
       const formData = new FormData();
 
       // Append required fields
-      formData.append("service_id", bookingData.service_id.toString());
-      formData.append("worker_id", bookingData.worker_id.toString());
-      formData.append("price", bookingData.price);
+      formData.append("category_id", bookingData.category_id.toString());
+      formData.append("expected_price", bookingData.expected_price);
+      formData.append("address", bookingData.address);
 
       // Append optional fields
       if (bookingData.description) {
@@ -119,18 +114,13 @@ export const useCreateBid = () => {
           formData.append("images[]", image);
         });
       }
-
-      if (bookingData.videos) {
-        bookingData.videos.forEach((video) => {
-          formData.append("videos[]", video);
-        });
-      }
+     
 
       if (bookingData.audio) {
         formData.append("audio", bookingData.audio);
       }
 
-      const response = await api.post<CreateBidResponse>("/bid", formData, {
+      const response = await api.post<CreateBidResponse>("/bidCreationCustomer", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -148,11 +138,12 @@ export const useDirectBooking = () => {
       const formData = new FormData();
 
       // Append booking data
-      formData.append("service_id", bookingData.service_id.toString());
-      formData.append("price", bookingData.price);
+      formData.append("category_id", bookingData.category_id.toString());
+      formData.append("expected_price", bookingData.expected_price);
       if (bookingData.description) {
         formData.append("description", bookingData.description);
       }
+
 
       // Handle media files
       if (bookingData.images) {

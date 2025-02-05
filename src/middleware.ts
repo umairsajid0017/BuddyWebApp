@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 const PROTECTED_ROUTES = ["/dashboard", "/settings", "/services", "/bookings"];
-const PUBLIC_ROUTES = ["/login", "/register", "/about", "/contact"];
+const PUBLIC_ROUTES = ["/login", "/register", "/about", "/contact", "/register/verify-otp", "/assets"];
 const LOGIN_URL = "/login";
 const HOME_URL = "/";
 
@@ -12,7 +12,8 @@ export function middleware(req: NextRequest): NextResponse {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  console.log("Middleware:", pathname, token);
+  console.log("Pathname:", pathname);
+  console.log("Is Public Route:", matchesPattern(pathname, PUBLIC_ROUTES));
   // Allow access to public routes
   if (matchesPattern(pathname, PUBLIC_ROUTES)) {
     return NextResponse.next();

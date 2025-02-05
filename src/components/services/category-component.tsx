@@ -25,7 +25,7 @@ const CategoryComponent: React.FC<CategoryComponentProps> = ({ category }) => {
     >
       <CardContent className="flex flex-col items-center justify-center gap-2 p-2">
         <Image
-          src={`/assets/icons/${kebabCase(category.title)}.svg`}
+          src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${category.image}`}
           alt={category.title}
           width={60}
           height={60}
