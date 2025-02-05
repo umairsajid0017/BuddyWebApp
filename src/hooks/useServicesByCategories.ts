@@ -1,16 +1,22 @@
-import { useServices } from "@/lib/api";
-import { Service } from "@/lib/types";
+import { useQuery } from "react-query";
+import { CategoryService } from "@/lib/types";
+import { getServicesByCategory } from "@/lib/apis/get-categories";
 
 export const useServicesByCategory = (categoryId: string) => {
-  const { data: servicesResponse, isLoading, error } = useServices();
-
-  const filteredServices = servicesResponse?.filter(
-    (service: Service) => service.category_id === Number(categoryId),
+  console.log("useServicesByCategory hook called with categoryId:", categoryId);
+  
+  return useQuery<CategoryService[], Error>(
+    ['services', categoryId],
+    () => getServicesByCategory(categoryId),
+    {
+      enabled: Boolean(categoryId),
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      cacheTime: 1000 * 60 * 30, // 30 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+      onError: (error) => {
+        console.error('Failed to fetch services:', error);
+      }
+    }
   );
-
-  return {
-    services: filteredServices || [],
-    isLoading,
-    error,
-  };
 };

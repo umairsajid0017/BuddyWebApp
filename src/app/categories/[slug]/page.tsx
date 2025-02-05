@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { Service } from "@/lib/types";
+import { CategoryService } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { StarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,46 +10,46 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useServicesByCategory } from "@/hooks/useServicesByCategories";
+import { useCategory } from "@/lib/apis/get-categories";
 import FilterBar from "@/components/services/filter-bar";
 import useFiltersStore from "@/store/filterStore";
 import { CURRENCY } from "@/utils/constants";
 
-const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
-  console.log("Service Card", service),
-  (
-    <Link href={`/services/${service.id}`} className="block">
-      <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
-        <div className="relative h-44 overflow-hidden bg-gray-200">
-          <Image
-            src={
-              service.images?.[0]?.name
-                ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
-                : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`
-            }
-            alt={service.service_name}
-            layout="fill"
-            objectFit="cover"
-            unoptimized
-          />
-        </div>
-        <CardContent>
-          <h4 className="mt-2 text-xl font-medium">{service.service_name}</h4>
-          <p className="text-xs text-gray-600">{service.description}</p>
-          <div className="mt-2 flex items-center justify-between">
-            <p className="text-lg font-bold text-primary">
-              {CURRENCY}. {service.fixed_price}
-            </p>
-            <div className="flex items-center text-xs text-gray-600">
-              <StarIcon className="h-4 w-4" />
-              <span className="ml-1">
-                {service.ratings?.length || 0} reviews
-              </span>
-            </div>
+const ServiceCard: React.FC<{ service: CategoryService }> = ({ service }) => (
+  <Link href={`/services/${service.service_id}`} className="block">
+    <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+      <div className="relative h-44 overflow-hidden bg-gray-200">
+        <Image
+          src={
+            service.images?.[0]?.name
+              ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
+              : '/assets/placeholder.jpg'
+          }
+          alt={service.service_name}
+          layout="fill"
+          objectFit="cover"
+          unoptimized
+        />
+      </div>
+      <CardContent>
+        <h4 className="mt-2 text-xl font-medium">{service.service_name}</h4>
+        <p className="text-xs text-gray-600">{service.description}</p>
+        <div className="mt-2 flex items-center justify-between">
+          <p className="text-lg font-bold text-primary">
+            {service.fixed_price !== "0.00" ? (
+              `${service.fixed_price} ${CURRENCY}`
+            ) : (
+              `${service.hourly_price}/hr ${CURRENCY}`
+            )}
+          </p>
+          <div className="flex items-center text-xs text-gray-600">
+            <StarIcon className="h-4 w-4" />
+            <span className="ml-1">{service.total_reviews} reviews</span>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
-  )
+        </div>
+      </CardContent>
+    </Card>
+  </Link>
 );
 
 const ServiceSkeleton: React.FC = () => (
@@ -86,51 +86,52 @@ const NoResultsFound: React.FC<{ categoryId: string }> = ({ categoryId }) => (
   </div>
 );
 
+const CategoryHeader: React.FC<{ categoryId: string }> = ({ categoryId }) => {
+  const { data: category, isLoading } = useCategory(categoryId);
+
+  if (isLoading) {
+    return (
+      <div className="mb-8">
+        <Skeleton className="h-12 w-64" />
+        <Skeleton className="mt-2 h-4 w-96" />
+      </div>
+    );
+  }
+
+  if (!category) return null;
+
+  return (
+    <div className="mb-8">
+      <h1 className="text-2xl font-bold text-text-800">{category.title}</h1>
+      <p className="mt-2 text-sm text-text-600">
+        Browse all services in {category.title}
+      </p>
+    </div>
+
+  );
+};
+
 const CategoryPage: React.FC = () => {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("id") ?? "";
   const { filters } = useFiltersStore();
 
-  const { services, isLoading, error } = useServicesByCategory(categoryId);
+  console.log("Category ID from query:", categoryId);
+
+  const { 
+    data: services,
+    isLoading,
+    error,
+    isError,
+    isFetching
+  } = useServicesByCategory(categoryId);
 
   const filteredAndSortedServices = React.useMemo(() => {
-    if (!services) return [];
+    if (!services?.length) return [];
 
     let filtered = [...services];
 
-    // // Apply service options filter
-    // if (filters.serviceOptions) {
-    //   filtered = filtered.filter(
-    //     (service) => service.type === filters.serviceOptions
-    //   );
-    // }
-
-    // // Apply budget filter
-    // if (filters.budget) {
-    //   const [min, max] = filters.budget.split("-").map(Number);
-    //   filtered = filtered.filter((service) => {
-    //     const price = Number(service.price);
-    //     if (max === undefined) return price >= min;
-    //     return price >= min && price <= max;
-    //   });
-    // }
-
-    // // Apply delivery time filter
-    // if (filters.deliveryTime) {
-    //   filtered = filtered.filter(
-    //     (service) => Number(service.delivery_time) <= Number(filters.deliveryTime)
-    //   );
-    // }
-
-    // Apply sorting
     switch (filters.sortBy) {
-      case "newest":
-        filtered.sort(
-          (a, b) =>
-            new Date(b.created_at || 0).getTime() -
-            new Date(a.created_at || 0).getTime(),
-        );
-        break;
       case "price_asc":
         filtered.sort((a, b) => Number(a.fixed_price) - Number(b.fixed_price));
         break;
@@ -138,16 +139,17 @@ const CategoryPage: React.FC = () => {
         filtered.sort((a, b) => Number(b.fixed_price) - Number(a.fixed_price));
         break;
       default:
-        // best_selling - you might want to implement your own logic here
         break;
     }
 
     return filtered;
   }, [services, filters]);
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return (
       <div className="container mx-auto px-4 py-8">
+        <CategoryHeader categoryId={categoryId} />
+        <FilterBar />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {[...Array(12)].map((_, index) => (
             <ServiceSkeleton key={index} />
@@ -157,21 +159,26 @@ const CategoryPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <div className="text-center text-red-500">
-        Error loading services: {error.message}
+      <div className="container mx-auto px-4 py-8">
+        <CategoryHeader categoryId={categoryId} />
+        <FilterBar />
+        <div className="text-center text-red-500 mt-8">
+          Error loading services: {(error as Error).message || 'Failed to load services'}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <CategoryHeader categoryId={categoryId} />
       <FilterBar />
       {filteredAndSortedServices.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {filteredAndSortedServices.map((service: Service) => (
-            <ServiceCard key={service.id} service={service} />
+          {filteredAndSortedServices.map((service: CategoryService) => (
+            <ServiceCard key={service.service_id} service={service} />
           ))}
         </div>
       ) : (

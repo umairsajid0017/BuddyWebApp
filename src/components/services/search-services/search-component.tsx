@@ -90,6 +90,13 @@ const ServiceResult = ({
   </div>
 );
 
+const createSlug = (title: string) => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+};
+
 export function SearchComponent({
   onClose,
   className,
@@ -132,7 +139,8 @@ export function SearchComponent({
   const handleSelectCategory = (category: { id: number; title: string; image: string }) => {
     setSearchTerm(category.title);
     setShowDropdown(false);
-    router.push(`/categories/${category.id}`);
+    const slug = createSlug(category.title);
+    router.push(`/categories/${slug}?id=${category.id}`);
   };
 
   const handleSelectService = (service: SearchResponse["records"]["services"][0]) => {

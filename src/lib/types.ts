@@ -320,3 +320,27 @@ export interface SearchResponse {
     }[];
   };
 }
+
+export interface CategoryService {
+  service_id: number;
+  service_name: string;
+  images: {
+    id: number;
+    name: string;
+  }[];
+  description: string;
+  fixed_price: string;
+  hourly_price: string;
+  address: string;
+  category_id: number;
+  user_id: number;
+  average_rating: number | null;
+  is_favorite: number;
+  total_reviews: number;
+}
+
+export interface CategoryServiceResponse {
+  error: boolean;
+  message: string;
+  records: CategoryService[];
+}
