@@ -19,7 +19,8 @@ const OTPVerification = () => {
   const router = useRouter();
   const { toast } = useToast();
   const email = searchParams.get("email");
-  const type = (searchParams.get("type") as "register" | "reset" | "verify") || "register";
+  const type =
+    (searchParams.get("type") as "register" | "reset" | "verify") || "register";
 
   const [otp, setOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
@@ -61,7 +62,8 @@ const OTPVerification = () => {
       } else {
         if (response.records?.next_retry_at) {
           const waitTime = Math.ceil(
-            (new Date(response.records.next_retry_at).getTime() - Date.now()) / 1000
+            (new Date(response.records.next_retry_at).getTime() - Date.now()) /
+              1000,
           );
           setResendTimer(waitTime);
         }
@@ -113,7 +115,8 @@ const OTPVerification = () => {
         });
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Failed to verify OTP";
+      const errorMessage =
+        error.response?.data?.message || "Failed to verify OTP";
       if (error.response?.data?.remaining_attempts !== undefined) {
         setRemainingAttempts(error.response.data.remaining_attempts);
       }
@@ -156,11 +159,7 @@ const OTPVerification = () => {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-center">
-              <InputOTP
-                maxLength={6}
-                value={otp}
-                onChange={setOtp}
-              >
+              <InputOTP maxLength={6} value={otp} onChange={setOtp}>
                 <InputOTPGroup>
                   <InputOTPSlot index={0} />
                   <InputOTPSlot index={1} />
@@ -190,7 +189,9 @@ const OTPVerification = () => {
           </Button>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600">Didn't receive the code?</p>
+            <p className="text-sm text-gray-600">
+              Didn&apos;t receive the code?
+            </p>
             <Button
               variant="link"
               onClick={handleSendOTP}
@@ -212,4 +213,4 @@ const OTPVerification = () => {
   );
 };
 
-export default OTPVerification; 
+export default OTPVerification;

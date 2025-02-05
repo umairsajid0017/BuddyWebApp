@@ -3,7 +3,7 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 import { useServices } from "@/lib/api";
-import { SearchServicesResponse, type Service } from "@/lib/types";
+import { SearchResponse } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { StarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,30 +14,33 @@ import { useSearchServices } from "@/lib/apis/search-services";
 import { CURRENCY } from "@/utils/constants";
 
 //TODO: This service card component is used in multiple places. It should be moved to a shared component.
-const ServiceCard: React.FC<{ service: SearchServicesResponse }> = ({
+const ServiceCard: React.FC<{ service: SearchResponse["records"]["services"][0] }> = ({
   service,
 }) => (
-  <Link href={`/services/${service.service_name}`} className="block">
+  <Link href={`/services/${service.id}`} className="block">
     <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
       <div className="relative h-44 overflow-hidden bg-gray-200">
         <Image
-          src={`/placeholder.svg?height=176&width=264`}
-          alt={service.service_name}
+          src={service.images?.[0]?.name 
+            ? `${process.env.NEXT_PUBLIC_IMAGE_URL}${service.images[0].name}`
+            : `/placeholder.svg?height=176&width=264`}
+          alt={service.name}
           layout="fill"
           objectFit="cover"
         />
       </div>
       <CardContent>
-        <h4 className="mt-2 text-xl font-medium">{service.service_name}</h4>
-        <p className="text-xs text-gray-600">{service.tag_line}</p>
+        <h4 className="mt-2 text-xl font-medium">{service.name}</h4>
+        <p className="text-xs text-gray-600">{service.description}</p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-lg font-bold text-primary">
-            {CURRENCY}. {service.price}
+            {CURRENCY} {service.price_mode === "fixed" ? service.fixed_price : service.hourly_price}
+            {service.price_mode === "hourly" && "/hr"}
           </p>
           <div className="flex items-center text-xs text-gray-600">
             <StarIcon className="h-4 w-4" />
             <span className="ml-1">
-              {service.average_rating} | {service.total_reviews} reviews
+              {service.address}
             </span>
           </div>
         </div>
@@ -93,6 +96,7 @@ const SearchResults: React.FC = () => {
   });
   // const services = servicesResponse?.data ?? []
 
+
   // const filteredServices = services?.filter(
   //   (service) =>
   //     service.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -127,10 +131,10 @@ const SearchResults: React.FC = () => {
       <h1 className="mb-6 text-3xl font-bold">
         Search Results for &quot;{query}&quot;
       </h1>
-      {services && services.length > 0 ? (
+      {services?.records?.services && services.records.services.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {services.map((service: SearchServicesResponse) => (
-            <ServiceCard key={service.service_name} service={service} />
+          {services.records.services.map((service) => (
+            <ServiceCard key={service.id} service={service} />
           ))}
         </div>
       ) : (
