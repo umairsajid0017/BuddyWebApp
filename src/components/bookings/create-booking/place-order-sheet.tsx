@@ -250,7 +250,7 @@ export function PlaceOrderSheet({
             </div>
           </div>
         </div>
-        {service ? (
+        {!service ? (
           <Button
             onClick={() =>
               onContinue(description, {

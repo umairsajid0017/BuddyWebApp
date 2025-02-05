@@ -41,7 +41,7 @@ export default function AuthLayout({
   return (
     <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="light"
             enableSystem
             disableTransitionOnChange
           >
