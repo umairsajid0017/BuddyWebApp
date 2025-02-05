@@ -1,20 +1,14 @@
 import useAuthStore from "@/store/authStore";
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { UseQueryOptions, useQuery } from "react-query";
-import { SearchServicesResponse as Service } from "@/lib/types";
+import { SearchResponse } from "@/lib/types";
+
 // Types
 interface SearchParams {
-  name?: string;
+  keyword?: string;
   category_id?: number;
   price_from?: number;
   price_to?: number;
-}
-
-// API Response type
-interface ApiResponse<T> {
-  error: boolean;
-  message: string;
-  records: T;
 }
 
 // Error response type
@@ -47,7 +41,7 @@ api.interceptors.response.use(
       const store = useAuthStore.getState();
       store.setUser(null);
       store.setToken(null);
-      store.setError("Session expired. Please log in again."); // You might want to redirect to login page here
+      store.setError("Session expired. Please log in again.");
     }
     return Promise.reject(error);
   },
@@ -57,7 +51,7 @@ api.interceptors.response.use(
 const buildQueryString = (params: SearchParams): string => {
   const queryParams = new URLSearchParams();
 
-  if (params.name) queryParams.append("name", params.name);
+  if (params.keyword) queryParams.append("keyword", params.keyword);
   if (params.category_id)
     queryParams.append("category_id", params.category_id.toString());
   if (params.price_from)
@@ -72,37 +66,35 @@ const buildQueryString = (params: SearchParams): string => {
 // React Query hook for search with authentication
 export const useSearchServices = (
   searchParams: SearchParams,
-  options?: UseQueryOptions<Service[], AxiosError<ApiError>>,
+  options?: UseQueryOptions<SearchResponse, AxiosError<ApiError>>,
 ) => {
-  return useQuery<Service[], AxiosError<ApiError>>(
+  return useQuery<SearchResponse, AxiosError<ApiError>>(
     ["services", "search", searchParams],
     async () => {
       try {
         const queryString = buildQueryString(searchParams);
-        const response = await api.get<ApiResponse<Service[]>>(
-          `/getSearch${queryString}`,
+        const response = await api.get<SearchResponse>(
+          `/searchAll${queryString}`,
         );
-        return response.data.records;
+        return response.data;
+
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
-          // Handle unauthorized access
           throw new Error("Please log in to search services");
         }
         throw error;
       }
     },
     {
-      // Only execute the query if at least one search parameter is provided
       enabled:
         Object.values(searchParams).some((param) => param !== undefined) &&
-        Boolean(useAuthStore.getState().token), // Only run if authenticated
+        Boolean(useAuthStore.getState().token),
       ...options,
       retry: (failureCount, error) => {
-        // Don't retry on 401 unauthorized
         if (axios.isAxiosError(error) && error.response?.status === 401) {
           return false;
         }
-        return failureCount < 3; // Retry other errors up to 3 times
+        return failureCount < 3;
       },
     },
   );

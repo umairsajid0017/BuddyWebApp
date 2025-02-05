@@ -2,51 +2,89 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { SearchServicesResponse } from "@/lib/types";
+import { SearchResponse } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, Star } from "lucide-react";
 import { useSearchServices } from "@/lib/apis/search-services";
 import { cn } from "@/lib/utils";
 import { CURRENCY } from "@/utils/constants";
 
-const SearchResult = ({
+const CategoryResult = ({
+  category,
+  onSelect,
+}: {
+  category: { id: number; title: string; image: string };
+  onSelect: (category: { id: number; title: string; image: string }) => void;
+}) => (
+  <div
+    className="cursor-pointer rounded-lg p-3 transition-all hover:bg-accent/50"
+    onClick={() => onSelect(category)}
+  >
+    <div className="flex items-center gap-4">
+      <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md bg-muted">
+        {category.image ? (
+          <Image
+            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${category.image}`}
+            alt={category.title}
+            layout="fill"
+            objectFit="cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+            <SearchIcon className="h-6 w-6" />
+          </div>
+        )}
+      </div>
+      <div className="flex-grow">
+        <h4 className="font-medium text-foreground">{category.title}</h4>
+      </div>
+    </div>
+  </div>
+);
+
+const ServiceResult = ({
   service,
   onSelect,
 }: {
-  service: SearchServicesResponse;
-  onSelect: (service: SearchServicesResponse) => void;
+  service: SearchResponse["records"]["services"][0];
+  onSelect: (service: SearchResponse["records"]["services"][0]) => void;
 }) => (
   <div
     className="cursor-pointer rounded-lg p-3 transition-all hover:bg-accent/50"
     onClick={() => onSelect(service)}
   >
     <div className="flex items-center gap-4">
-      <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md">
-        <Image
-          src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${service.image}`}
-          alt={service.service_name}
-          layout="fill"
-          objectFit="cover"
-        />
+      <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md bg-muted">
+        {service.images?.[0] ? (
+          <Image
+            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${service.images[0].name}`}
+            alt={service.name}
+            layout="fill"
+            objectFit="cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+            <SearchIcon className="h-6 w-6" />
+          </div>
+        )}
       </div>
       <div className="flex-grow">
-        <h4 className="font-medium text-foreground">{service.service_name}</h4>
+        <h4 className="font-medium text-foreground">{service.name}</h4>
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {CURRENCY}. {parseFloat(service.price).toLocaleString()}
-          </p>
-          <div className="flex items-center text-xs text-muted-foreground">
-            <svg
-              className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-0.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z" />
-            </svg>
-            <span>4.8</span>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-muted-foreground">
+              {CURRENCY} {service.price_mode === "fixed" ? service.fixed_price : service.hourly_price}
+              {service.price_mode === "hourly" && "/hr"}
+            </p>
           </div>
+          {service.address && (
+            <p className="text-xs text-muted-foreground">{service.address}</p>
+          )}
         </div>
+        {service.description && (
+          <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{service.description}</p>
+        )}
       </div>
     </div>
   </div>
@@ -66,8 +104,8 @@ export function SearchComponent({
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const { data: searchServices, isLoading } = useSearchServices({
-    name: debouncedSearchTerm,
+  const { data: searchResults, isLoading } = useSearchServices({
+    keyword: debouncedSearchTerm,
   });
 
   useEffect(() => {
@@ -91,10 +129,64 @@ export function SearchComponent({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (service: SearchServicesResponse) => {
-    setSearchTerm(service.service_name);
+  const handleSelectCategory = (category: { id: number; title: string; image: string }) => {
+    setSearchTerm(category.title);
     setShowDropdown(false);
-    router.push(`/services/${service.service_id}`);
+    router.push(`/categories/${category.id}`);
+  };
+
+  const handleSelectService = (service: SearchResponse["records"]["services"][0]) => {
+    setSearchTerm(service.name);
+    setShowDropdown(false);
+    router.push(`/services/${service.id}`);
+  };
+
+  const renderSearchResults = () => {
+    if (!searchResults?.records) return null;
+
+    const { categories = [], services = [] } = searchResults.records;
+    const hasResults = categories.length > 0 || services.length > 0;
+
+    if (!hasResults) {
+      return (
+        <div className="p-4 text-center text-muted-foreground">
+          No results found
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {categories.length > 0 && (
+          <div>
+            <div className="border-b px-3 py-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Categories</h3>
+            </div>
+            {categories.map((category) => (
+              <CategoryResult
+                key={category.id}
+                category={category}
+                onSelect={handleSelectCategory}
+              />
+            ))}
+          </div>
+        )}
+        {services.length > 0 && (
+          <div>
+            <div className="border-b px-3 py-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Services</h3>
+            </div>
+            {services.map((service) => (
+              <ServiceResult
+                key={service.id}
+                service={service}
+                onSelect={handleSelectService}
+              />
+            ))}
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
@@ -162,19 +254,9 @@ export function SearchComponent({
                 </div>
               ))}
             </div>
-          ) : searchServices?.length ? (
-            <div className="max-h-[60vh] overflow-y-auto">
-              {searchServices.map((service) => (
-                <SearchResult
-                  key={service.service_id}
-                  service={service}
-                  onSelect={handleSelect}
-                />
-              ))}
-            </div>
           ) : (
-            <div className="p-4 text-center text-muted-foreground">
-              No services found
+            <div className="max-h-[60vh] overflow-y-auto">
+              {renderSearchResults()}
             </div>
           )}
         </div>

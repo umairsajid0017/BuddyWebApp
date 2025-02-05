@@ -234,3 +234,89 @@ export interface SendOtpData {
   email: string;
   // type: "register" | "reset" | "verify";
 }
+
+export interface SearchCategory {
+  id: number;
+  title: string;
+  image: string;
+}
+
+export interface SearchProfile {
+  // Add profile fields when available
+  id: number;
+  [key: string]: any;
+}
+
+export interface SearchService {
+  id: number;
+  name: string;
+  images: {
+    id: number;
+    name: string;
+  }[];
+  description: string;
+  fixed_price: string;
+  hourly_price: string;
+  address: string;
+  category_id: number;
+  user_id: number;
+  price_mode: "fixed" | "hourly";
+}
+
+export interface SearchServiceResponse {
+  service_id: number;
+  category_id: number;
+  service_name: string;
+  image: string | null;
+  price: string | null;
+  user_id: number;
+  user_name: string;
+  lat: number | null;
+  long: number | null;
+  address: string | null;
+  average_rating: number;
+  is_favorite: number;
+  total_reviews: number;
+  tag_line: string;
+}
+
+export interface SearchResponse {
+  error: boolean;
+  message: string;
+  records: {
+    categories: {
+      id: number;
+      title: string;
+      image: string;
+    }[];
+    profiles: {
+      id: number;
+      name: string;
+      email: string;
+      phone: string | null;
+      image: string | null;
+      country: string | null;
+      role: string;
+      dob: string | null;
+      gender: string | null;
+      address: string | null;
+      registration_number: string | null;
+      tax_number: string | null;
+    }[];
+    services: {
+      id: number;
+      name: string;
+      images: {
+        id: number;
+        name: string;
+      }[];
+      description: string;
+      fixed_price: string;
+      hourly_price: string;
+      address: string | null;
+      category_id: number;
+      user_id: number;
+      price_mode: "fixed" | "hourly";
+    }[];
+  };
+}
