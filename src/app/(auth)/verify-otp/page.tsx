@@ -48,6 +48,7 @@ const OTPVerification = () => {
     try {
       const response = await sendOtpMutation.mutateAsync({
         email: email!,
+        role: "customer",
       });
 
       if (!response.error) {
@@ -98,32 +99,25 @@ const OTPVerification = () => {
         otp,
       });
 
-      if (response.status) {
+      if (response.message && !response.error) {
         toast({
           title: "Success",
           description: "Email verified successfully.",
         });
         router.push(type === "reset" ? "/reset-password" : "/login");
       } else {
-        if (response.remaining_attempts !== undefined) {
-          setRemainingAttempts(response.remaining_attempts);
-        }
         toast({
           variant: "destructive",
           title: "Error",
           description: response.message,
         });
       }
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to verify OTP";
-      if (error.response?.data?.remaining_attempts !== undefined) {
-        setRemainingAttempts(error.response.data.remaining_attempts);
-      }
+    } catch (error) {
+      const errorMessage = error || "Failed to verify OTP";
       toast({
         variant: "destructive",
         title: "Error",
-        description: errorMessage,
+        description: errorMessage.toString(),
       });
     }
   };

@@ -250,29 +250,20 @@ export function PlaceOrderSheet({
             </div>
           </div>
         </div>
-        {!service ? (
           <Button
-            onClick={() =>
+            onClick={() => {
               onContinue(description, {
                 images,
                 videos,
-                audio: audioFile || undefined,
+                audio: audioFile ?? undefined,
               })
-            }
+              console.log("Images, ", images, audioFile)
+            }}
             className="w-full"
-            disabled={!description.trim()}
+            disabled={!description.trim() || !audioFile || !images.length}
           >
-            Continue
+            {!service ? " Continue": "Book Now"}
           </Button>
-        ) : (
-          <Button
-            onClick={onClose}
-            className="w-full"
-            disabled={!description.trim()}
-          >
-            Book Now
-          </Button>
-        )}
       </SheetContent>
     </Sheet>
   );

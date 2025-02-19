@@ -49,35 +49,35 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
           </SheetHeader>
           <div className="mt-6 space-y-6">
             <Image
-              src={process.env.NEXT_PUBLIC_IMAGE_URL + booking.service.image}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking.before_images[0]?.name}
               alt={booking.service.name}
               width={500}
               height={300}
               className="w-full rounded-lg"
             />
             <div className="space-y-2">
-              <Badge
-                variant={
-                  booking.status === "confirmed"
-                    ? "secondary"
-                    : booking.status === "completed"
-                      ? "default"
-                      : "destructive"
-                }
-                className={`${booking.status === "completed" ? "bg-green-500 hover:bg-green-400" : ""}`}
-              >
-                {booking.status}
-              </Badge>
+              {/*<Badge*/}
+              {/*  variant={*/}
+              {/*    booking.status === "confirmed"*/}
+              {/*      ? "secondary"*/}
+              {/*      : booking.status === "completed"*/}
+              {/*        ? "default"*/}
+              {/*        : "destructive"*/}
+              {/*  }*/}
+              {/*  className={`${booking.status === "completed" ? "bg-green-500 hover:bg-green-400" : ""}`}*/}
+              {/*>*/}
+              {/*  {booking.status}*/}
+              {/*</Badge>*/}
               <div className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  {booking.updated_at.split("T")[0] || "Date not specified"}
+                  {booking.updated_at.split("T")[0] ?? "Date not specified"}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <Clock className="h-4 w-4" />
                 <span>
-                  {booking.updated_at?.split("T")[1]?.split(".")[0] ||
+                  {booking.updated_at?.split("T")[1]?.split(".")[0] ??
                     "Time not specified"}
                 </span>
               </div>
@@ -89,36 +89,34 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
               </div>
             </div>
             <div className="flex space-x-4">
-              {booking.status === "confirmed" && (
+              {/*{booking.status === "confirmed" && (*/}
                 <Button onClick={handleChat} className="flex-1">
                   <MessageCircle className="mr-2 h-4 w-4" />
                   Chat
                 </Button>
-              )}
+              {/*)}*/}
 
-              {booking.status === "pending" && (
-                <CancelBookingDialog
-                  booking={booking}
-                  onConfirm={handleCancel}
-                  onCancel={() => console.log("Cancellation aborted")}
-                />
-              )}
-              {booking.status === "completed" && (
-                <Button className="flex-1">Book Again</Button>
-              )}
+              {/*{booking.status === "pending" && (*/}
+              {/*  <CancelBookingDialog*/}
+              {/*    booking={booking}*/}
+              {/*    onConfirm={handleCancel}*/}
+              {/*    onCancel={() => console.log("Cancellation aborted")}*/}
+              {/*  />*/}
+              {/*)}*/}
+              {/*{booking.status === "completed" && (*/}
+              {/*  <Button className="flex-1">Book Again</Button>*/}
+              {/*)}*/}
             </div>
           </div>
         </SheetContent>
       </Sheet>
 
-      {booking.status === "confirmed" && (
-        <BookingChat
-          isOpen={isChatOpen}
-          onClose={() => setIsChatOpen(false)}
-          taskId={booking.id.toString()}
-          provider={booking.worker}
-        />
-      )}
+  <BookingChat
+      isOpen={isChatOpen}
+      onClose={() => setIsChatOpen(false)}
+      taskId={booking.id.toString()}
+      provider={booking.worker}
+  />
     </>
   );
 };

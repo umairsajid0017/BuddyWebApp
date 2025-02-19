@@ -48,7 +48,7 @@ const NoBookingsView: React.FC<{ status: string }> = ({ status }) => (
   </div>
 );
 const BookingsComponent: React.FC = () => {
-  const { data: bookingsResponse, isLoading, error } = useBookings();
+  const { data: bookingsResponse, isLoading, error } = useBookings("customer");
 
   useEffect(() => {
     console.log("Bookings", bookingsResponse);
@@ -57,6 +57,7 @@ const BookingsComponent: React.FC = () => {
   if (error) {
     return <div>Error loading bookings: {error.message}</div>;
   }
+
 
   return (
     <div className="p-4">
@@ -76,12 +77,9 @@ const BookingsComponent: React.FC = () => {
           <TabsContent key={status} value={status}>
             {isLoading ? (
               <LoadingBookings />
-            ) : (bookingsResponse?.data ?? []).filter(
-                (booking) => booking.status === status,
-              ).length > 0 ? (
+            ) : (bookingsResponse?.records ?? []).length > 0 ? (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {(bookingsResponse?.data ?? [])
-                  .filter((booking) => booking.status === status)
+                {(bookingsResponse?.records ?? [])
                   .map((booking) => (
                     <TaskCard key={booking.id} booking={booking} />
                   ))}
