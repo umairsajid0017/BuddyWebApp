@@ -50,10 +50,10 @@ export interface VerifyOtpData {
 }
 
 export interface VerifyOtpResponse {
-  status: boolean;
+  error: boolean;
   message: string;
-  user?: User;
-  remaining_attempts: number;
+  // user?: User;
+  // remaining_attempts: number;
 }
 
 export interface VerifyOtpError {
@@ -232,6 +232,7 @@ export interface SendOtpResponse {
 
 export interface SendOtpData {
   email: string;
+  role: "customer"
   // type: "register" | "reset" | "verify";
 }
 

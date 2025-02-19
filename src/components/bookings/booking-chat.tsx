@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { chatService, ChatMessage } from "@/lib/services/chatService";
+import { chatService, type ChatMessage } from "@/lib/services/chatService";
 import { useAuth } from "@/store/authStore";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -26,15 +26,13 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 
+import {type Worker} from "@/lib/types/booking-types";
+
 interface BookingChatProps {
   isOpen: boolean;
   onClose: () => void;
   taskId: string;
-  provider: {
-    id: number;
-    name: string;
-    image: string;
-  };
+  provider: Worker
 }
 
 const MessageComponent = React.memo<{
@@ -162,7 +160,7 @@ const ChatInput = React.memo<{
       size="icon"
       className="shrink-0 rounded-full"
       onClick={onSend}
-      disabled={disabled || !value.trim()}
+      disabled={disabled ?? !value.trim()}
     >
       <Send className="h-5 w-5" />
     </Button>
@@ -205,7 +203,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
       }
     };
 
-    initializeChat();
+     initializeChat();
   }, [user, provider]);
 
   useEffect(() => {
@@ -312,7 +310,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
           </Button>
           <Avatar className="h-10 w-10">
             <AvatarImage
-              src={process.env.NEXT_PUBLIC_IMAGE_URL + provider.image}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL! + provider.image}
             />
             <AvatarFallback>{provider.name[0]}</AvatarFallback>
           </Avatar>

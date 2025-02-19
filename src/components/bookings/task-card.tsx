@@ -35,8 +35,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="p-0">
+
         <img
-          src={process.env.NEXT_PUBLIC_IMAGE_URL + booking.service.image}
+          src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking?.before_images[0]?.name}
           alt={booking.service.name}
           className="h-40 w-full rounded-t-lg object-cover"
         />
@@ -61,8 +62,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between p-4 pt-0">
-        <Badge variant="default" className={`${statusColors[booking.status]}`}>
-          {statusMapping[booking.status]}
+        <Badge variant="default" className={``}>
+          {/*{statusMapping[booking.status]}*/}
         </Badge>
         <BookingDetailsSheet booking={booking} />
       </CardFooter>

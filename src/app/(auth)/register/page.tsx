@@ -164,6 +164,7 @@ const Register: React.FC = () => {
         const otpResponse = await sendOtpMutation.mutateAsync({
           email: formData.email,
           // type: "register"
+          role: "customer"
         });
 
         if (!otpResponse.error) {

@@ -44,9 +44,10 @@ export function ResetPasswordComponent() {
 
       const response = await sendOtpMutation.mutateAsync({ 
         email,
+        role: "customer"
       });
 
-      if (!response.error) {
+      if (response.error) {
         toast.success("OTP sent to your email");
         router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=reset`);
       } else {
