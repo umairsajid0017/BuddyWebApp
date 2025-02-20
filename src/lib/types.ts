@@ -24,6 +24,8 @@ export interface User {
   status: number;
   created_at: string;
   updated_at: string;
+  is_online: string;
+  otp_verify: string;
 }
 
 export interface LoginCredentials {
@@ -232,7 +234,7 @@ export interface SendOtpResponse {
 
 export interface SendOtpData {
   email: string;
-  role: "customer"
+  role: "customer";
   // type: "register" | "reset" | "verify";
 }
 

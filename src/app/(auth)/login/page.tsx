@@ -55,10 +55,15 @@ export default function Login() {
       if (!data.error && data.token && data.records) {
         const { records, token } = data;
         console.log("User logged in:", records, token);
-        useAuthStore.getState().setUser(records);
-        useAuthStore.getState().setToken(token);
-        await setAuthCookie(token);
-        void router.push("/");
+        if (records.otp_verify === "0") {
+          console.log("OTP not verified");
+          void router.push(`/verify-otp?email=${records.email}`);
+        } else {
+          useAuthStore.getState().setUser(records);
+          useAuthStore.getState().setToken(token);
+          await setAuthCookie(token);
+          void router.push("/");
+        }
       } else {
         throw new Error(data.message ?? "Login failed");
       }
