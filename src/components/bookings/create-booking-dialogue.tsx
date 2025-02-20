@@ -51,7 +51,6 @@ type BookFormState = {
   service: Service | null;
   description: string;
   budget: number;
-  time: string;
   date: Date | undefined;
   mediaFiles: MediaFiles | undefined;
   address: string;
@@ -61,7 +60,6 @@ type BidFormState = {
   category: { id: number; title: string } | null;
   description: string;
   budget: number;
-  time: string;
   date: Date | undefined;
   mediaFiles: MediaFiles | undefined;
   address: string;
@@ -135,7 +133,6 @@ export function CreateBookingDialog({
             service: initialService ?? null,
             description: "",
             budget: 200,
-            time: "",
             date: undefined,
             mediaFiles: undefined,
             address: "Oman",
@@ -144,7 +141,6 @@ export function CreateBookingDialog({
             category: null,
             description: "",
             budget: 200,
-            time: "",
             date: undefined,
             mediaFiles: undefined,
             address: "Oman",
@@ -157,9 +153,8 @@ export function CreateBookingDialog({
     const isValid =
       mode === "book"
         ? isBookingForm(formState) &&
-          Boolean(formState.service && formState.date && formState.time)
-        : isBidForm(formState) &&
-          Boolean(formState.category && formState.date && formState.time);
+          Boolean(formState.service && formState.date)
+        : isBidForm(formState) && Boolean(formState.category && formState.date);
 
     if (!isValid) {
       toast.error("Please fill in all required fields");
@@ -359,7 +354,7 @@ export function CreateBookingDialog({
               className="flex w-full items-center justify-center rounded-md border"
             />
 
-            <div className="grid grid-cols-4 items-center gap-4">
+            {/* <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="time" className="text-right">
                 Time
               </Label>
@@ -370,9 +365,9 @@ export function CreateBookingDialog({
                 value={formState.time}
                 onChange={handleTimeChange}
               />
-            </div>
+            </div> */}
 
-            <div className="grid grid-cols-4 items-center gap-4">
+            {/* <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="budget" className="text-right">
                 Budget
               </Label>
@@ -393,7 +388,7 @@ export function CreateBookingDialog({
                   className="pl-14"
                 />
               </div>
-            </div>
+            </div> */}
           </div>
 
           <DialogFooter>
@@ -402,11 +397,10 @@ export function CreateBookingDialog({
               onClick={handleSaveBooking}
               disabled={
                 mode === "book"
-                  ? !initialService || !formState.date || !formState.time
+                  ? !initialService || !formState.date
                   : !isBidForm(formState) ||
                     !formState.category ||
-                    !formState.date ||
-                    !formState.time
+                    !formState.date
               }
             >
               Continue

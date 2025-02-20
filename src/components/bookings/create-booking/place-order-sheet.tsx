@@ -35,9 +35,9 @@ export function PlaceOrderSheet({
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [images, setImages] = useState<File[]>([]);
-  const [videos, setVideos] = useState<File[]>([]);
+  // const [videos, setVideos] = useState<File[]>([]);
   const [imageURLs, setImageURLs] = useState<string[]>([]);
-  const [videoURLs, setVideoURLs] = useState<string[]>([]);
+  // const [videoURLs, setVideoURLs] = useState<string[]>([]);
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -96,8 +96,8 @@ export function PlaceOrderSheet({
         setImages((prev) => [...prev, ...fileArray]);
         setImageURLs((prev) => [...prev, ...urls]);
       } else {
-        setVideos((prev) => [...prev, ...fileArray]);
-        setVideoURLs((prev) => [...prev, ...urls]);
+        // setVideos((prev) => [...prev, ...fileArray]);
+        // setVideoURLs((prev) => [...prev, ...urls]);
       }
     }
   };
@@ -107,8 +107,8 @@ export function PlaceOrderSheet({
       setImages((prev) => prev.filter((_, i) => i !== index));
       setImageURLs((prev) => prev.filter((_, i) => i !== index));
     } else if (type === "video") {
-      setVideos((prev) => prev.filter((_, i) => i !== index));
-      setVideoURLs((prev) => prev.filter((_, i) => i !== index));
+      // setVideos((prev) => prev.filter((_, i) => i !== index));
+      // setVideoURLs((prev) => prev.filter((_, i) => i !== index));
     } else {
       setAudioURL(null);
     }
@@ -211,7 +211,7 @@ export function PlaceOrderSheet({
               ))}
             </div>
           </div>
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Videos</h3>
               <Button
@@ -248,22 +248,22 @@ export function PlaceOrderSheet({
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
-          <Button
-            onClick={() => {
-              onContinue(description, {
-                images,
-                videos,
-                audio: audioFile ?? undefined,
-              })
-              console.log("Images, ", images, audioFile)
-            }}
-            className="w-full"
-            disabled={!description.trim() || !audioFile || !images.length}
-          >
-            {!service ? " Continue": "Book Now"}
-          </Button>
+        <Button
+          onClick={() => {
+            onContinue(description, {
+              images,
+              // videos,
+              audio: audioFile ?? undefined,
+            });
+            console.log("Images, ", images, audioFile);
+          }}
+          className="w-full"
+          disabled={!description.trim() || !audioFile || !images.length}
+        >
+          {!service ? " Continue" : "Book Now"}
+        </Button>
       </SheetContent>
     </Sheet>
   );
