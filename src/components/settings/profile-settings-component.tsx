@@ -15,11 +15,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CameraIcon } from "lucide-react";
 import { useAuth } from "@/store/authStore";
 import { splitFullName } from "@/utils/helper-functions";
-import { toast } from "sonner";
 import { useUpdateProfile } from "@/lib/api";
 import { profileSchema } from "@/lib/schemas";
 import { ZodError } from "zod";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface ProfileFormData {
   name: string;
@@ -145,9 +145,10 @@ export default function ProfileComponent() {
       const fieldNames = emptyFields.map((field) =>
         field.replace(/_/g, " ").toUpperCase(),
       );
-      toast.error(
-        `Please fill in the following required fields: ${fieldNames.join(", ")}`,
-      );
+      toast({
+        title: "Error",
+        description: `Please fill in the following required fields: ${fieldNames.join(", ")}`,
+      });
       return false;
     }
     return true;
@@ -168,7 +169,10 @@ export default function ProfileComponent() {
         formData: validatedData,
         image: selectedImage || undefined,
       });
-      toast.success(response.message || "Profile updated successfully");
+      toast({
+        title: "Success",
+        description: response.message || "Profile updated successfully",
+      });
 
       // Clear image preview
       if (previewUrl) {
@@ -180,11 +184,16 @@ export default function ProfileComponent() {
       if (error instanceof ZodError) {
         // Handle validation errors
         const errors = error.errors.map((err) => err.message);
-        toast.error(errors.join("\n"));
+        toast({
+          title: "Error",
+          description: errors.join("\n"),
+        });
       } else {
-        toast.error(
-          error instanceof Error ? error.message : "Failed to update profile",
-        );
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to update profile",
+        });
       }
     }
   };
