@@ -118,7 +118,7 @@ export default function NavBar() {
               <div className="hidden font-bold md:flex md:items-center md:space-x-4">
                 <Button
                   variant="ghost"
-                  onClick={() => router.push("/bookings")}
+                  onClick={() => router.push("/bids")}
                   className="font-semibold text-white hover:bg-secondary-800 hover:text-white"
                 >
                   My Bids
