@@ -242,7 +242,7 @@ const BidsPage = () => {
                         }}
                       >
                         <source
-                          src={`${process.env.NEXT_PUBLIC_API_URL}/${bid.audio}`}
+                          src={`${process.env.NEXT_PUBLIC_AUDIO_URL}/${bid.audio}`}
                           type="audio/wav"
                         />
                         Your browser does not support the audio element.
