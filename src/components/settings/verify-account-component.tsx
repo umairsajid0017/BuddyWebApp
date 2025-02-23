@@ -11,6 +11,9 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  RefreshCw,
+  FlipHorizontal,
+  Timer,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -19,9 +22,9 @@ import {
   usePassportVerification,
   useVerificationCheck,
 } from "@/lib/api";
-import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { VerificationRecord, VerificationStatus } from "@/lib/types";
+import { toast } from "@/hooks/use-toast";
 
 export default function VerifyAccountComponent() {
   const [idFront, setIdFront] = useState<File | null>(null);
@@ -32,6 +35,9 @@ export default function VerifyAccountComponent() {
     useState<VerificationRecord | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: verificationCheck, refetch: refetchVerification } =
     useVerificationCheck();
@@ -48,18 +54,85 @@ export default function VerifyAccountComponent() {
     }
   };
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setIsCapturing(true);
+  const startCamera = () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast({
+        title: "Camera not supported in your browser",
+        description: "Please use a different browser or device",
+      });
+      return;
+    }
+    setIsCapturing(true);
+  };
+
+  useEffect(() => {
+    let stream: MediaStream;
+    const initCamera = async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: isFrontCamera ? "user" : "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+        toast({
+          title: "Failed to access camera",
+          description: "Please make sure you have given camera permissions.",
+        });
+        setIsCapturing(false);
       }
-    } catch (error) {
-      console.error("Error accessing camera:", error);
-      toast.error(
-        "Failed to access camera. Please make sure you have given camera permissions.",
-      );
+    };
+
+    if (isCapturing) {
+      initCamera();
+    }
+
+    return () => {
+      if (videoRef.current?.srcObject) {
+        (videoRef.current.srcObject as MediaStream)
+          .getTracks()
+          .forEach((track) => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    };
+  }, [isCapturing, isFrontCamera]);
+
+  const switchCamera = async () => {
+    setIsFrontCamera((prev) => !prev);
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    startCamera();
+  };
+
+  const startCountdown = () => {
+    setCountdown(3);
+    countdownRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(countdownRef.current!);
+          capturePhoto();
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const cancelCountdown = () => {
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      setCountdown(null);
     }
   };
 
@@ -68,27 +141,42 @@ export default function VerifyAccountComponent() {
       const canvas = document.createElement("canvas");
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
-      canvas.getContext("2d")?.drawImage(videoRef.current, 0, 0);
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const file = new File([blob], "live-photo.jpg", {
-            type: "image/jpeg",
-          });
-          setLivePhoto(file);
-          stopCamera();
+      const ctx = canvas.getContext("2d");
+
+      if (ctx && videoRef.current) {
+        if (isFrontCamera) {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
         }
-      }, "image/jpeg");
+        ctx.drawImage(videoRef.current, 0, 0);
+      }
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const file = new File([blob], "live-photo.jpg", {
+              type: "image/jpeg",
+            });
+            setLivePhoto(file);
+            stopCamera();
+          }
+        },
+        "image/jpeg",
+        0.8,
+      );
     }
   };
 
   const stopCamera = () => {
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-      setIsCapturing(false);
-    }
+    cancelCountdown();
+    setIsCapturing(false);
   };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   const getVerificationIcon = (status: VerificationStatus | undefined) => {
     if (!status?.hasData) return null;
@@ -157,7 +245,9 @@ export default function VerifyAccountComponent() {
 
   const handleVerifyCnic = async () => {
     if (!idFront || !idBack) {
-      toast.error("Please upload both front and back sides of your CNIC");
+      toast({
+        title: "Please upload both front and back sides of your CNIC",
+      });
       return;
     }
 
@@ -169,22 +259,30 @@ export default function VerifyAccountComponent() {
 
       if (!response.error) {
         setVerificationStatus(response.records);
-        toast.success(
-          response.message || "CNIC verification submitted successfully",
-        );
-        refetchVerification(); // Refresh verification status
+        setIdFront(null);
+        setIdBack(null);
+        toast({
+          title: response.message || "CNIC verification submitted successfully",
+        });
+        refetchVerification();
       } else {
-        toast.error(response.message || "Failed to verify CNIC");
+        toast({
+          title: response.message || "Failed to verify CNIC",
+        });
       }
     } catch (error) {
       console.error("CNIC verification error:", error);
-      toast.error("An error occurred while verifying CNIC");
+      toast({
+        title: "An error occurred while verifying CNIC",
+      });
     }
   };
 
   const handleVerifyLivePhoto = async () => {
     if (!livePhoto) {
-      toast.error("Please capture your live photo");
+      toast({
+        title: "Please capture your live photo",
+      });
       return;
     }
 
@@ -194,22 +292,31 @@ export default function VerifyAccountComponent() {
       });
 
       if (!response.error) {
-        toast.success(
-          response.message || "Live photo verification submitted successfully",
-        );
-        refetchVerification(); // Refresh verification status
+        setLivePhoto(null);
+        toast({
+          title:
+            response.message ||
+            "Live photo verification submitted successfully",
+        });
+        refetchVerification();
       } else {
-        toast.error(response.message || "Failed to verify live photo");
+        toast({
+          title: response.message || "Failed to verify live photo",
+        });
       }
     } catch (error) {
       console.error("Live photo verification error:", error);
-      toast.error("An error occurred while verifying live photo");
+      toast({
+        title: "An error occurred while verifying live photo",
+      });
     }
   };
 
   const handleVerifyPassport = async () => {
     if (!passportFront) {
-      toast.error("Please upload your passport");
+      toast({
+        title: "Please upload your passport",
+      });
       return;
     }
 
@@ -219,16 +326,22 @@ export default function VerifyAccountComponent() {
       });
 
       if (!response.error) {
-        toast.success(
-          response.message || "Passport verification submitted successfully",
-        );
-        refetchVerification(); // Refresh verification status
+        setPassportFront(null);
+        toast({
+          title:
+            response.message || "Passport verification submitted successfully",
+        });
+        refetchVerification();
       } else {
-        toast.error(response.message || "Failed to verify passport");
+        toast({
+          title: response.message || "Failed to verify passport",
+        });
       }
     } catch (error) {
       console.error("Passport verification error:", error);
-      toast.error("An error occurred while verifying passport");
+      toast({
+        title: "An error occurred while verifying passport",
+      });
     }
   };
 
@@ -350,41 +463,121 @@ export default function VerifyAccountComponent() {
               <Badge className="absolute -top-2 z-10">Live Photo</Badge>
               <div className="flex flex-col items-center space-y-4">
                 {isCapturing ? (
-                  <>
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      className="h-[280px] w-[280px] rounded-lg object-cover"
-                    />
-                    <div className="flex gap-2">
-                      <Button onClick={capturePhoto}>Capture</Button>
-                      <Button variant="outline" onClick={stopCamera}>
-                        Cancel
+                  <div className="relative w-full">
+                    <div className="relative mx-auto h-[400px] w-[400px] overflow-hidden rounded-lg bg-black">
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        muted
+                        className={`h-full w-full object-cover ${
+                          isFrontCamera ? "scale-x-[-1]" : ""
+                        }`}
+                      />
+                      {countdown !== null && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <span className="text-8xl font-bold text-white drop-shadow-lg">
+                            {countdown}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-2">
+                        {countdown === null ? (
+                          <>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={switchCamera}
+                              className="bg-white/70 hover:bg-white"
+                            >
+                              <FlipHorizontal className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={startCountdown}
+                              className="bg-white/70 hover:bg-white"
+                            >
+                              <Timer className="mr-1 h-4 w-4" />
+                              Timer
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={capturePhoto}
+                              className="bg-white/70 hover:bg-white"
+                            >
+                              Capture
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={stopCamera}
+                              className="bg-white/70 hover:bg-white"
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={cancelCountdown}
+                            className="bg-white/70 hover:bg-white"
+                          >
+                            Cancel Timer
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mt-4 text-center text-sm text-gray-500">
+                      {isFrontCamera ? "Front Camera" : "Back Camera"}
+                    </div>
+                  </div>
+                ) : livePhoto ? (
+                  <div className="relative mx-auto">
+                    <div className="h-[400px] w-[400px] overflow-hidden rounded-lg">
+                      <Image
+                        src={URL.createObjectURL(livePhoto)}
+                        alt="live-photo"
+                        width={400}
+                        height={400}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          setLivePhoto(null);
+                          startCamera();
+                        }}
+                        className="bg-white/70 hover:bg-white"
+                      >
+                        <RefreshCw className="mr-1 h-4 w-4" />
+                        Retake
                       </Button>
                     </div>
-                  </>
-                ) : livePhoto ? (
-                  <div className="relative h-[280px] w-[280px]">
-                    <Image
-                      src={URL.createObjectURL(livePhoto)}
-                      alt="live-photo"
-                      fill
-                      className="rounded-lg object-cover"
-                    />
-                    <Button
-                      variant="outline"
-                      className="absolute bottom-2 right-2"
-                      onClick={() => setLivePhoto(null)}
-                    >
-                      Retake
-                    </Button>
                   </div>
                 ) : (
-                  <Button onClick={startCamera}>
-                    <Camera className="mr-2 h-4 w-4" />
-                    Take Live Photo
-                  </Button>
+                  <div className="flex flex-col items-center space-y-4 py-8">
+                    <div className="rounded-full bg-gray-100 p-8">
+                      <Camera className="h-12 w-12 text-gray-400" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold">Take Live Photo</h3>
+                      <p className="mt-2 max-w-[300px] text-sm text-gray-500">
+                        Please ensure you're in a well-lit area and look
+                        directly at the camera. Keep your face centered and
+                        clearly visible.
+                      </p>
+                    </div>
+                    <Button onClick={startCamera} className="mt-4">
+                      <Camera className="mr-2 h-4 w-4" />
+                      Start Camera
+                    </Button>
+                  </div>
                 )}
               </div>
             </Card>
