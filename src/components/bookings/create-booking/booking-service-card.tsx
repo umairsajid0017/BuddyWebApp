@@ -25,7 +25,7 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
                   ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
                   : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`
               }
-              alt={service.service_name}
+              alt={service.name}
               layout="fill"
               objectFit="cover"
               className=""
@@ -36,7 +36,7 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
             <h3
               className={`mb-2 ${!compact ? "text-xl" : "text-base"} + font-semibold text-text-900`}
             >
-              {service.service_name}
+              {service.name}
             </h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between">

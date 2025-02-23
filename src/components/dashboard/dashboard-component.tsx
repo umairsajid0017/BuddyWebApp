@@ -16,18 +16,16 @@ import { useCategories } from "@/lib/apis/get-categories";
 import useCategoriesStore from "@/store/categoriesStore";
 import CategoryComponent from "../services/category-component";
 import Link from "next/link";
+import { Input } from "../ui/input";
+import { CheckCircle, Search, Shield } from "lucide-react";
+import { SearchComponent } from "../services/search-services/search-component";
+import { useSpecialOffers } from "@/lib/apis/get-special-offers";
+import useSpecialOffersStore from "@/store/specialOffersStore";
 
 type ImageItem = {
   src: string;
   alt: string;
 };
-
-const images: ImageItem[] = [
-  { src: "/assets/promo-2.png", alt: "Image 1" },
-  { src: "/assets/cleaning.png", alt: "Image 2" },
-  { src: "/assets/laundry.png", alt: "Image 3" },
-  { src: "/assets/garage.png", alt: "Image 4" },
-];
 
 export function DashboardComponent() {
   const { data: servicesResponse, isLoading, error } = useServices();
@@ -36,6 +34,11 @@ export function DashboardComponent() {
     isLoading: categoriesLoading,
     error: categoriesError,
   } = useCategories();
+  const {
+    data: specialOffersResponse,
+    isLoading: specialOffersLoading,
+    error: specialOffersError,
+  } = useSpecialOffers();
   const router = useRouter();
   const { services, setServices, setLoading, setError, deleteService } =
     useServicesStore();
@@ -47,6 +50,13 @@ export function DashboardComponent() {
     setError: setCategoriesError,
     deleteCategory,
   } = useCategoriesStore();
+
+  const {
+    specialOffers,
+    setSpecialOffers,
+    setLoading: setSpecialOffersLoading,
+    setError: setSpecialOffersError,
+  } = useSpecialOffersStore();
 
   useEffect(() => {
     if (servicesResponse) {
@@ -81,24 +91,101 @@ export function DashboardComponent() {
     setError,
   ]);
 
-  if (isLoading) return <DashboardSkeleton />;
+  useEffect(() => {
+    if (specialOffersResponse) {
+      setSpecialOffers(specialOffersResponse);
+    }
+    setSpecialOffersLoading(specialOffersLoading);
+    setSpecialOffersError(
+      specialOffersError ? (specialOffersError as any).message : null,
+    );
+  }, [
+    specialOffersResponse,
+    specialOffersLoading,
+    specialOffersError,
+    setSpecialOffers,
+    setSpecialOffersLoading,
+    setSpecialOffersError,
+  ]);
+
+  if (isLoading || categoriesLoading || specialOffersLoading)
+    return <DashboardSkeleton />;
+
+  const specialOfferItems = specialOffers.map((offer) => ({
+    src: process.env.NEXT_PUBLIC_IMAGE_URL! + offer.image,
+    alt: offer.title,
+    title: offer.title,
+    description: offer.description,
+    discount: offer.discount_percentage,
+  }));
 
   return (
     <div className="flex min-h-screen flex-col md:mx-8 lg:px-24">
       <main className="flex-1 p-6">
         <section className="mt-6 flex flex-col gap-4 lg:flex-row">
-          <DashboardStats />
-          <div className="flex h-96 flex-col justify-center rounded-lg bg-red-100 p-0 shadow lg:w-2/3">
+          <div
+            className="flex h-96 flex-col items-center justify-center gap-6 rounded-lg bg-card p-8 shadow lg:w-[40%]"
+            style={{
+              backgroundImage: "url('/assets/search-bg.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundColor: "rgba(0, 0, 0, 0.1)",
+              backgroundBlendMode: "overlay",
+            }}
+          >
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-text-900">
+                Find Your Perfect Service
+              </h2>
+              <p className="mt-2 text-lg text-text-700">
+                Search from thousands of trusted service providers
+              </p>
+            </div>
+            <SearchComponent className="w-full max-w-2xl" />
+            <div className="mt-4 flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                <span className="text-sm text-text-700">
+                  Verified Providers
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                <span className="text-sm text-text-700">Secure Booking</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative h-96 overflow-hidden rounded-lg lg:w-[60%]">
             <CardStack
-              items={images}
+              items={specialOfferItems}
               renderItem={(item) => (
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  className="h-full w-full object-cover"
-                />
+                <div className="relative h-full w-full">
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/50 to-transparent">
+                    <div className="space-y-2 p-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-3xl font-bold text-text-100">
+                          {item.title}
+                        </h3>
+                        {item.discount !== "0.00" && (
+                          <span className="rounded-full bg-primary px-4 py-1 text-lg font-bold text-text-100">
+                            {item.discount}% OFF
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-base leading-relaxed text-text-100">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
-              interval={2000}
+              interval={3000}
             />
           </div>
         </section>

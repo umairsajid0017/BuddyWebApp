@@ -12,7 +12,12 @@ interface StepOneProps {
   handleNextStep: () => void;
 }
 
-const StepOne: React.FC<StepOneProps> = ({ formData, errors, handleChange, handleNextStep }) => {
+const StepOne: React.FC<StepOneProps> = ({
+  formData,
+  errors,
+  handleChange,
+  handleNextStep,
+}) => {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -27,7 +32,9 @@ const StepOne: React.FC<StepOneProps> = ({ formData, errors, handleChange, handl
           onChange={handleChange}
         />
         {errors.name && (
-          <Alert variant="destructive" className="text-xs text-red-600">{errors.name}</Alert>
+          <Alert variant="destructive" className="text-xs text-red-600">
+            {errors.name}
+          </Alert>
         )}
       </div>
       <div className="space-y-2">
@@ -43,7 +50,9 @@ const StepOne: React.FC<StepOneProps> = ({ formData, errors, handleChange, handl
           onChange={handleChange}
         />
         {errors.email && (
-          <Alert variant="destructive" className="text-xs text-red-600">{errors.email}</Alert>
+          <Alert variant="destructive" className="text-xs text-red-600">
+            {errors.email}
+          </Alert>
         )}
       </div>
       <div className="space-y-2">
@@ -54,14 +63,18 @@ const StepOne: React.FC<StepOneProps> = ({ formData, errors, handleChange, handl
           type="text"
           required
           placeholder="Your mobile number"
-          value={formData.phone}
+          value={formData.phone || "+968"}
           onChange={handleChange}
         />
         {errors.phone && (
-          <Alert variant="destructive" className="text-xs text-red-600">{errors.phone}</Alert>
+          <Alert variant="destructive" className="text-xs text-red-600">
+            {errors.phone}
+          </Alert>
         )}
       </div>
-      <Button type="button" onClick={handleNextStep} className="w-full">Next</Button>
+      <Button type="button" onClick={handleNextStep} className="w-full">
+        Next
+      </Button>
     </div>
   );
 };

@@ -1,13 +1,12 @@
 import BookingsComponent from "@/components/bookings/bookings-component";
 import Main from "@/components/ui/main";
 
-const Bookings: React.FC = ()=> {
-    return( 
+const Bookings: React.FC = () => {
+  return (
     <Main>
-       <BookingsComponent/>
+      <BookingsComponent />
     </Main>
-);
-}
+  );
+};
 
-
-export default Bookings
+export default Bookings;

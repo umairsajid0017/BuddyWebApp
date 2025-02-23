@@ -1,6 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { useRegister, useVerifyOtp, useCheckCredentials, useSendOtp } from "@/lib/api";
+import {
+  useRegister,
+  useVerifyOtp,
+  useCheckCredentials,
+  useSendOtp,
+} from "@/lib/api";
 import { VerifyOtpError, type RegisterData } from "@/lib/types";
 import { ZodError } from "zod";
 import { useRouter } from "next/navigation";
@@ -62,22 +67,22 @@ const Register: React.FC = () => {
         if (response.error) {
           // Handle validation errors
           const newErrors: Partial<Record<keyof RegisterData, string>> = {};
-          
+
           if (response.records.email) {
             newErrors.email = "This email is already registered";
           }
           if (response.records.phone) {
             newErrors.phone = "This phone number is already registered";
           }
-          
+
           setErrors(newErrors);
-          
+
           toast({
             variant: "destructive",
             title: "Validation Error",
             description: response.message,
           });
-          
+
           return;
         }
 
@@ -88,7 +93,8 @@ const Register: React.FC = () => {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "An error occurred while checking credentials. Please try again.",
+          description:
+            "An error occurred while checking credentials. Please try again.",
         });
       }
     }
@@ -141,7 +147,8 @@ const Register: React.FC = () => {
           });
         } else {
           // Handle multiple validation errors
-          const validationErrors: Partial<Record<keyof RegisterData, string>> = {};
+          const validationErrors: Partial<Record<keyof RegisterData, string>> =
+            {};
 
           Object.entries(response.message).forEach(([field, messages]) => {
             if (Array.isArray(messages)) {
@@ -164,7 +171,7 @@ const Register: React.FC = () => {
         const otpResponse = await sendOtpMutation.mutateAsync({
           email: formData.email,
           // type: "register"
-          role: "customer"
+          role: "customer",
         });
 
         if (!otpResponse.error) {
@@ -223,7 +230,7 @@ const Register: React.FC = () => {
         otp: verificationCode,
       });
 
-      if (response.status) {
+      if (!response.error) {
         toast({
           title: "Success",
           description: "Email verified successfully. You can now log in.",
@@ -240,7 +247,10 @@ const Register: React.FC = () => {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data as VerifyOtpError;
-        const errorMessage = errorData.errors?.otp?.[0] || errorData.message || "Verification failed";
+        const errorMessage =
+          errorData.errors?.otp?.[0] ||
+          errorData.message ||
+          "Verification failed";
         setErrors({ otp: errorMessage });
         toast({
           variant: "destructive",
@@ -261,7 +271,7 @@ const Register: React.FC = () => {
 
   return (
     <main
-      className="min-w-screen flex min-h-screen w-full items-center justify-center p-4"
+      className="min-w-screen flex w-full items-center justify-center p-4"
       style={{
         backgroundImage: `url(${backgroundImageUrl})`,
         backgroundSize: "cover",
@@ -273,10 +283,9 @@ const Register: React.FC = () => {
           <div className="mb-4 flex justify-center">
             <Image
               src="/assets/logo.png"
-              alt="App Icon"
-              className="h-16 w-16"
-              width={"64"}
-              height={"64"}
+              alt="Buddy Logo"
+              width={72}
+              height={72}
             />
           </div>
           <CardTitle className="text-center text-2xl font-bold">

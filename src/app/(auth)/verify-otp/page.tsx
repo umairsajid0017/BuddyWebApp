@@ -129,8 +129,8 @@ const OTPVerification = () => {
   };
 
   return (
-    <main className="min-w-screen flex min-h-screen w-full items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <main className="min-w-screen flex w-full items-center justify-center p-4">
+      <Card className="h-[90%] w-full max-w-md">
         <CardHeader className="pb-2">
           <div className="mb-4 flex justify-center">
             <Link href="/">

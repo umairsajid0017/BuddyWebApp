@@ -1,7 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 const PROTECTED_ROUTES = ["/dashboard", "/settings", "/services", "/bookings"];
-const PUBLIC_ROUTES = ["/login", "/register", "/about", "/contact", "/register/verify-otp", "/assets"];
+const PUBLIC_ROUTES = [
+  "/login",
+  "/register",
+  "/about",
+  "/contact",
+  "/verify-otp",
+  "/assets",
+];
 const LOGIN_URL = "/login";
 const HOME_URL = "/";
 

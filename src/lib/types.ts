@@ -24,6 +24,8 @@ export interface User {
   status: number;
   created_at: string;
   updated_at: string;
+  is_online: string;
+  otp_verify: string;
 }
 
 export interface LoginCredentials {
@@ -64,7 +66,7 @@ export interface VerifyOtpError {
 
 export interface Service {
   id: number;
-  service_name: string;
+  name: string;
   description: string;
   fixed_price: string;
   image: string;
@@ -82,7 +84,7 @@ export interface Service {
 
 interface ServiceRecords {
   id: number;
-  service_name: string;
+  name: string;
   description: string;
   fixed_price: string;
   image: string;
@@ -234,7 +236,7 @@ export interface SendOtpResponse {
 
 export interface SendOtpData {
   email: string;
-  role: "customer"
+  role: "customer";
   // type: "register" | "reset" | "verify";
 }
 
@@ -346,4 +348,65 @@ export interface CategoryServiceResponse {
   error: boolean;
   message: string;
   records: CategoryService[];
+}
+
+export interface CnicVerificationRequest {
+  cnic_front: File;
+  cnic_back: File;
+}
+
+export interface VerificationRecord {
+  id: number;
+  user_id: number;
+  verification_status: "Pending" | "Approved" | "Rejected";
+  cnic_front: string;
+  cnic_back: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface CnicVerificationResponse {
+  error: boolean;
+  message: string;
+  records: VerificationRecord;
+}
+
+export interface LivePhotoVerificationRequest {
+  live_photo: File;
+}
+
+export interface PassportVerificationRequest {
+  passport_photo: File;
+}
+
+export interface LivePhotoVerificationResponse {
+  error: boolean;
+  message: string;
+  data?: {
+    is_verify: string;
+  };
+}
+
+export interface PassportVerificationResponse {
+  error: boolean;
+  message: string;
+  data?: {
+    is_verify: string;
+  };
+}
+
+export interface VerificationStatus {
+  hasData: boolean;
+  status: "pending" | "approved" | "rejected" | null;
+}
+
+export interface VerificationCheckResponse {
+  error: boolean;
+  message: string;
+  role: string;
+  userVerified: boolean;
+  cnicInfo: VerificationStatus;
+  livePhotoRecord: VerificationStatus;
+  passportPhotoRecord: VerificationStatus;
 }

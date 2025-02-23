@@ -55,10 +55,15 @@ export default function Login() {
       if (!data.error && data.token && data.records) {
         const { records, token } = data;
         console.log("User logged in:", records, token);
-        useAuthStore.getState().setUser(records);
-        useAuthStore.getState().setToken(token);
-        await setAuthCookie(token);
-        void router.push("/");
+        if (records.otp_verify === "0") {
+          console.log("OTP not verified");
+          void router.push(`/verify-otp?email=${records.email}`);
+        } else {
+          useAuthStore.getState().setUser(records);
+          useAuthStore.getState().setToken(token);
+          await setAuthCookie(token);
+          void router.push("/");
+        }
       } else {
         throw new Error(data.message ?? "Login failed");
       }
@@ -94,7 +99,7 @@ export default function Login() {
 
   return (
     <main
-      className="flex min-h-screen w-full items-center justify-center p-4"
+      className="flex w-full items-center justify-center p-4"
       style={{
         backgroundImage: `url(${backgroundImageUrl})`,
         backgroundSize: "cover",
@@ -106,9 +111,9 @@ export default function Login() {
           <div className="mb-4 flex justify-center">
             <Image
               src="/assets/logo.png"
-              alt="App Icon"
-              width={64}
-              height={64}
+              alt="Buddy Logo"
+              width={72}
+              height={72}
             />
           </div>
           <CardTitle className="text-center text-2xl font-bold">

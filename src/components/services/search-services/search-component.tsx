@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { SearchResponse } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { Search as SearchIcon, Star } from "lucide-react";
+import { Search, Search as SearchIcon, Star } from "lucide-react";
 import { useSearchServices } from "@/lib/apis/search-services";
 import { cn } from "@/lib/utils";
 import { CURRENCY } from "@/utils/constants";
+import { Button } from "@/components/ui/button";
+import TooltipWrapper from "@/components/ui/tooltip-wrapper";
 
 const CategoryResult = ({
   category,
@@ -74,7 +76,10 @@ const ServiceResult = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <p className="text-sm text-muted-foreground">
-              {CURRENCY} {service.price_mode === "fixed" ? service.fixed_price : service.hourly_price}
+              {CURRENCY}{" "}
+              {service.price_mode === "fixed"
+                ? service.fixed_price
+                : service.hourly_price}
               {service.price_mode === "hourly" && "/hr"}
             </p>
           </div>
@@ -83,7 +88,9 @@ const ServiceResult = ({
           )}
         </div>
         {service.description && (
-          <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{service.description}</p>
+          <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+            {service.description}
+          </p>
         )}
       </div>
     </div>
@@ -93,8 +100,8 @@ const ServiceResult = ({
 const createSlug = (title: string) => {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 };
 
 export function SearchComponent({
@@ -136,39 +143,46 @@ export function SearchComponent({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelectCategory = (category: { id: number; title: string; image: string }) => {
+  const handleSelectCategory = (category: {
+    id: number;
+    title: string;
+    image: string;
+  }) => {
     setSearchTerm(category.title);
     setShowDropdown(false);
     const slug = createSlug(category.title);
     router.push(`/categories/${slug}?id=${category.id}`);
   };
 
-  const handleSelectService = (service: SearchResponse["records"]["services"][0]) => {
+  const handleSelectService = (
+    service: SearchResponse["records"]["services"][0],
+  ) => {
     setSearchTerm(service.name);
     setShowDropdown(false);
     router.push(`/services/${service.id}`);
   };
 
   const renderSearchResults = () => {
-    if (!searchResults?.records) return null;
+    // if (!searchResults?.records) return null;
 
-    const { categories = [], services = [] } = searchResults.records;
+    const { categories = [], services = [] } = searchResults?.records || {};
     const hasResults = categories.length > 0 || services.length > 0;
 
-    if (!hasResults) {
+    if (searchResults?.error)
       return (
         <div className="p-4 text-center text-muted-foreground">
           No results found
         </div>
       );
-    }
 
     return (
       <>
         {categories.length > 0 && (
           <div>
             <div className="border-b px-3 py-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Categories</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Categories
+              </h3>
             </div>
             {categories.map((category) => (
               <CategoryResult
@@ -182,7 +196,9 @@ export function SearchComponent({
         {services.length > 0 && (
           <div>
             <div className="border-b px-3 py-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Services</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Services
+              </h3>
             </div>
             {services.map((service) => (
               <ServiceResult
@@ -200,35 +216,37 @@ export function SearchComponent({
   return (
     <div className={cn("relative w-full", className)} ref={dropdownRef}>
       <div className="relative">
-        <div className="relative flex items-center">
+        <div className="relative flex items-center gap-2">
           <div className="pointer-events-none absolute left-4 flex items-center">
             <SearchIcon className="h-5 w-5 text-muted-foreground/60" />
           </div>
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Looking for a service?"
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setShowDropdown(true);
-            }}
-            onFocus={() => setShowDropdown(true)}
-            className={cn(
-              "h-12 w-full rounded-full bg-background px-11 py-3 text-sm",
-              "border border-input/90 shadow-sm",
-              "placeholder:text-muted-foreground/60",
-              "focus:border-input focus:outline-none focus:ring-1 focus:ring-ring/20",
-              "transition-all duration-200",
-            )}
-          />
+          <TooltipWrapper content="Search for services by name, category or description">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Looking for a service?"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowDropdown(true);
+              }}
+              onFocus={() => setShowDropdown(true)}
+              className={cn(
+                "h-12 w-full rounded-lg bg-background px-11 py-3 text-sm",
+                "border border-input/90 shadow-sm",
+                "placeholder:text-muted-foreground/60",
+                "focus:border-input focus:outline-none focus:ring-1 focus:ring-ring/20",
+                "transition-all duration-200",
+              )}
+            />
+          </TooltipWrapper>
           {searchTerm && (
             <button
               onClick={() => {
                 setSearchTerm("");
                 inputRef.current?.focus();
               }}
-              className="absolute right-4 rounded-full p-1 hover:bg-muted"
+              className="absolute right-20 rounded-full p-1 hover:bg-muted"
             >
               <svg
                 className="h-4 w-4 text-muted-foreground/60"
@@ -245,6 +263,9 @@ export function SearchComponent({
               </svg>
             </button>
           )}
+          <Button className="h-12 rounded-r-lg bg-primary hover:bg-primary-600">
+            <Search className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 

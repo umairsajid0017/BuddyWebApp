@@ -1,3 +1,6 @@
+import { User } from "../types";
+import { type MediaFiles } from "./common";
+
 export interface BookingsResponse {
   error: boolean;
   message: string;
@@ -123,7 +126,6 @@ export interface Category {
   updated_at: string;
 }
 
-
 export interface CreateBookingData {
   worker_id: string;
   description?: string;
@@ -131,7 +133,6 @@ export interface CreateBookingData {
   audio?: File;
   booking_date: string;
   address: string;
-
 }
 export interface CreateBidData {
   category_id: string;
@@ -142,12 +143,40 @@ export interface CreateBidData {
   address: string;
 }
 
-
 export interface CreateBookingResponse {
   error: boolean;
   message: string;
-  data?: {
-    id: string;
+  records: {
+    id: number;
+    booking_number: number;
+    booking_date: string;
+    bid_id: number | null;
+    customer_id: number;
+    worker_id: number;
+    worker_linked_time: string | null;
+    service_id: number;
+    status: number;
+    address: string;
+    canceled_reason: string | null;
+    canceled_by: string | null;
+    images: Array<{
+      id: number;
+      name: string;
+    }> | null;
+    before_images: string | null;
+    after_images: string | null;
+    audio: string | null;
+    description: string | null;
+    price: string;
+    is_feedback: number;
+    completed_time: string | null;
+    canceled_time: string | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    customer: User;
+    worker: User;
+    service: Service;
   };
 }
 

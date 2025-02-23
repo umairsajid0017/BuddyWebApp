@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { format, setDate } from "date-fns";
 import { type Service } from "@/lib/types";
 import { PlaceOrderSheet } from "./create-booking/place-order-sheet";
@@ -38,9 +38,15 @@ import {
   type CreateBidData,
   type CreateBidResponse,
   type CreateBookingData,
+  type CreateBookingResponse,
 } from "@/lib/types/booking-types";
 import { CURRENCY } from "@/utils/constants";
 import { useCategories } from "@/lib/apis/get-categories";
+import { useLocationUpdate } from "@/utils/location";
+import { useCalendarAvailability } from "@/lib/hooks/useCalendarAvailability";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BookingDirectConfirmation } from "./create-booking/booking-direct-confirmation";
+import { BackgroundGradient } from "../ui/background-gradient";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -51,7 +57,6 @@ type BookFormState = {
   service: Service | null;
   description: string;
   budget: number;
-  time: string;
   date: Date | undefined;
   mediaFiles: MediaFiles | undefined;
   address: string;
@@ -61,7 +66,6 @@ type BidFormState = {
   category: { id: number; title: string } | null;
   description: string;
   budget: number;
-  time: string;
   date: Date | undefined;
   mediaFiles: MediaFiles | undefined;
   address: string;
@@ -85,6 +89,9 @@ export function CreateBookingDialog({
   const { user } = useAuth();
   const createBid = useCreateBid();
   const directBooking = useDirectBooking();
+  const { updateUserLocation } = useLocationUpdate();
+  const { isLoading: isLoadingAvailability, isDateAvailable } =
+    useCalendarAvailability(initialService?.user?.id?.toString());
 
   const [formState, setFormState] = useState<FormState>(() => {
     const baseState = {
@@ -113,9 +120,15 @@ export function CreateBookingDialog({
   const [isPlaceOrderOpen, setIsPlaceOrderOpen] = useState(false);
   const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
+    useState(false);
   const [bidDetails, setBidDetails] = useState<
     CreateBidResponse["records"] | null
   >(null);
+  const [bookingDetails, setBookingDetails] = useState<
+    CreateBookingResponse["records"] | null
+  >(null);
+  const [isBookingLoading, setIsBookingLoading] = useState(false);
 
   const { data: servicesResponse, isLoading } = useServices();
   const { data: categoriesResponse, isLoading: categoriesLoading } =
@@ -135,7 +148,6 @@ export function CreateBookingDialog({
             service: initialService ?? null,
             description: "",
             budget: 200,
-            time: "",
             date: undefined,
             mediaFiles: undefined,
             address: "Oman",
@@ -144,7 +156,6 @@ export function CreateBookingDialog({
             category: null,
             description: "",
             budget: 200,
-            time: "",
             date: undefined,
             mediaFiles: undefined,
             address: "Oman",
@@ -157,9 +168,13 @@ export function CreateBookingDialog({
     const isValid =
       mode === "book"
         ? isBookingForm(formState) &&
-          Boolean(formState.service && formState.date && formState.time)
+          Boolean(
+            formState.service && formState.date && formState.address.trim(),
+          )
         : isBidForm(formState) &&
-          Boolean(formState.category && formState.date && formState.time);
+          Boolean(
+            formState.category && formState.date && formState.address.trim(),
+          );
 
     if (!isValid) {
       toast.error("Please fill in all required fields");
@@ -183,35 +198,49 @@ export function CreateBookingDialog({
       console.log("Bid mode");
       setIsStartBookingOpen(true);
     } else {
-      //TODO: There is a bug here that need to be resolved as the mediafiles are not in the correct state
-      await handleDirectBooking();
+      setIsBookingConfirmationOpen(true);
+      await handleDirectBooking(mediaFiles);
     }
   };
 
-  const handleDirectBooking = async () => {
+  const handleDirectBooking = async (mediaFiles?: MediaFiles) => {
     const bookingState = formState as BookFormState;
     if (!user || !bookingState.service) return;
 
     try {
+      setIsBookingLoading(true);
+
+      // Update location
+      await updateUserLocation();
+
+      // Format date to YYYY-MM-DD
+      const formattedDate = bookingState.date
+        ? format(bookingState.date, "yyyy-MM-dd")
+        : "";
+
       const payload: CreateBookingData = {
         description: bookingState.description,
-        images: bookingState.mediaFiles?.images,
-        audio: bookingState.mediaFiles?.audio,
+        images: mediaFiles?.images || bookingState.mediaFiles?.images,
+        audio: mediaFiles?.audio || bookingState.mediaFiles?.audio,
         address: bookingState.address,
-        booking_date: bookingState.date?.toString() ?? "",
+        booking_date: formattedDate,
         worker_id: initialService?.user.id.toString() ?? "",
       };
+
+      console.log("Direct booking payload:", payload);
       const response = await directBooking.mutateAsync(payload);
 
       if (!response.error) {
+        setBookingDetails(response.records);
         toast.success("Booking created successfully");
-        router.push("/bookings");
       } else {
         toast.error(response.message || "Failed to create booking");
       }
     } catch (error) {
       toast.error("Error creating booking");
       console.error("Booking error:", error);
+    } finally {
+      setIsBookingLoading(false);
     }
   };
 
@@ -220,6 +249,9 @@ export function CreateBookingDialog({
     if (!user || !bidState.category) return;
 
     try {
+      // Update location
+      await updateUserLocation();
+
       const payload: CreateBidData = {
         category_id: bidState.category.id.toString(),
         description: bidState.description,
@@ -251,14 +283,37 @@ export function CreateBookingDialog({
     }));
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+
+    if (mode === "book" && !isDateAvailable(date)) {
+      return;
+    }
+
+    if (mode === "bid") {
+      const today = new Date();
+      const isToday =
+        format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
+      if (!isToday) {
+        toast.error("For bids, only today's date can be selected");
+        return;
+      }
+    }
+
+    setFormState((prev) => ({ ...prev, date }));
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+          <BackgroundGradient className="w-fit" containerClassName="w-fit">
         <DialogTrigger asChild>
-          <Button variant="default">
-            {mode === "book" ? "Book Now" : "Create a Bid"}
-          </Button>
+            <Button variant="default" className="relative z-10 font-bold" effect={"shine"}>
+              <Plus className="h-4 w-4" />
+              {mode === "book" ? "Book Now" : "Create a Bid"}
+            </Button>
         </DialogTrigger>
+          </BackgroundGradient>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
@@ -338,12 +393,13 @@ export function CreateBookingDialog({
                 <Button
                   variant="outline"
                   className={`w-full justify-start text-left font-normal ${!formState.date && "text-muted-foreground"}`}
-                  onClick={() =>
-                    setFormState((prev) => ({ ...prev, date: new Date() }))
-                  }
+                  onClick={() => handleDateSelect(new Date())}
+                  disabled={mode === "book" && isLoadingAvailability}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formState.date ? (
+                  {isLoadingAvailability ? (
+                    <Skeleton className="h-4 w-[100px]" />
+                  ) : formState.date ? (
                     format(formState.date, "PPP")
                   ) : (
                     <span>Pick a date</span>
@@ -352,14 +408,58 @@ export function CreateBookingDialog({
               </div>
             </div>
 
-            <Calendar
-              mode="single"
-              selected={formState.date}
-              onSelect={(date) => setFormState((prev) => ({ ...prev, date }))}
-              className="flex w-full items-center justify-center rounded-md border"
-            />
+            {isLoadingAvailability ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
+              <Calendar
+                mode="single"
+                selected={formState.date}
+                onSelect={handleDateSelect}
+                className="flex w-full items-center justify-center rounded-md border"
+                disabled={
+                  mode === "book"
+                    ? (date) => !isDateAvailable(date)
+                    : (date) =>
+                        format(date, "yyyy-MM-dd") !==
+                        format(new Date(), "yyyy-MM-dd")
+                }
+                modifiers={
+                  mode === "book"
+                    ? {
+                        available: (date) => isDateAvailable(date),
+                      }
+                    : {
+                        available: (date) =>
+                          format(date, "yyyy-MM-dd") ===
+                          format(new Date(), "yyyy-MM-dd"),
+                      }
+                }
+                modifiersClassNames={{
+                  available: "bg-green-100 hover:bg-green-200",
+                }}
+              />
+            )}
 
             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="address" className="text-right">
+                Address
+              </Label>
+              <Input
+                id="address"
+                type="text"
+                className="col-span-3"
+                value={formState.address}
+                onChange={(e) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    address: e.target.value,
+                  }))
+                }
+                placeholder="Enter your address"
+              />
+            </div>
+
+            {/* <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="time" className="text-right">
                 Time
               </Label>
@@ -370,9 +470,9 @@ export function CreateBookingDialog({
                 value={formState.time}
                 onChange={handleTimeChange}
               />
-            </div>
+            </div> */}
 
-            <div className="grid grid-cols-4 items-center gap-4">
+            {/* <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="budget" className="text-right">
                 Budget
               </Label>
@@ -393,7 +493,7 @@ export function CreateBookingDialog({
                   className="pl-14"
                 />
               </div>
-            </div>
+            </div> */}
           </div>
 
           <DialogFooter>
@@ -402,11 +502,10 @@ export function CreateBookingDialog({
               onClick={handleSaveBooking}
               disabled={
                 mode === "book"
-                  ? !initialService || !formState.date || !formState.time
+                  ? !initialService || !formState.date
                   : !isBidForm(formState) ||
                     !formState.category ||
-                    !formState.date ||
-                    !formState.time
+                    !formState.date
               }
             >
               Continue
@@ -436,6 +535,19 @@ export function CreateBookingDialog({
             : undefined
         }
         isLoading={createBid.isLoading}
+      />
+
+      <BookingDirectConfirmation
+        isOpen={isBookingConfirmationOpen}
+        onClose={() => {
+          setIsBookingConfirmationOpen(false);
+          resetForm();
+          if (!isBookingLoading && bookingDetails) {
+            router.push("/bookings");
+          }
+        }}
+        bookingDetails={bookingDetails ?? undefined}
+        isLoading={isBookingLoading}
       />
 
       <BookingConfirmation

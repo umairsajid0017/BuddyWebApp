@@ -24,6 +24,13 @@ import {
   type CheckCredentialsResponse,
   type SendOtpResponse,
   type SendOtpData,
+  type CnicVerificationResponse,
+  type CnicVerificationRequest,
+  type LivePhotoVerificationResponse,
+  type LivePhotoVerificationRequest,
+  type PassportVerificationResponse,
+  type PassportVerificationRequest,
+  type VerificationCheckResponse,
 } from "./types";
 import {
   useMutation,
@@ -77,12 +84,17 @@ export const useRegister = () => {
 };
 
 export const useCheckCredentials = () => {
-  return useMutation<CheckCredentialsResponse, AxiosError, { email: string; phone: string }>(
-    async (data) => {
-      const response = await api.post<CheckCredentialsResponse>("/checkCredentials", data);
-      return response.data;
-    },
-  );
+  return useMutation<
+    CheckCredentialsResponse,
+    AxiosError,
+    { email: string; phone: string }
+  >(async (data) => {
+    const response = await api.post<CheckCredentialsResponse>(
+      "/checkCredentials",
+      data,
+    );
+    return response.data;
+  });
 };
 
 //The useLogin hook is a custom hook that uses the useMutation hook from react-query to log in a user.
@@ -152,30 +164,32 @@ export const useUser = () => useQuery(["user"], () => api.get<User>("/user"));
 //The useSendOtp hook is a custom hook that uses the useMutation hook from react-query to send an OTP code.
 //It sends a POST request to the /sendOtp endpoint with the user's data and returns the response data.
 export const useSendOtp = () => {
-  return useMutation<SendOtpResponse, AxiosError, SendOtpData>(
-    async (data) => {
-      const response = await api.post<SendOtpResponse>("/sendOTP", data);
-      return response.data;
-    },
-  );
+  return useMutation<SendOtpResponse, AxiosError, SendOtpData>(async (data) => {
+    const response = await api.post<SendOtpResponse>("/sendOTP", data);
+    return response.data;
+  });
 };
 
 //The useVerifyOtp hook is a custom hook that uses the useMutation hook from react-query to verify an OTP code.
 //It sends a POST request to the /verifyOtp endpoint with the OTP code and returns the response data.
 //It takes and email and an OTP that was sent to the user and returns the response data.
 export const useVerifyOtp = () => {
-  return useMutation<VerifyOtpResponse, AxiosError<VerifyOtpError>, VerifyOtpData>(
+  return useMutation<
+    VerifyOtpResponse,
+    AxiosError<VerifyOtpError>,
+    VerifyOtpData
+  >(
     async (data) => {
       const response = await api.post<VerifyOtpResponse>("/verifyOtp", data);
       return response.data;
     },
     {
-      onSuccess: (data) => {
-        if (data.user) {
-          // Update auth store with verified user if available
-          useAuthStore.getState().setUser(data.user);
-        }
-      },
+      // onSuccess: (data) => {
+      //   if (data.user) {
+      //     // Update auth store with verified user if available
+      //     useAuthStore.getState().setUser(data.user);
+      //   }
+      // },
     },
   );
 };
@@ -362,13 +376,89 @@ export const useRequestResetOtp = () => {
 export const useResetPassword = () => {
   return useMutation<ResetPasswordResponse, Error, ResetPasswordData>(
     async (data) => {
-      const response = await api.post<ResetPasswordResponse>(
-        "/resetPassword",
-        {
-          email: data.email,
-          password: data.password,
-          // otp: data.
+      const response = await api.post<ResetPasswordResponse>("/resetPassword", {
+        email: data.email,
+        password: data.password,
+        // otp: data.
+      });
+      return response.data;
+    },
+  );
+};
+
+export const useCnicVerification = () => {
+  return useMutation<
+    CnicVerificationResponse,
+    AxiosError,
+    CnicVerificationRequest
+  >(async (data) => {
+    const formData = new FormData();
+    formData.append("cnic_front", data.cnic_front);
+    formData.append("cnic_back", data.cnic_back);
+
+    const response = await api.post<CnicVerificationResponse>(
+      "/addVerificationCnic",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
+      },
+    );
+    return response.data;
+  });
+};
+
+export const useLivePhotoVerification = () => {
+  return useMutation<
+    LivePhotoVerificationResponse,
+    AxiosError,
+    LivePhotoVerificationRequest
+  >(async (data) => {
+    const formData = new FormData();
+    formData.append("live_photo", data.live_photo);
+
+    const response = await api.post<LivePhotoVerificationResponse>(
+      "/addVerificationLivePhoto",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  });
+};
+
+export const usePassportVerification = () => {
+  return useMutation<
+    PassportVerificationResponse,
+    AxiosError,
+    PassportVerificationRequest
+  >(async (data) => {
+    const formData = new FormData();
+    formData.append("passport_photo", data.passport_photo);
+
+    const response = await api.post<PassportVerificationResponse>(
+      "/addVerificationPassport",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  });
+};
+
+export const useVerificationCheck = () => {
+  return useQuery<VerificationCheckResponse>(
+    ["verificationCheck"],
+    async () => {
+      const response = await api.get<VerificationCheckResponse>(
+        "/checkAccountVerification",
       );
       return response.data;
     },

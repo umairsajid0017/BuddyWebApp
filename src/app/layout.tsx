@@ -10,6 +10,7 @@ import QueryClientWrapper from "@/components/client-query/clientQueryWrapper";
 import NavBar from "@/components/ui/navbar";
 import NavbarWrapper from "@/components/ui/navbar-wrapper";
 import { Toaster } from "@/components/ui/toaster";
+import Footer from "@/components/ui/footer";
 
 export const metadata: Metadata = {
   title: "Buddy Customer",
@@ -25,10 +26,11 @@ export default function RootLayout({
       <body>
         <QueryClientWrapper>
           {/* <AuthProvider> */}
-          <NavbarWrapper />
-
-          {children}
-
+          <div className="flex min-h-screen flex-col">
+            <NavbarWrapper />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
           {/* </AuthProvider> */}
           <Toaster />
         </QueryClientWrapper>
