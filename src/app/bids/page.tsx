@@ -30,6 +30,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { BidOffers } from "@/components/BidOffers";
 import Main from "@/components/ui/main";
+import { ImageViewer } from "@/components/ImageViewer";
 
 const getStatusBadgeProps = (status: number) => {
   switch (status) {
@@ -73,6 +74,7 @@ const BidsPage = () => {
   const [cancelReason, setCancelReason] = useState("");
   const [showOffers, setShowOffers] = useState(false);
   const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   // Mock offers data - replace with actual API call
   const mockOffers = [
@@ -230,7 +232,11 @@ const BidsPage = () => {
                             {bid.images.map((image) => (
                               <div
                                 key={image.id}
-                                className="relative h-24 w-24 overflow-hidden rounded-lg"
+                                className="relative h-24 w-24 overflow-hidden rounded-lg cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedImage(`${process.env.NEXT_PUBLIC_IMAGE_URL}/${image.name}`);
+                                }}
                               >
                                 <Image
                                   src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/${image.name}`}
@@ -342,6 +348,14 @@ const BidsPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Image Viewer */}
+      <ImageViewer
+        src={selectedImage || ""}
+        alt="Bid image"
+        isOpen={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+      />
 
       {/* Offers Panel */}
       <BidOffers
