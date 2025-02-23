@@ -49,7 +49,7 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
           </SheetHeader>
           <div className="mt-6 space-y-6">
             <Image
-              src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking.before_images[0]?.name}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking.images[0]?.name}
               alt={booking.service.name}
               width={500}
               height={300}
@@ -90,10 +90,10 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
             </div>
             <div className="flex space-x-4">
               {/*{booking.status === "confirmed" && (*/}
-                <Button onClick={handleChat} className="flex-1">
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Chat
-                </Button>
+              <Button onClick={handleChat} className="flex-1">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Chat
+              </Button>
               {/*)}*/}
 
               {/*{booking.status === "pending" && (*/}
@@ -111,12 +111,12 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
         </SheetContent>
       </Sheet>
 
-  <BookingChat
-      isOpen={isChatOpen}
-      onClose={() => setIsChatOpen(false)}
-      taskId={booking.id.toString()}
-      provider={booking.worker}
-  />
+      <BookingChat
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        taskId={booking.id.toString()}
+        provider={booking.worker}
+      />
     </>
   );
 };

@@ -28,6 +28,26 @@ export const useBookings = (
   );
 };
 
+// Get bookings by status
+export const useBookingsByStatus = (
+  status: number,
+  options?: UseQueryOptions<BookingsResponse, AxiosError>,
+) => {
+  return useQuery<BookingsResponse, AxiosError>(
+    ["bookings", status],
+    async () => {
+      const response = await api.get<BookingsResponse>(
+        "/bookingsAgainstStatus",
+        {
+          params: { status },
+        },
+      );
+      return response.data;
+    },
+    options,
+  );
+};
+
 // Create a new booking
 export const useCreateBooking = () => {
   return useMutation<CreateBookingResponse, AxiosError, CreateBookingData>(

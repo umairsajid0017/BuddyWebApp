@@ -10,34 +10,48 @@ import { Badge } from "@/components/ui/badge";
 import { Booking } from "@/lib/types/booking-types";
 import BookingDetailsSheet from "./bookings-details-sheet";
 import { CURRENCY } from "@/utils/constants";
+import { BookingStatus, getStatusLabel } from "@/lib/types/status";
+import { formatDistanceToNow } from "date-fns";
+import { MapPin, Clock } from "lucide-react";
 
 interface TaskCardProps {
   booking: Booking;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
-  const statusColors = {
-    pending: "bg-yellow-500",
-    in_progress: "bg-blue-500",
-    completed: "bg-green-500",
-    cancelled: "bg-red-500",
-    confirmed: "bg-blue-500",
-  };
+const getStatusBadgeVariant = (status: BookingStatus) => {
+  switch (status) {
+    case BookingStatus.OPEN:
+    case BookingStatus.CONFIRMED:
+    case BookingStatus.STARTED:
+    case BookingStatus.WORKER_HAS_STARTED_THE_WORK:
+    case BookingStatus.WORKER_IS_ON_HIS_WAY:
+    case BookingStatus.WORKER_IS_ON_YOUR_DOORSTEP:
+      return "default";
+    case BookingStatus.COMPLETED:
+      return "success";
+    case BookingStatus.CANCELED:
+    case BookingStatus.CANCELED_BY_WORKER:
+    case BookingStatus.CANCELED_BY_CUSTOMER:
+    case BookingStatus.TIMEOUT_CANCELED:
+    case BookingStatus.DECLINED:
+      return "destructive";
+    case BookingStatus.PENDING:
+    case BookingStatus.NOT_STARTED:
+      return "outline";
+    default:
+      return "secondary";
+  }
+};
 
-  const statusMapping = {
-    pending: "Pending",
-    in_progress: "In Progress",
-    completed: "Completed",
-    cancelled: "Cancelled",
-    confirmed: "Confirmed",
-  };
+const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
+  const statusVariant = getStatusBadgeVariant(booking.status);
+  const statusLabel = getStatusLabel(booking.status);
 
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="p-0">
-
         <img
-          src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking?.before_images[0]?.name}
+          src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking?.images[0]?.name}
           alt={booking.service.name}
           className="h-40 w-full rounded-t-lg object-cover"
         />
@@ -62,8 +76,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between p-4 pt-0">
-        <Badge variant="default" className={``}>
-          {/*{statusMapping[booking.status]}*/}
+        <Badge variant={statusVariant as any} className="mt-2">
+          {statusLabel}
         </Badge>
         <BookingDetailsSheet booking={booking} />
       </CardFooter>
