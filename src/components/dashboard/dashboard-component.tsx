@@ -19,18 +19,13 @@ import Link from "next/link";
 import { Input } from "../ui/input";
 import { Search } from "lucide-react";
 import { SearchComponent } from "../services/search-services/search-component";
+import { useSpecialOffers } from "@/lib/apis/get-special-offers";
+import useSpecialOffersStore from "@/store/specialOffersStore";
 
 type ImageItem = {
   src: string;
   alt: string;
 };
-
-const images: ImageItem[] = [
-  { src: "/assets/promo-2.png", alt: "Image 1" },
-  { src: "/assets/cleaning.png", alt: "Image 2" },
-  { src: "/assets/laundry.png", alt: "Image 3" },
-  { src: "/assets/garage.png", alt: "Image 4" },
-];
 
 export function DashboardComponent() {
   const { data: servicesResponse, isLoading, error } = useServices();
@@ -39,6 +34,11 @@ export function DashboardComponent() {
     isLoading: categoriesLoading,
     error: categoriesError,
   } = useCategories();
+  const {
+    data: specialOffersResponse,
+    isLoading: specialOffersLoading,
+    error: specialOffersError,
+  } = useSpecialOffers();
   const router = useRouter();
   const { services, setServices, setLoading, setError, deleteService } =
     useServicesStore();
@@ -50,6 +50,13 @@ export function DashboardComponent() {
     setError: setCategoriesError,
     deleteCategory,
   } = useCategoriesStore();
+
+  const {
+    specialOffers,
+    setSpecialOffers,
+    setLoading: setSpecialOffersLoading,
+    setError: setSpecialOffersError,
+  } = useSpecialOffersStore();
 
   useEffect(() => {
     if (servicesResponse) {
@@ -84,7 +91,33 @@ export function DashboardComponent() {
     setError,
   ]);
 
-  if (isLoading) return <DashboardSkeleton />;
+  useEffect(() => {
+    if (specialOffersResponse) {
+      setSpecialOffers(specialOffersResponse);
+    }
+    setSpecialOffersLoading(specialOffersLoading);
+    setSpecialOffersError(
+      specialOffersError ? (specialOffersError as any).message : null,
+    );
+  }, [
+    specialOffersResponse,
+    specialOffersLoading,
+    specialOffersError,
+    setSpecialOffers,
+    setSpecialOffersLoading,
+    setSpecialOffersError,
+  ]);
+
+  if (isLoading || categoriesLoading || specialOffersLoading)
+    return <DashboardSkeleton />;
+
+  const specialOfferItems = specialOffers.map((offer) => ({
+    src: process.env.NEXT_PUBLIC_IMAGE_URL! + offer.image,
+    alt: offer.title,
+    title: offer.title,
+    description: offer.description,
+    discount: offer.discount_percentage,
+  }));
 
   return (
     <div className="flex min-h-screen flex-col md:mx-8 lg:px-24">
@@ -93,41 +126,46 @@ export function DashboardComponent() {
           <div
             className="flex h-96 flex-col items-center justify-center rounded-lg bg-card p-6 shadow lg:w-[40%]"
             style={{
-              backgroundImage: "url('/assets/search-bg.png')",
-              backgroundSize: "contain",
+              backgroundImage: "url('/assets/search-bg.jpg')",
+              backgroundSize: "cover",
               backgroundPosition: "center",
-              // backgroundColor: "rgba(0,0,0,0.1)", // Add dark overlay
-              // backgroundBlendMode: "multiply", // Blend the overlay with image
+              backgroundColor: "rgba(0, 0, 0, 0.1)",
+              backgroundBlendMode: "overlay",
             }}
           >
-            {/* <div className="flex w-full max-w-lg items-center justify-center gap-2">
-              <Input
-                type="text"
-                placeholder="Search for any service..."
-                className="h-12 rounded-lg border-input bg-background px-4 text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              <Button
-                className="h-12 rounded-lg bg-primary hover:bg-primary-600"
-                effect="shine"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-
-            </div> */}
             <SearchComponent />
           </div>
 
           <div className="relative h-96 overflow-hidden rounded-lg lg:w-[60%]">
             <CardStack
-              items={images}
+              items={specialOfferItems}
               renderItem={(item) => (
-                <img
-                  src={item.src}
-                  alt={item.alt}
-                  className="h-full w-full object-cover"
-                />
+                <div className="relative h-full w-full">
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/50 to-transparent">
+                    <div className="space-y-2 p-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-3xl font-bold text-text-100">
+                          {item.title}
+                        </h3>
+                        {item.discount !== "0.00" && (
+                          <span className="rounded-full bg-primary px-4 py-1 text-lg font-bold text-text-100">
+                            {item.discount}% OFF
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-base leading-relaxed text-text-100">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
-              interval={2000}
+              interval={3000}
             />
           </div>
         </section>
