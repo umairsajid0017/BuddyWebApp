@@ -134,7 +134,7 @@ export default function NavBar() {
 
                 <Button
                   variant="ghost"
-                  onClick={() => router.push("/bookings")}
+                  onClick={() => router.push("/help-center")}
                   className="font-semibold text-white hover:bg-secondary-800 hover:text-white"
                 >
                   Help Center
