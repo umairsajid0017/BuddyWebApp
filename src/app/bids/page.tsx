@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Clock, MoreVertical } from "lucide-react";
+import { MapPin, Clock, MoreVertical, PlayCircle } from "lucide-react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -72,6 +72,7 @@ const BidsPage = () => {
   const [selectedBid, setSelectedBid] = useState<number | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [showOffers, setShowOffers] = useState(false);
+  const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
 
   // Mock offers data - replace with actual API call
   const mockOffers = [
@@ -271,19 +272,32 @@ const BidsPage = () => {
                   </div>
                   {bid.audio && (
                     <div className="bg-muted/50 p-4">
-                      <audio
-                        controls
-                        className="h-10 w-full"
-                        style={{
-                          colorScheme: "normal",
-                        }}
-                      >
-                        <source
-                          src={`${process.env.NEXT_PUBLIC_AUDIO_URL}/${bid.audio}`}
-                          type="audio/wav"
-                        />
-                        Your browser does not support the audio element.
-                      </audio>
+                      {playingAudioId === bid.id ? (
+                        <audio
+                          controls
+                          className="h-10 w-full"
+                          style={{
+                            colorScheme: "normal",
+                          }}
+                          onEnded={() => setPlayingAudioId(null)}
+                          autoPlay
+                        >
+                          <source
+                            src={`${process.env.NEXT_PUBLIC_AUDIO_URL}/${bid.audio}`}
+                            type="audio/wav"
+                          />
+                          Your browser does not support the audio element.
+                        </audio>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="flex items-center justify-center gap-2"
+                          onClick={() => setPlayingAudioId(bid.id)}
+                        >
+                          <PlayCircle className="h-5 w-5" />
+                          Play Audio
+                        </Button>
+                      )}
                     </div>
                   )}
                 </Card>
