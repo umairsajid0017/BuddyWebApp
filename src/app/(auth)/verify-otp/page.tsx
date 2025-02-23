@@ -19,7 +19,8 @@ const OTPVerification = () => {
   const router = useRouter();
   const { toast } = useToast();
   const email = searchParams.get("email");
-  const type = (searchParams.get("type") as "register" | "reset" | "verify") || "register";
+  const type =
+    (searchParams.get("type") as "register" | "reset" | "verify") || "register";
 
   const [otp, setOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
@@ -47,7 +48,7 @@ const OTPVerification = () => {
     try {
       const response = await sendOtpMutation.mutateAsync({
         email: email!,
-        role: "customer"
+        role: "customer",
       });
 
       if (!response.error) {
@@ -62,7 +63,8 @@ const OTPVerification = () => {
       } else {
         if (response.records?.next_retry_at) {
           const waitTime = Math.ceil(
-            (new Date(response.records.next_retry_at).getTime() - Date.now()) / 1000
+            (new Date(response.records.next_retry_at).getTime() - Date.now()) /
+              1000,
           );
           setResendTimer(waitTime);
         }
@@ -104,7 +106,6 @@ const OTPVerification = () => {
         });
         router.push(type === "reset" ? "/reset-password" : "/login");
       } else {
-
         toast({
           variant: "destructive",
           title: "Error",
@@ -128,8 +129,8 @@ const OTPVerification = () => {
   };
 
   return (
-    <main className="min-w-screen flex min-h-screen w-full items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <main className="min-w-screen flex w-full items-center justify-center p-4">
+      <Card className="h-[90%] w-full max-w-md">
         <CardHeader className="pb-2">
           <div className="mb-4 flex justify-center">
             <Link href="/">
@@ -152,11 +153,7 @@ const OTPVerification = () => {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-center">
-              <InputOTP
-                maxLength={6}
-                value={otp}
-                onChange={setOtp}
-              >
+              <InputOTP maxLength={6} value={otp} onChange={setOtp}>
                 <InputOTPGroup>
                   <InputOTPSlot index={0} />
                   <InputOTPSlot index={1} />
@@ -208,4 +205,4 @@ const OTPVerification = () => {
   );
 };
 
-export default OTPVerification; 
+export default OTPVerification;

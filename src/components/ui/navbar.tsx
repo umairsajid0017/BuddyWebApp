@@ -85,7 +85,7 @@ export default function NavBar() {
         >
           {isSearchVisible ? (
             <div className="flex w-full items-center">
-              <SearchComponent onClose={() => setIsSearchVisible(false)} />
+              {/* <SearchComponent onClose={() => setIsSearchVisible(false)} /> */}
               <Button
                 variant="ghost"
                 size="icon"

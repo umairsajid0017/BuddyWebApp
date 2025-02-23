@@ -271,7 +271,7 @@ const Register: React.FC = () => {
 
   return (
     <main
-      className="min-w-screen flex min-h-screen w-full items-center justify-center p-4"
+      className="min-w-screen flex w-full items-center justify-center p-4"
       style={{
         backgroundImage: `url(${backgroundImageUrl})`,
         backgroundSize: "cover",
@@ -283,10 +283,9 @@ const Register: React.FC = () => {
           <div className="mb-4 flex justify-center">
             <Image
               src="/assets/logo.png"
-              alt="App Icon"
-              className="h-16 w-16"
-              width={"64"}
-              height={"64"}
+              alt="Buddy Logo"
+              width={72}
+              height={72}
             />
           </div>
           <CardTitle className="text-center text-2xl font-bold">

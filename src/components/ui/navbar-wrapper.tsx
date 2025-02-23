@@ -8,7 +8,10 @@ import { useAuth } from "@/store/authStore";
 export default function NavbarWrapper() {
   const pathname = usePathname();
   const isAuthPage =
-    pathname.startsWith("/login") || pathname.startsWith("/register");
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/verify-otp") ||
+    pathname.startsWith("/reset-password");
 
   const { user } = useAuth();
 

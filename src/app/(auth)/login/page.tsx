@@ -98,7 +98,7 @@ export default function Login() {
 
   return (
     <main
-      className="flex min-h-screen w-full items-center justify-center p-4"
+      className="flex w-full items-center justify-center p-4"
       style={{
         backgroundImage: `url(${backgroundImageUrl})`,
         backgroundSize: "cover",
@@ -110,9 +110,9 @@ export default function Login() {
           <div className="mb-4 flex justify-center">
             <Image
               src="/assets/logo.png"
-              alt="App Icon"
-              width={64}
-              height={64}
+              alt="Buddy Logo"
+              width={72}
+              height={72}
             />
           </div>
           <CardTitle className="text-center text-2xl font-bold">
