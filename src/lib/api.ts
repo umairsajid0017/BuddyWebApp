@@ -24,6 +24,13 @@ import {
   type CheckCredentialsResponse,
   type SendOtpResponse,
   type SendOtpData,
+  type CnicVerificationResponse,
+  type CnicVerificationRequest,
+  type LivePhotoVerificationResponse,
+  type LivePhotoVerificationRequest,
+  type PassportVerificationResponse,
+  type PassportVerificationRequest,
+  type VerificationCheckResponse,
 } from "./types";
 import {
   useMutation,
@@ -374,6 +381,85 @@ export const useResetPassword = () => {
         password: data.password,
         // otp: data.
       });
+      return response.data;
+    },
+  );
+};
+
+export const useCnicVerification = () => {
+  return useMutation<
+    CnicVerificationResponse,
+    AxiosError,
+    CnicVerificationRequest
+  >(async (data) => {
+    const formData = new FormData();
+    formData.append("cnic_front", data.cnic_front);
+    formData.append("cnic_back", data.cnic_back);
+
+    const response = await api.post<CnicVerificationResponse>(
+      "/addVerificationCnic",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  });
+};
+
+export const useLivePhotoVerification = () => {
+  return useMutation<
+    LivePhotoVerificationResponse,
+    AxiosError,
+    LivePhotoVerificationRequest
+  >(async (data) => {
+    const formData = new FormData();
+    formData.append("live_photo", data.live_photo);
+
+    const response = await api.post<LivePhotoVerificationResponse>(
+      "/addVerificationLivePhoto",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  });
+};
+
+export const usePassportVerification = () => {
+  return useMutation<
+    PassportVerificationResponse,
+    AxiosError,
+    PassportVerificationRequest
+  >(async (data) => {
+    const formData = new FormData();
+    formData.append("passport_photo", data.passport_photo);
+
+    const response = await api.post<PassportVerificationResponse>(
+      "/addVerificationPassport",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return response.data;
+  });
+};
+
+export const useVerificationCheck = () => {
+  return useQuery<VerificationCheckResponse>(
+    ["verificationCheck"],
+    async () => {
+      const response = await api.get<VerificationCheckResponse>(
+        "/checkAccountVerification",
+      );
       return response.data;
     },
   );

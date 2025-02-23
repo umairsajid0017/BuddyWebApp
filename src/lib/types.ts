@@ -347,3 +347,64 @@ export interface CategoryServiceResponse {
   message: string;
   records: CategoryService[];
 }
+
+export interface CnicVerificationRequest {
+  cnic_front: File;
+  cnic_back: File;
+}
+
+export interface VerificationRecord {
+  id: number;
+  user_id: number;
+  verification_status: "Pending" | "Approved" | "Rejected";
+  cnic_front: string;
+  cnic_back: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface CnicVerificationResponse {
+  error: boolean;
+  message: string;
+  records: VerificationRecord;
+}
+
+export interface LivePhotoVerificationRequest {
+  live_photo: File;
+}
+
+export interface PassportVerificationRequest {
+  passport_photo: File;
+}
+
+export interface LivePhotoVerificationResponse {
+  error: boolean;
+  message: string;
+  data?: {
+    is_verify: string;
+  };
+}
+
+export interface PassportVerificationResponse {
+  error: boolean;
+  message: string;
+  data?: {
+    is_verify: string;
+  };
+}
+
+export interface VerificationStatus {
+  hasData: boolean;
+  status: "pending" | "approved" | "rejected" | null;
+}
+
+export interface VerificationCheckResponse {
+  error: boolean;
+  message: string;
+  role: string;
+  userVerified: boolean;
+  cnicInfo: VerificationStatus;
+  livePhotoRecord: VerificationStatus;
+  passportPhotoRecord: VerificationStatus;
+}
