@@ -189,12 +189,11 @@ export function CreateBookingDialog({
       console.log("Bid mode");
       setIsStartBookingOpen(true);
     } else {
-      //TODO: There is a bug here that need to be resolved as the mediafiles are not in the correct state
-      await handleDirectBooking();
+      await handleDirectBooking(mediaFiles);
     }
   };
 
-  const handleDirectBooking = async () => {
+  const handleDirectBooking = async (mediaFiles?: MediaFiles) => {
     const bookingState = formState as BookFormState;
     if (!user || !bookingState.service) return;
 
@@ -209,12 +208,14 @@ export function CreateBookingDialog({
 
       const payload: CreateBookingData = {
         description: bookingState.description,
-        images: bookingState.mediaFiles?.images,
-        audio: bookingState.mediaFiles?.audio,
+        images: mediaFiles?.images || bookingState.mediaFiles?.images,
+        audio: mediaFiles?.audio || bookingState.mediaFiles?.audio,
         address: bookingState.address,
         booking_date: formattedDate,
         worker_id: initialService?.user.id.toString() ?? "",
       };
+
+      console.log("Direct booking payload:", payload);
       const response = await directBooking.mutateAsync(payload);
 
       if (!response.error) {
