@@ -58,9 +58,9 @@ const NoBookingsView: React.FC<{ status: string }> = ({ status }) => (
     </h2>
     <p className="mb-6 text-center text-gray-500">
       You do not have any {status} bookings. Make a new booking by clicking the
-      button below.
+      button.
     </p>
-    <CreateBookingDialog />
+    {/* <CreateBookingDialog /> */}
   </div>
 );
 
@@ -85,7 +85,7 @@ const BookingsComponent: React.FC = () => {
     <div className="p-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Bookings</h1>
-        <CreateBookingDialog />
+        {/* <CreateBookingDialog /> */}
       </div>
       <Tabs
         value={currentStatusKey}

@@ -12,11 +12,11 @@ export default function Footer() {
               <Image
                 src="/assets/logo.png"
                 alt="Buddy Logo"
-                width={40}
-                height={40}
+                width={72}
+                height={72}
                 className="mr-2"
               />
-              <h3 className="text-xl font-bold">Buddy</h3>
+              <h3 className="text-2xl font-bold">Buddy</h3>
             </div>
             <p className="text-gray-300">
               Your trusted platform for connecting with skilled service
@@ -25,12 +25,12 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h3 className="mb-4 text-xl font-bold">Quick Links</h3>
+            <h3 className="mb-4 text-lg font-bold">Quick Links</h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/services"
-                  className="text-gray-300 transition-colors hover:text-white"
+                  className="text-gray-300 text-sm transition-colors hover:text-white"
                 >
                   Browse Services
                 </Link>
@@ -38,7 +38,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/bookings"
-                  className="text-gray-300 transition-colors hover:text-white"
+                  className="text-gray-300 text-sm transition-colors hover:text-white"
                 >
                   My Bookings
                 </Link>
@@ -46,7 +46,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/profile"
-                  className="text-gray-300 transition-colors hover:text-white"
+                  className="text-gray-300 text-sm transition-colors hover:text-white"
                 >
                   My Profile
                 </Link>
@@ -54,7 +54,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/help-center"
-                  className="text-gray-300 transition-colors hover:text-white"
+                  className="text-gray-300 text-sm transition-colors hover:text-white"
                 >
                   Help Center
                 </Link>
@@ -62,28 +62,28 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-xl font-bold">Contact Us</h3>
-            <p className="text-gray-300">Support Hours:</p>
-            <p className="mb-2 text-gray-300">Mon-Fri: 9:00 AM - 6:00 PM</p>
-            <p className="text-gray-300">Email:</p>
+            <h3 className="mb-4 text-lg font-bold">Contact Us</h3>
+            <p className="text-gray-300 text-sm">Support Hours:</p>
+            <p className="mb-2 text-gray-300 text-sm">Mon-Fri: 9:00 AM - 6:00 PM</p>
+            <p className="text-gray-300 text-sm">Email:</p>
             <a
               href="mailto:support@buddy.com"
-              className="text-gray-300 hover:text-white"
+              className="text-gray-300 text-sm hover:text-white"
             >
               support@buddy.com
             </a>
-            <p className="mt-2 text-gray-300">Phone:</p>
+            <p className="mt-2 text-gray-300 text-sm">Phone:</p>
             <a
               href="tel:+1234567890"
-              className="text-gray-300 hover:text-white"
+              className="text-gray-300 text-sm hover:text-white"
             >
               +1 (234) 567-890
             </a>
           </div>
           <div>
-            <h3 className="mb-4 text-xl font-bold">Connect With Us</h3>
+            <h3 className="mb-4 text-lg font-bold">Connect With Us</h3>
             <div className="space-y-4">
-              <p className="text-gray-300">
+              <p className="text-gray-300 text-sm">
                 Follow us on social media for updates, tips, and service
                 provider highlights.
               </p>
@@ -91,7 +91,7 @@ export default function Footer() {
                 <Link
                   href="https://facebook.com/buddyservices"
                   target="_blank"
-                  className="text-gray-300 transition-colors hover:text-white"
+                  className="text-gray-300 text-sm transition-colors hover:text-white"
                 >
                   <Facebook className="h-6 w-6" />
                   <span className="sr-only">Facebook</span>
@@ -99,7 +99,7 @@ export default function Footer() {
                 <Link
                   href="https://twitter.com/buddyservices"
                   target="_blank"
-                  className="text-gray-300 transition-colors hover:text-white"
+                  className="text-gray-300 text-sm transition-colors hover:text-white"
                 >
                   <Twitter className="h-6 w-6" />
                   <span className="sr-only">Twitter</span>
@@ -107,7 +107,7 @@ export default function Footer() {
                 <Link
                   href="https://instagram.com/buddyservices"
                   target="_blank"
-                  className="text-gray-300 transition-colors hover:text-white"
+                  className="text-gray-300 text-sm transition-colors hover:text-white"
                 >
                   <Instagram className="h-6 w-6" />
                   <span className="sr-only">Instagram</span>
@@ -117,7 +117,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-gray-700 pt-8 text-center">
-          <p className="text-gray-300">
+          <p className="text-gray-300 text-sm">
             &copy; {new Date().getFullYear()} Buddy Services. All rights
             reserved.
           </p>
