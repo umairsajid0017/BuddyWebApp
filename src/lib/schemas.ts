@@ -3,21 +3,25 @@ import type { User, LoginCredentials, RegisterData } from "./types";
 import { LoginType } from "@/utils/constants";
 
 // Regex pattern for validating phone numbers in +92 format
-const phoneRegex = /^(\+92)[0-9]{10}$/;
+const phoneRegex = /^(\+968)[0-9]{8}$/;
 
 // Password validation schema
-const passwordSchema = z.string()
+const passwordSchema = z
+  .string()
   .min(8, "Password must be at least 8 characters long")
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
   .regex(/[0-9]/, "Password must contain at least one number")
-  .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character");
+  .regex(
+    /[^A-Za-z0-9]/,
+    "Password must contain at least one special character",
+  );
 
 export const userSchema = z.object({
   id: z.number(),
   name: z.string().min(2, "Name must be at least 2 characters long"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().regex(phoneRegex, "Phone number must be in +92 format"),
+  phone: z.string().regex(phoneRegex, "Phone number must be in +968 format"),
   email_verified_at: z.string().nullable(),
   image: z.string().nullable(),
   dob: z.string().nullable(),
@@ -36,6 +40,8 @@ export const userSchema = z.object({
   status: z.number(),
   created_at: z.string(),
   updated_at: z.string(),
+  is_online: z.string(),
+  otp_verify: z.string(),
 }) satisfies z.ZodType<User>;
 
 export const loginSchema = z.object({
@@ -49,7 +55,7 @@ export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long"),
   email: z.string().email("Invalid email address"),
   password: passwordSchema,
-  phone: z.string().regex(phoneRegex, "Phone number must be in +92 format"),
+  phone: z.string().regex(phoneRegex, "Phone number must be in +968 format"),
   otp: z.string().optional(),
 }) satisfies z.ZodType<RegisterData>;
 
