@@ -38,12 +38,14 @@ import {
   type CreateBidData,
   type CreateBidResponse,
   type CreateBookingData,
+  type CreateBookingResponse,
 } from "@/lib/types/booking-types";
 import { CURRENCY } from "@/utils/constants";
 import { useCategories } from "@/lib/apis/get-categories";
 import { useLocationUpdate } from "@/utils/location";
 import { useCalendarAvailability } from "@/lib/hooks/useCalendarAvailability";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BookingDirectConfirmation } from "./create-booking/booking-direct-confirmation";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -117,9 +119,15 @@ export function CreateBookingDialog({
   const [isPlaceOrderOpen, setIsPlaceOrderOpen] = useState(false);
   const [isStartBookingOpen, setIsStartBookingOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
+    useState(false);
   const [bidDetails, setBidDetails] = useState<
     CreateBidResponse["records"] | null
   >(null);
+  const [bookingDetails, setBookingDetails] = useState<
+    CreateBookingResponse["records"] | null
+  >(null);
+  const [isBookingLoading, setIsBookingLoading] = useState(false);
 
   const { data: servicesResponse, isLoading } = useServices();
   const { data: categoriesResponse, isLoading: categoriesLoading } =
@@ -189,6 +197,7 @@ export function CreateBookingDialog({
       console.log("Bid mode");
       setIsStartBookingOpen(true);
     } else {
+      setIsBookingConfirmationOpen(true);
       await handleDirectBooking(mediaFiles);
     }
   };
@@ -198,6 +207,8 @@ export function CreateBookingDialog({
     if (!user || !bookingState.service) return;
 
     try {
+      setIsBookingLoading(true);
+
       // Update location
       await updateUserLocation();
 
@@ -219,14 +230,16 @@ export function CreateBookingDialog({
       const response = await directBooking.mutateAsync(payload);
 
       if (!response.error) {
+        setBookingDetails(response.records);
         toast.success("Booking created successfully");
-        router.push("/bookings");
       } else {
         toast.error(response.message || "Failed to create booking");
       }
     } catch (error) {
       toast.error("Error creating booking");
       console.error("Booking error:", error);
+    } finally {
+      setIsBookingLoading(false);
     }
   };
 
@@ -518,6 +531,19 @@ export function CreateBookingDialog({
             : undefined
         }
         isLoading={createBid.isLoading}
+      />
+
+      <BookingDirectConfirmation
+        isOpen={isBookingConfirmationOpen}
+        onClose={() => {
+          setIsBookingConfirmationOpen(false);
+          resetForm();
+          if (!isBookingLoading && bookingDetails) {
+            router.push("/bookings");
+          }
+        }}
+        bookingDetails={bookingDetails ?? undefined}
+        isLoading={isBookingLoading}
       />
 
       <BookingConfirmation

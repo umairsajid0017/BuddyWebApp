@@ -1,3 +1,4 @@
+import { User } from "../types";
 import { type MediaFiles } from "./common";
 
 export interface BookingsResponse {
@@ -145,8 +146,37 @@ export interface CreateBidData {
 export interface CreateBookingResponse {
   error: boolean;
   message: string;
-  data?: {
-    id: string;
+  records: {
+    id: number;
+    booking_number: number;
+    booking_date: string;
+    bid_id: number | null;
+    customer_id: number;
+    worker_id: number;
+    worker_linked_time: string | null;
+    service_id: number;
+    status: number;
+    address: string;
+    canceled_reason: string | null;
+    canceled_by: string | null;
+    images: Array<{
+      id: number;
+      name: string;
+    }> | null;
+    before_images: string | null;
+    after_images: string | null;
+    audio: string | null;
+    description: string | null;
+    price: string;
+    is_feedback: number;
+    completed_time: string | null;
+    canceled_time: string | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    customer: User;
+    worker: User;
+    service: Service;
   };
 }
 
