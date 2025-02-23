@@ -28,6 +28,8 @@ import { CURRENCY } from "@/utils/constants";
 import { BidStatus } from "@/lib/types/bid-types";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { BidOffers } from "@/components/BidOffers";
+import Main from "@/components/ui/main";
 
 const getStatusBadgeProps = (status: number) => {
   switch (status) {
@@ -69,6 +71,35 @@ const BidsPage = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedBid, setSelectedBid] = useState<number | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+  const [showOffers, setShowOffers] = useState(false);
+
+  // Mock offers data - replace with actual API call
+  const mockOffers = [
+    {
+      id: 1,
+      worker_name: "John's Electric",
+      rating: 4.8,
+      description: "I can help with your electrical needs. Available immediately.",
+      price: 180,
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      worker_name: "Quick Fix Electric",
+      rating: 4.5,
+      description: "Professional electrician with 10+ years experience.",
+      price: 220,
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: 3,
+      worker_name: "PowerPro Services",
+      rating: 4.9,
+      description: "Licensed electrician. Can start tomorrow.",
+      price: 195,
+      created_at: new Date().toISOString(),
+    },
+  ];
 
   const handleCancelBid = async () => {
     if (!selectedBid || !cancelReason.trim()) return;
@@ -136,7 +167,7 @@ const BidsPage = () => {
   }
 
   return (
-    <>
+    <Main>
       <div className="container mx-auto p-6">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight">My Bids</h1>
@@ -149,7 +180,13 @@ const BidsPage = () => {
                 <Card key={bid.id} className="overflow-hidden">
                   <div className="border-b p-6">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-4">
+                      <div 
+                        className="space-y-4 cursor-pointer" 
+                        onClick={() => {
+                          setSelectedBid(bid.id);
+                          setShowOffers(true);
+                        }}
+                      >
                         <div className="flex items-center gap-3">
                           <h3 className="text-xl font-semibold">
                             {bid.category.title}
@@ -291,7 +328,17 @@ const BidsPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+
+      {/* Offers Panel */}
+      <BidOffers
+        isOpen={showOffers}
+        onClose={() => {
+          setShowOffers(false);
+          setSelectedBid(null);
+        }}
+        offers={mockOffers}
+      />
+    </Main>
   );
 };
 
