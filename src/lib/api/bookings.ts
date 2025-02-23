@@ -164,10 +164,8 @@ export const useDirectBooking = () => {
       const formData = new FormData();
 
       // Append booking data
-
       formData.append("worker_id", bookingData.worker_id);
-      //TODO: Date is hard Coded remove it as soon as the API is tested
-      formData.append("booking_date", "2025-02-13");
+      formData.append("booking_date", bookingData.booking_date);
       formData.append("address", bookingData.address);
 
       if (bookingData.description) {
@@ -219,4 +217,54 @@ export const useUpdateLocation = () => {
 
     return response.data;
   });
+};
+
+interface WorkerAvailabilityResponse {
+  error: boolean;
+  message: string;
+  worker_details: {
+    id: number;
+    name: string;
+    service: {
+      id: number;
+      name: string;
+      fixed_price: string;
+      hourly_price: string;
+      category: {
+        id: number;
+        title: string;
+      };
+    };
+  };
+  availability_details: Array<{
+    id: number;
+    user_id: number;
+    service_id: number;
+    date_is: string;
+    is_available: number;
+    created_at: string;
+    updated_at: string;
+  }>;
+}
+
+// Get worker availability for a month
+export const useWorkerAvailability = (workerId: string, month: number) => {
+  return useQuery<WorkerAvailabilityResponse, AxiosError>(
+    ["workerAvailability", workerId, month],
+    async () => {
+      const response = await api.get<WorkerAvailabilityResponse>(
+        "/getavailableWorkersByMonth",
+        {
+          params: {
+            worker_id: workerId,
+            month: month,
+          },
+        },
+      );
+      return response.data;
+    },
+    {
+      enabled: Boolean(workerId && month),
+    },
+  );
 };

@@ -134,7 +134,7 @@ export function DashboardComponent() {
             }}
           >
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-primary">
+              <h2 className="text-3xl font-bold text-text-900">
                 Find Your Perfect Service
               </h2>
               <p className="mt-2 text-lg text-text-700">

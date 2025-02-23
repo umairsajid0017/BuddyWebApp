@@ -1,3 +1,5 @@
+import { type MediaFiles } from "./common";
+
 export interface BookingsResponse {
   error: boolean;
   message: string;
@@ -123,7 +125,6 @@ export interface Category {
   updated_at: string;
 }
 
-
 export interface CreateBookingData {
   worker_id: string;
   description?: string;
@@ -131,7 +132,6 @@ export interface CreateBookingData {
   audio?: File;
   booking_date: string;
   address: string;
-
 }
 export interface CreateBidData {
   category_id: string;
@@ -141,7 +141,6 @@ export interface CreateBidData {
   audio?: File;
   address: string;
 }
-
 
 export interface CreateBookingResponse {
   error: boolean;

@@ -42,6 +42,8 @@ import {
 import { CURRENCY } from "@/utils/constants";
 import { useCategories } from "@/lib/apis/get-categories";
 import { useLocationUpdate } from "@/utils/location";
+import { useCalendarAvailability } from "@/lib/hooks/useCalendarAvailability";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -85,6 +87,8 @@ export function CreateBookingDialog({
   const createBid = useCreateBid();
   const directBooking = useDirectBooking();
   const { updateUserLocation } = useLocationUpdate();
+  const { isLoading: isLoadingAvailability, isDateAvailable } =
+    useCalendarAvailability(initialService?.user?.id?.toString());
 
   const [formState, setFormState] = useState<FormState>(() => {
     const baseState = {
@@ -155,8 +159,13 @@ export function CreateBookingDialog({
     const isValid =
       mode === "book"
         ? isBookingForm(formState) &&
-          Boolean(formState.service && formState.date)
-        : isBidForm(formState) && Boolean(formState.category && formState.date);
+          Boolean(
+            formState.service && formState.date && formState.address.trim(),
+          )
+        : isBidForm(formState) &&
+          Boolean(
+            formState.category && formState.date && formState.address.trim(),
+          );
 
     if (!isValid) {
       toast.error("Please fill in all required fields");
@@ -193,12 +202,17 @@ export function CreateBookingDialog({
       // Update location
       await updateUserLocation();
 
+      // Format date to YYYY-MM-DD
+      const formattedDate = bookingState.date
+        ? format(bookingState.date, "yyyy-MM-dd")
+        : "";
+
       const payload: CreateBookingData = {
         description: bookingState.description,
         images: bookingState.mediaFiles?.images,
         audio: bookingState.mediaFiles?.audio,
         address: bookingState.address,
-        booking_date: bookingState.date?.toString() ?? "",
+        booking_date: formattedDate,
         worker_id: initialService?.user.id.toString() ?? "",
       };
       const response = await directBooking.mutateAsync(payload);
@@ -252,6 +266,13 @@ export function CreateBookingDialog({
       ...prev,
       time: e.target.value,
     }));
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date || (mode === "book" && !isDateAvailable(date))) {
+      return;
+    }
+    setFormState((prev) => ({ ...prev, date }));
   };
 
   return (
@@ -341,12 +362,13 @@ export function CreateBookingDialog({
                 <Button
                   variant="outline"
                   className={`w-full justify-start text-left font-normal ${!formState.date && "text-muted-foreground"}`}
-                  onClick={() =>
-                    setFormState((prev) => ({ ...prev, date: new Date() }))
-                  }
+                  onClick={() => handleDateSelect(new Date())}
+                  disabled={mode === "book" && isLoadingAvailability}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formState.date ? (
+                  {isLoadingAvailability ? (
+                    <Skeleton className="h-4 w-[100px]" />
+                  ) : formState.date ? (
                     format(formState.date, "PPP")
                   ) : (
                     <span>Pick a date</span>
@@ -355,12 +377,48 @@ export function CreateBookingDialog({
               </div>
             </div>
 
-            <Calendar
-              mode="single"
-              selected={formState.date}
-              onSelect={(date) => setFormState((prev) => ({ ...prev, date }))}
-              className="flex w-full items-center justify-center rounded-md border"
-            />
+            {isLoadingAvailability ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
+              <Calendar
+                mode="single"
+                selected={formState.date}
+                onSelect={handleDateSelect}
+                className="flex w-full items-center justify-center rounded-md border"
+                disabled={
+                  mode === "book" ? (date) => !isDateAvailable(date) : undefined
+                }
+                modifiers={
+                  mode === "book"
+                    ? {
+                        available: (date) => isDateAvailable(date),
+                      }
+                    : undefined
+                }
+                modifiersClassNames={{
+                  available: "bg-green-100 hover:bg-green-200",
+                }}
+              />
+            )}
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="address" className="text-right">
+                Address
+              </Label>
+              <Input
+                id="address"
+                type="text"
+                className="col-span-3"
+                value={formState.address}
+                onChange={(e) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    address: e.target.value,
+                  }))
+                }
+                placeholder="Enter your address"
+              />
+            </div>
 
             {/* <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="time" className="text-right">
