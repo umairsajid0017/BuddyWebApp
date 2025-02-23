@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { format, setDate } from "date-fns";
 import { type Service } from "@/lib/types";
 import { PlaceOrderSheet } from "./create-booking/place-order-sheet";
@@ -46,6 +46,7 @@ import { useLocationUpdate } from "@/utils/location";
 import { useCalendarAvailability } from "@/lib/hooks/useCalendarAvailability";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDirectConfirmation } from "./create-booking/booking-direct-confirmation";
+import { BackgroundGradient } from "../ui/background-gradient";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -305,11 +306,14 @@ export function CreateBookingDialog({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+          <BackgroundGradient className="w-fit" containerClassName="w-fit">
         <DialogTrigger asChild>
-          <Button variant="default">
-            {mode === "book" ? "Book Now" : "Create a Bid"}
-          </Button>
+            <Button variant="default" className="relative z-10 font-bold" effect={"shine"}>
+              <Plus className="h-4 w-4" />
+              {mode === "book" ? "Book Now" : "Create a Bid"}
+            </Button>
         </DialogTrigger>
+          </BackgroundGradient>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
