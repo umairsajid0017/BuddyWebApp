@@ -5,7 +5,6 @@ import Login from "@/app/(auth)/login/page";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { DashboardComponent } from "@/components/dashboard/dashboard-component";
 import { useAuth } from "@/store/authStore";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useRouter } from "next/navigation";
 import LandingPageComponent from "@/components/landing-page/landing-page-component";
 

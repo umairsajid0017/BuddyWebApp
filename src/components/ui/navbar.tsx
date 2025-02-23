@@ -29,6 +29,7 @@ import {
   SearchIcon,
   User,
   X,
+  Bell,
 } from "lucide-react";
 
 export default function NavBar() {
@@ -70,12 +71,12 @@ export default function NavBar() {
   };
 
   return (
-    <header className="flex justify-center bg-white shadow">
-      <div className="container flex items-center justify-between px-6 py-4 md:mx-auto">
+    <header className="flex justify-center bg-gradient-to-b from-[#1D0D25] to-[#673086] shadow">
+      <div className="container flex items-center justify-between px-6 py-2 md:mx-auto">
         {!isSearchVisible && (
           <Link href={"/"} className="flex items-center gap-2">
             <Image src={"/assets/logo.png"} alt="logo" width={72} height={72} />
-            <span className="text-3xl font-bold text-text-900">Buddy</span>
+            <span className="text-3xl font-bold text-white">Buddy</span>
           </Link>
         )}
         <div
@@ -88,7 +89,7 @@ export default function NavBar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="ml-2 md:hidden"
+                className="ml-2 text-white hover:bg-secondary-800 md:hidden"
                 onClick={() => setIsSearchVisible(false)}
               >
                 <X className="h-5 w-5" />
@@ -97,13 +98,13 @@ export default function NavBar() {
           ) : (
             <>
               <div className="hidden w-80 md:block">
-                <SearchComponent />
+                {/* <SearchComponent /> */}
               </div>
               <TooltipWrapper content="Search for services">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="flex items-center justify-center md:hidden"
+                  className="flex items-center justify-center text-white hover:bg-secondary-800 hover:text-white md:hidden"
                   onClick={toggleSearch}
                 >
                   <SearchIcon className="h-5 w-5" />
@@ -118,18 +119,39 @@ export default function NavBar() {
                 <Button
                   variant="ghost"
                   onClick={() => router.push("/bookings")}
-                  className="font-semibold"
+                  className="font-semibold text-white hover:bg-secondary-800 hover:text-white"
                 >
-                  Bookings
+                  My Bids
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/bookings")}
+                  className="font-semibold text-white hover:bg-secondary-800 hover:text-white"
+                >
+                  My Bookings
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/bookings")}
+                  className="font-semibold text-white hover:bg-secondary-800 hover:text-white"
+                >
+                  Help Center
                 </Button>
                 <Button
                   variant="ghost"
-                  className="font-semibold"
-                  onClick={() => router.push("/bookings/offers")}
+                  onClick={() => router.push("/bookings")}
+                  className="font-semibold text-white hover:bg-secondary-800 hover:text-white"
                 >
-                  Offers
+                  Privacy Policy
                 </Button>
                 <CreateBookingDialog />
+                <TooltipWrapper content="Notifications">
+                  <Button variant="ghost" size="icon" className="ml-2">
+                    <Bell className="h-5 w-5 text-white" />
+                  </Button>
+                </TooltipWrapper>
               </div>
             </>
           )}
@@ -142,7 +164,11 @@ export default function NavBar() {
                   onOpenChange={setIsOpenAccount}
                 >
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative hover:bg-secondary-800"
+                    >
                       <Avatar className="h-9 w-9">
                         <AvatarImage
                           src={
@@ -156,54 +182,39 @@ export default function NavBar() {
                           {user.name?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500" />
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-secondary-900 bg-green-500" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <div className="border-b px-2 py-2">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 bg-secondary-900 text-white"
+                  >
+                    <div className="border-b border-secondary-700 px-2 py-2">
                       <p className="font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {user.email}
-                      </p>
+                      <p className="text-xs text-secondary-300">{user.email}</p>
                     </div>
 
                     <DropdownMenuItem
                       onClick={() => router.push("/profile")}
-                      className="gap-2 py-2"
+                      className="gap-2 py-2 text-white hover:bg-secondary-800"
                     >
                       <UserCircle className="h-4 w-4" />
                       My Account
                     </DropdownMenuItem>
 
-                    {/* <DropdownMenuItem
-                      onClick={() => router.push("/bookmarks")}
-                      className="gap-2 py-2"
-                    >
-                      <BookMarked className="h-4 w-4" />
-                      Saved
-                    </DropdownMenuItem> */}
-
-                    {/* <DropdownMenuItem
-                      onClick={() => router.push("/helpdesk")}
-                      className="gap-2 py-2"
-                    >
-                      <LifeBuoy className="h-4 w-4" />
-                      Helpdesk
-                    </DropdownMenuItem> */}
-
                     <DropdownMenuItem
                       onClick={() => router.push("/settings")}
-                      className="gap-2 py-2"
+                      className="gap-2 py-2 text-white hover:bg-secondary-800"
                     >
                       <Settings className="h-4 w-4" />
                       Settings
                     </DropdownMenuItem>
 
-                    <div className="my-1 h-px bg-muted" />
+                    <div className="my-1 h-px bg-secondary-700" />
 
                     <DropdownMenuItem
                       onClick={handleLogout}
-                      className="gap-2 py-2 text-red-600 focus:text-red-600"
+                      className="gap-2 py-2 text-red-400 hover:bg-secondary-800 focus:text-red-400"
                     >
                       <LogOut className="h-4 w-4" />
                       Log out
@@ -211,12 +222,18 @@ export default function NavBar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button onClick={() => router.push("/login")}>Login</Button>
+                <Button
+                  onClick={() => router.push("/login")}
+                  variant="outline"
+                  className="text-white hover:bg-secondary-800"
+                >
+                  Login
+                </Button>
               )}
               <Button
                 variant="ghost"
                 size="icon"
-                className="ml-2 md:hidden"
+                className="ml-2 text-white hover:bg-secondary-800 md:hidden"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 <Menu className="h-5 w-5" />
@@ -226,22 +243,27 @@ export default function NavBar() {
         </div>
       </div>
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-white p-4 md:hidden">
+        <div className="fixed inset-0 z-50 bg-gradient-to-r from-secondary-900 to-secondary-700 p-4 md:hidden">
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-4"
+            className="absolute right-4 top-4 text-white hover:bg-secondary-800"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <X className="h-5 w-5" />
           </Button>
           <div className="mt-16 flex flex-col space-y-4">
-            <Button variant="ghost" onClick={() => router.push("/bookings")}>
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/bookings")}
+              className="text-white hover:bg-secondary-800"
+            >
               Bookings
             </Button>
             <Button
               variant="ghost"
               onClick={() => router.push("/bookings/offers")}
+              className="text-white hover:bg-secondary-800"
             >
               Offers
             </Button>

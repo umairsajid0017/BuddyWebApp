@@ -16,6 +16,9 @@ import { useCategories } from "@/lib/apis/get-categories";
 import useCategoriesStore from "@/store/categoriesStore";
 import CategoryComponent from "../services/category-component";
 import Link from "next/link";
+import { Input } from "../ui/input";
+import { Search } from "lucide-react";
+import { SearchComponent } from "../services/search-services/search-component";
 
 type ImageItem = {
   src: string;
@@ -87,8 +90,34 @@ export function DashboardComponent() {
     <div className="flex min-h-screen flex-col md:mx-8 lg:px-24">
       <main className="flex-1 p-6">
         <section className="mt-6 flex flex-col gap-4 lg:flex-row">
-          <DashboardStats />
-          <div className="flex h-96 flex-col justify-center rounded-lg bg-red-100 p-0 shadow lg:w-2/3">
+          <div
+            className="flex h-96 flex-col items-center justify-center rounded-lg bg-card p-6 shadow lg:w-[40%]"
+            style={{
+              backgroundImage: "url('/assets/search-bg.png')",
+              backgroundSize: "contain",
+              backgroundPosition: "center",
+              // backgroundColor: "rgba(0,0,0,0.1)", // Add dark overlay
+              // backgroundBlendMode: "multiply", // Blend the overlay with image
+            }}
+          >
+            {/* <div className="flex w-full max-w-lg items-center justify-center gap-2">
+              <Input
+                type="text"
+                placeholder="Search for any service..."
+                className="h-12 rounded-lg border-input bg-background px-4 text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              />
+              <Button
+                className="h-12 rounded-lg bg-primary hover:bg-primary-600"
+                effect="shine"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+
+            </div> */}
+            <SearchComponent />
+          </div>
+
+          <div className="relative h-96 overflow-hidden rounded-lg lg:w-[60%]">
             <CardStack
               items={images}
               renderItem={(item) => (
