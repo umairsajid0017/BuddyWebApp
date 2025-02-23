@@ -17,7 +17,7 @@ import useCategoriesStore from "@/store/categoriesStore";
 import CategoryComponent from "../services/category-component";
 import Link from "next/link";
 import { Input } from "../ui/input";
-import { Search } from "lucide-react";
+import { CheckCircle, Search, Shield } from "lucide-react";
 import { SearchComponent } from "../services/search-services/search-component";
 import { useSpecialOffers } from "@/lib/apis/get-special-offers";
 import useSpecialOffersStore from "@/store/specialOffersStore";
@@ -124,16 +124,36 @@ export function DashboardComponent() {
       <main className="flex-1 p-6">
         <section className="mt-6 flex flex-col gap-4 lg:flex-row">
           <div
-            className="flex h-96 flex-col items-center justify-center rounded-lg bg-card p-6 shadow lg:w-[40%]"
+            className="flex h-96 flex-col items-center justify-center gap-6 rounded-lg bg-card p-8 shadow lg:w-[40%]"
             style={{
-              backgroundImage: "url('/assets/search-bg.jpg')",
+              backgroundImage: "url('/assets/search-bg.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundColor: "rgba(0, 0, 0, 0.1)",
               backgroundBlendMode: "overlay",
             }}
           >
-            <SearchComponent />
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-primary">
+                Find Your Perfect Service
+              </h2>
+              <p className="mt-2 text-lg text-text-700">
+                Search from thousands of trusted service providers
+              </p>
+            </div>
+            <SearchComponent className="w-full max-w-2xl" />
+            <div className="mt-4 flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                <span className="text-sm text-text-700">
+                  Verified Providers
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                <span className="text-sm text-text-700">Secure Booking</span>
+              </div>
+            </div>
           </div>
 
           <div className="relative h-96 overflow-hidden rounded-lg lg:w-[60%]">
