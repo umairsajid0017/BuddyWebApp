@@ -69,7 +69,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
     if (serviceResponse) {
       setService({
         ...serviceResponse,
-        service_name: serviceResponse.name,
+
         ratings: [],
         long: serviceResponse.long ? Number(serviceResponse.long) : null,
         lat: serviceResponse.lat ? Number(serviceResponse.lat) : null,
@@ -123,12 +123,12 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                     <ServiceImageGallery
                       mainImage={service.images[0]?.name || ""}
                       images={service.images.slice(1)}
-                      serviceName={service.service_name}
+                      serviceName={service.name}
                     />
                   </div>
                   <div className="mt-6 md:mt-0 md:w-1/2 md:pl-6">
                     <h1 className="mb-2 text-3xl font-bold">
-                      {service.service_name || "Service Name"}
+                      {service.name || "Service Name"}
                     </h1>
                     <div className="mb-4 flex items-center">
                       <span className="font-regular mr-2 text-base font-bold">
