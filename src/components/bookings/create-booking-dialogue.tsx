@@ -269,9 +269,22 @@ export function CreateBookingDialog({
   };
 
   const handleDateSelect = (date: Date | undefined) => {
-    if (!date || (mode === "book" && !isDateAvailable(date))) {
+    if (!date) return;
+
+    if (mode === "book" && !isDateAvailable(date)) {
       return;
     }
+
+    if (mode === "bid") {
+      const today = new Date();
+      const isToday =
+        format(date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
+      if (!isToday) {
+        toast.error("For bids, only today's date can be selected");
+        return;
+      }
+    }
+
     setFormState((prev) => ({ ...prev, date }));
   };
 
@@ -386,14 +399,22 @@ export function CreateBookingDialog({
                 onSelect={handleDateSelect}
                 className="flex w-full items-center justify-center rounded-md border"
                 disabled={
-                  mode === "book" ? (date) => !isDateAvailable(date) : undefined
+                  mode === "book"
+                    ? (date) => !isDateAvailable(date)
+                    : (date) =>
+                        format(date, "yyyy-MM-dd") !==
+                        format(new Date(), "yyyy-MM-dd")
                 }
                 modifiers={
                   mode === "book"
                     ? {
                         available: (date) => isDateAvailable(date),
                       }
-                    : undefined
+                    : {
+                        available: (date) =>
+                          format(date, "yyyy-MM-dd") ===
+                          format(new Date(), "yyyy-MM-dd"),
+                      }
                 }
                 modifiersClassNames={{
                   available: "bg-green-100 hover:bg-green-200",
