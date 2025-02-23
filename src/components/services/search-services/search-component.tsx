@@ -10,6 +10,7 @@ import { useSearchServices } from "@/lib/apis/search-services";
 import { cn } from "@/lib/utils";
 import { CURRENCY } from "@/utils/constants";
 import { Button } from "@/components/ui/button";
+import TooltipWrapper from "@/components/ui/tooltip-wrapper";
 
 const CategoryResult = ({
   category,
@@ -219,24 +220,26 @@ export function SearchComponent({
           <div className="pointer-events-none absolute left-4 flex items-center">
             <SearchIcon className="h-5 w-5 text-muted-foreground/60" />
           </div>
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Looking for a service?"
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setShowDropdown(true);
-            }}
-            onFocus={() => setShowDropdown(true)}
-            className={cn(
-              "h-12 w-full rounded-lg bg-background px-11 py-3 text-sm",
-              "border border-input/90 shadow-sm",
-              "placeholder:text-muted-foreground/60",
-              "focus:border-input focus:outline-none focus:ring-1 focus:ring-ring/20",
-              "transition-all duration-200",
-            )}
-          />
+          <TooltipWrapper content="Search for services by name, category or description">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Looking for a service?"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowDropdown(true);
+              }}
+              onFocus={() => setShowDropdown(true)}
+              className={cn(
+                "h-12 w-full rounded-lg bg-background px-11 py-3 text-sm",
+                "border border-input/90 shadow-sm",
+                "placeholder:text-muted-foreground/60",
+                "focus:border-input focus:outline-none focus:ring-1 focus:ring-ring/20",
+                "transition-all duration-200",
+              )}
+            />
+          </TooltipWrapper>
           {searchTerm && (
             <button
               onClick={() => {
