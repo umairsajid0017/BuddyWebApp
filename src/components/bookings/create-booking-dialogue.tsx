@@ -41,6 +41,7 @@ import {
 } from "@/lib/types/booking-types";
 import { CURRENCY } from "@/utils/constants";
 import { useCategories } from "@/lib/apis/get-categories";
+import { useLocationUpdate } from "@/utils/location";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -83,6 +84,7 @@ export function CreateBookingDialog({
   const { user } = useAuth();
   const createBid = useCreateBid();
   const directBooking = useDirectBooking();
+  const { updateUserLocation } = useLocationUpdate();
 
   const [formState, setFormState] = useState<FormState>(() => {
     const baseState = {
@@ -188,6 +190,9 @@ export function CreateBookingDialog({
     if (!user || !bookingState.service) return;
 
     try {
+      // Update location
+      await updateUserLocation();
+
       const payload: CreateBookingData = {
         description: bookingState.description,
         images: bookingState.mediaFiles?.images,
@@ -215,6 +220,9 @@ export function CreateBookingDialog({
     if (!user || !bidState.category) return;
 
     try {
+      // Update location
+      await updateUserLocation();
+
       const payload: CreateBidData = {
         category_id: bidState.category.id.toString(),
         description: bidState.description,

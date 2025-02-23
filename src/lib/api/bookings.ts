@@ -179,3 +179,24 @@ export const useDirectBooking = () => {
     },
   );
 };
+
+// Update location
+export const useUpdateLocation = () => {
+  return useMutation<
+    { error: boolean; message: string },
+    AxiosError,
+    { latitude: string; longitude: string }
+  >(async (locationData) => {
+    const formData = new URLSearchParams();
+    formData.append("latitude", locationData.latitude);
+    formData.append("longitude", locationData.longitude);
+
+    const response = await api.patch("/updateLocation", formData, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+
+    return response.data;
+  });
+};
