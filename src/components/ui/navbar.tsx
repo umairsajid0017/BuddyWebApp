@@ -107,7 +107,7 @@ export default function NavBar() {
                   className="flex items-center justify-center text-white hover:bg-secondary-800 hover:text-white md:hidden"
                   onClick={toggleSearch}
                 >
-                  <SearchIcon className="h-5 w-5" />
+                  {/* <SearchIcon className="h-5 w-5" /> */}
                 </Button>
               </TooltipWrapper>
             </>
@@ -141,7 +141,7 @@ export default function NavBar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  onClick={() => router.push("/bookings")}
+                  onClick={() => router.push("/privacy-policy")}
                   className="font-semibold text-white hover:bg-secondary-800 hover:text-white"
                 >
                   Privacy Policy
@@ -252,22 +252,47 @@ export default function NavBar() {
           >
             <X className="h-5 w-5" />
           </Button>
-          <div className="mt-16 flex flex-col space-y-4">
+          <div className="mt-16 flex flex-col space-y-4 items-center">
             <Button
               variant="ghost"
-              onClick={() => router.push("/bookings")}
+              onClick={() => {router.push("/bookings")
+                setIsMobileMenuOpen(false)
+              } }
               className="text-white hover:bg-secondary-800"
+              
             >
               Bookings
             </Button>
             <Button
               variant="ghost"
-              onClick={() => router.push("/bookings/offers")}
+              onClick={() => {router.push("/bids")
+                setIsMobileMenuOpen(false)
+              } }
               className="text-white hover:bg-secondary-800"
             >
-              Offers
+              My Bids
             </Button>
-            <CreateBookingDialog />
+            <Button
+              variant="ghost"
+              onClick={() => {router.push("/bookings")
+                setIsMobileMenuOpen(false)
+              } }
+              className="text-white hover:bg-secondary-800"
+            >
+              My Bookings
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {router.push("/help-center")
+                setIsMobileMenuOpen(false)
+              } }
+              className="text-white hover:bg-secondary-800"
+            >
+              Help Center
+              </Button>
+        {/* <div onClick={() => setIsMobileMenuOpen(false)}> */}
+              <CreateBookingDialog />
+            {/* </div> */}
           </div>
         </div>
       )}

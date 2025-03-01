@@ -19,6 +19,7 @@ import UserProfileCard from "@/components/services/user-profile-card";
 import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
 import { CURRENCY } from "@/utils/constants";
 import { ServiceImageGallery } from "@/components/services/service-image-gallery";
+import { CollapsibleText } from "@/components/ui/collapsible-text";
 
 interface ServiceDetailsProps {
   params: {
@@ -69,7 +70,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
     if (serviceResponse) {
       setService({
         ...serviceResponse,
-        service_name: serviceResponse.name,
+        name: serviceResponse.name,
         ratings: [],
         long: serviceResponse.long ? Number(serviceResponse.long) : null,
         lat: serviceResponse.lat ? Number(serviceResponse.lat) : null,
@@ -123,12 +124,12 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                     <ServiceImageGallery
                       mainImage={service.images[0]?.name || ""}
                       images={service.images.slice(1)}
-                      serviceName={service.service_name}
+                      serviceName={service.name}
                     />
                   </div>
                   <div className="mt-6 md:mt-0 md:w-1/2 md:pl-6">
                     <h1 className="mb-2 text-3xl font-bold">
-                      {service.service_name || "Service Name"}
+                      {service.name || "Service Name"}
                     </h1>
                     <div className="mb-4 flex items-center">
                       <span className="font-regular mr-2 text-base font-bold">
@@ -159,7 +160,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                     </p>
                     <h2 className="mb-2 text-xl font-semibold">About me</h2>
                     <p className="mb-4 text-muted-foreground">
-                      {service.description || "No description available."}
+                      {service.description ? <CollapsibleText text={service.description} /> : "No description available."}
                     </p>
                     <CreateBookingDialog initialService={service} mode="book" />
                   </div>

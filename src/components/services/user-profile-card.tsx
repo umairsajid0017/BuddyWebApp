@@ -5,6 +5,11 @@ import { type User } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "../ui/separator";
+import { useState } from "react";
+import { CollapsibleText } from "../ui/collapsible-text";
+
+// Collapsible text component
+
 
 interface UserProfileCardProps {
   user: User;
@@ -37,14 +42,7 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
               <MapPin className="h-4 w-4" />
               <span>{user.address || "Location not specified"}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Phone className="h-4 w-4" />
-              <span>{user.phone}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Mail className="h-4 w-4" />
-              <span>{user.email}</span>
-            </div>
+        
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <span>
@@ -57,18 +55,17 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
 
           <div className="space-y-2">
             <h3 className="text-sm font-medium">About</h3>
-            <div className="text-sm text-muted-foreground">
-              {user.role && (
-                <div className="mb-2">Professional {user.role}</div>
-              )}
-              <div>{user.email && `✉️ ${user.email}`}</div>
-              {user.phone && <div>📱 {user.phone}</div>}
-            </div>
+            {user.role && (
+              <div className="mb-2 text-sm text-muted-foreground">
+                Professional {user.role}
+              </div>
+            )}
+            {user.address && (
+              <CollapsibleText text={user.address} />
+            )}
           </div>
 
-          <Button className="w-full" variant="outline">
-            Contact Service Provider
-          </Button>
+         
         </div>
       </CardContent>
     </Card>
