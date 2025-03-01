@@ -10,12 +10,13 @@ const serviceOptions = [
   { label: "Full Stack Development", value: "full_stack" },
   { label: "Frontend Development", value: "frontend" },
 ];
+import { CURRENCY } from "@/utils/constants";
 
 const budgetOptions = [
   { label: "All Prices", value: "" },
-  { label: "Less than $100", value: "0-100" },
-  { label: "$100 - $500", value: "100-500" },
-  { label: "$500+", value: "500-plus" },
+  { label: `Less than ${CURRENCY}. 100`, value: "0-100" },
+  { label: `${CURRENCY}. 100 - ${CURRENCY}. 500`, value: "100-500" },
+  { label: `${CURRENCY}. 500+`, value: "500-plus" },
 ];
 
 const deliveryTimeOptions = [

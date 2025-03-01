@@ -100,7 +100,7 @@ export function CreateBookingDialog({
       time: "",
       date: mode === "bid" ? new Date() : undefined,
        mediaFiles: undefined,
-      address: "Oman",
+      address: "",
     };
 
     if (mode === "book") {

@@ -41,13 +41,7 @@ const UserProfile: React.FC<{ user: User }> = ({ user }) => {
                 {splitFullName(user.name).lastName[0]}
               </AvatarFallback>
             </Avatar>
-            <Button
-              size="sm"
-              className="absolute bottom-0 right-0 rounded-full"
-              variant="outline"
-            >
-              <CameraIcon className="h-4 w-4 text-primary" />
-            </Button>
+        
           </div>
           <div className="flex-1">
             <CardTitle className="text-2xl font-bold">{user.name}</CardTitle>
@@ -70,13 +64,13 @@ const UserProfile: React.FC<{ user: User }> = ({ user }) => {
               <h3 className="font-semibold">Personal Information</h3>
               <div className="grid gap-4">
                 <InfoItem
-                  label="First Name"
-                  value={splitFullName(user.name).firstName}
+                  label="Name"
+                  value={user.name}
                 />
-                <InfoItem
+                {/* <InfoItem
                   label="Last Name"
                   value={splitFullName(user.name).lastName}
-                />
+                /> */}
                 <InfoItem
                   label="Date of Birth"
                   value={user.dob ?? "Not specified"}

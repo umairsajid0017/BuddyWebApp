@@ -1,5 +1,5 @@
 import { Service } from "@/lib/types";
-import { StarIcon } from "lucide-react";
+import { BookmarkIcon, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "../ui/card";
@@ -34,7 +34,7 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
               {CURRENCY}. {service.fixed_price}
             </p>
             <div className="flex items-center text-xs text-gray-600">
-              <StarIcon className="h-4 w-4" />
+              <BookmarkIcon className="h-4 w-4" />
               {/* <span className="ml-1">
               {service.ratings?.length > 0
                 ? (

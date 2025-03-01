@@ -102,7 +102,7 @@ export function BookingConfirmation({
           </Button>
           <Button
             onClick={() => {
-              router.push("/bookings/offers");
+              router.push("/bids");
               onClose();
             }}
             className="flex-1 bg-primary hover:bg-primary-800"

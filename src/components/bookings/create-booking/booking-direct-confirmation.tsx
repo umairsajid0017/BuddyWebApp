@@ -64,7 +64,7 @@ export function BookingDirectConfirmation({
             )}
           </div>
           <DialogTitle className="text-center text-2xl font-semibold">
-            {isLoading ? "Processing Booking..." : "Booking Confirmed!"}
+            {isLoading ? "Processing Booking..." : "Booking Initiated!"}
           </DialogTitle>
           <DialogDescription className="mt-2 text-center">
             {isLoading

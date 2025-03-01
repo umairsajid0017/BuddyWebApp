@@ -4,7 +4,7 @@ import React from "react";
 import { useSearchParams } from "next/navigation";
 import { CategoryService } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { StarIcon } from "lucide-react";
+import { BookmarkIcon, StarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,7 +33,7 @@ const ServiceCard: React.FC<{ service: CategoryService }> = ({ service }) => (
       </div>
       <CardContent>
         <h4 className="mt-2 text-xl font-medium">{service.service_name}</h4>
-        <p className="text-xs text-gray-600">{service.description}</p>
+        <p className="text-xs text-gray-600">{service.description.slice(0, 50)}...</p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-lg font-bold text-primary">
             {service.fixed_price !== "0.00" ? (
@@ -43,7 +43,7 @@ const ServiceCard: React.FC<{ service: CategoryService }> = ({ service }) => (
             )}
           </p>
           <div className="flex items-center text-xs text-gray-600">
-            <StarIcon className="h-4 w-4" />
+            <BookmarkIcon className="h-4 w-4" />
             <span className="ml-1">{service.total_reviews} reviews</span>
           </div>
         </div>
