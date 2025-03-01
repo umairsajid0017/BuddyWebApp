@@ -98,8 +98,8 @@ export function CreateBookingDialog({
       description: "",
       budget: 200,
       time: "",
-      date: undefined,
-      mediaFiles: undefined,
+      date: mode === "bid" ? new Date() : undefined,
+       mediaFiles: undefined,
       address: "Oman",
     };
 
@@ -150,7 +150,7 @@ export function CreateBookingDialog({
             budget: 200,
             date: undefined,
             mediaFiles: undefined,
-            address: "Oman",
+            address: "",
           } as BookFormState)
         : ({
             category: null,
@@ -158,7 +158,7 @@ export function CreateBookingDialog({
             budget: 200,
             date: undefined,
             mediaFiles: undefined,
-            address: "Oman",
+            address: "",
           } as BidFormState),
     );
   };
@@ -385,7 +385,7 @@ export function CreateBookingDialog({
               </div>
             )}
 
-            <div className="grid grid-cols-4 items-center gap-4">
+           <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="date" className="text-right">
                 Date
               </Label>
@@ -407,10 +407,10 @@ export function CreateBookingDialog({
                 </Button>
               </div>
             </div>
-
             {isLoadingAvailability ? (
               <Skeleton className="h-[300px] w-full" />
             ) : (
+              mode !== "bid" && (
               <Calendar
                 mode="single"
                 selected={formState.date}
@@ -437,7 +437,7 @@ export function CreateBookingDialog({
                 modifiersClassNames={{
                   available: "bg-green-100 hover:bg-green-200",
                 }}
-              />
+              />)
             )}
 
             <div className="grid grid-cols-4 items-center gap-4">
