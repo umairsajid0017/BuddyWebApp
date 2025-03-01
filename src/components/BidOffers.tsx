@@ -1,33 +1,65 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Star } from "lucide-react";
+import { Star, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { CURRENCY } from "@/utils/constants";
-
-interface Offer {
-  id: number;
-  worker_name: string;
-  rating: number;
-  description: string;
-  price: number;
-  created_at: string;
-}
+import { Offer } from "@/lib/types/bid-types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BidOffersProps {
   isOpen: boolean;
   onClose: () => void;
-  offers: Offer[];
+  offers: Offer[] | undefined;
+  isLoading: boolean;
+  error: any;
+  message?: string;
 }
 
-export function BidOffers({ isOpen, onClose, offers }: BidOffersProps) {
+export function BidOffers({ isOpen, onClose, offers, isLoading, error, message }: BidOffersProps) {
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
-          <SheetTitle>Offers ({offers.length})</SheetTitle>
+          <SheetTitle>Offers ({offers?.length || 0})</SheetTitle>
         </SheetHeader>
+        
         <div className="mt-6 space-y-6">
-          {offers.map((offer) => (
+          {isLoading && (
+            <>
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="space-y-4 rounded-lg border p-4">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-6 w-[120px]" />
+                    <Skeleton className="h-6 w-[80px]" />
+                  </div>
+                  <Skeleton className="h-4 w-full" />
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-[80px]" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-8 w-[80px]" />
+                      <Skeleton className="h-8 w-[100px]" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+          
+          {error && (
+            <div className="text-center p-6">
+              <p className="text-destructive">Failed to load offers. Please try again.</p>
+              <Button className="mt-4" variant="outline" onClick={onClose}>Close</Button>
+            </div>
+          )}
+          
+          {!isLoading && !error && message && (
+            <div className="text-center p-6">
+              <p className="text-muted-foreground">{message}</p>
+              <Button className="mt-4" variant="outline" onClick={onClose}>Close</Button>
+            </div>
+          )}
+          
+          {!isLoading && !error && offers && offers.length > 0 && offers.map((offer) => (
             <div key={offer.id} className="space-y-4 rounded-lg border p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

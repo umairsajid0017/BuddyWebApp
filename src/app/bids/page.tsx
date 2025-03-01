@@ -1,6 +1,6 @@
 "use client";
 
-import { useCustomerBids, useCancelBid } from "@/lib/api/bids";
+import { useCustomerBids, useCancelBid, useBidResponses } from "@/lib/api/bids";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -67,6 +67,7 @@ const getStatusBadgeProps = (status: number) => {
 
 const BidsPage = () => {
   const { data: bidsData, isLoading, error, refetch } = useCustomerBids();
+  console.log(bidsData);
   const cancelBid = useCancelBid();
   const { toast } = useToast();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -76,34 +77,13 @@ const BidsPage = () => {
   const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Mock offers data - replace with actual API call
-  const mockOffers = [
-    {
-      id: 1,
-      worker_name: "John's Electric",
-      rating: 4.8,
-      description: "I can help with your electrical needs. Available immediately.",
-      price: 180,
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      worker_name: "Quick Fix Electric",
-      rating: 4.5,
-      description: "Professional electrician with 10+ years experience.",
-      price: 220,
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: 3,
-      worker_name: "PowerPro Services",
-      rating: 4.9,
-      description: "Licensed electrician. Can start tomorrow.",
-      price: 195,
-      created_at: new Date().toISOString(),
-    },
-  ];
+  const { 
+    data: bidResponsesData, 
+    isLoading: isLoadingResponses, 
+    error: responsesError 
+  } = useBidResponses(selectedBid);
 
+  console.log("bidResponsesData", bidResponsesData);
   const handleCancelBid = async () => {
     if (!selectedBid || !cancelReason.trim()) return;
 
@@ -169,6 +149,21 @@ const BidsPage = () => {
     );
   }
 
+  if (bidsData && !bidsData?.records) {
+    return (
+      <div className="container mx-auto p-6">
+        <h1 className="mb-6 text-3xl font-bold tracking-tight">My Bids</h1>
+        <Card className="p-6">
+          <div className="text-center">
+            <h3 className="mb-2 text-lg font-semibold text-destructive">
+              No Bids Found
+            </h3>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <Main>
       <div className="container mx-auto p-6">
@@ -177,7 +172,7 @@ const BidsPage = () => {
         </div>
         <ScrollArea className="h-[calc(100vh-200px)]">
           <div className="space-y-6">
-            {bidsData?.records.map((bid) => {
+            {bidsData && bidsData?.records && bidsData?.records?.map((bid) => {
               const statusProps = getStatusBadgeProps(bid.status);
               return (
                 <Card key={bid.id} className="overflow-hidden">
@@ -364,7 +359,10 @@ const BidsPage = () => {
           setShowOffers(false);
           setSelectedBid(null);
         }}
-        offers={mockOffers}
+        offers={bidResponsesData?.records}
+        isLoading={isLoadingResponses}
+        error={responsesError}
+        message={bidResponsesData?.message}
       />
     </Main>
   );

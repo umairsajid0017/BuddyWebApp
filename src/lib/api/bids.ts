@@ -5,6 +5,7 @@ import {
   BidsResponse,
   CancelBidRequest,
   CancelBidResponse,
+  BidResponse,
 } from "../types/bid-types";
 
 // Get all bids for the customer
@@ -34,5 +35,28 @@ export const useCancelBid = () => {
       );
       return response.data;
     },
+  );
+};
+
+// Get bid responses/offers for a specific bid
+export const useBidResponses = (
+  bid_id: number | null,
+  options?: UseQueryOptions<BidResponse, AxiosError>
+) => {
+  return useQuery<BidResponse, AxiosError>(
+    ["bidResponses", bid_id],
+    async () => {
+      if (!bid_id) {
+        throw new Error("Bid ID is required");
+      }
+      const response = await api.get<BidResponse>("/showBidResponseCustomer", {
+        params: { bid_id }
+      });
+      return response.data;
+    },
+    {
+      ...options,
+      enabled: !!bid_id && (options?.enabled ?? true),
+    }
   );
 };

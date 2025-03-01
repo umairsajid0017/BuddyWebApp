@@ -90,3 +90,24 @@ export interface CancelBidResponse {
   error: boolean;
   message: string;
 }
+
+export interface BidResponse {
+  error: boolean;
+  message: string;
+  records: Offer[];
+}
+
+export interface Offer {
+  id: number;
+  worker_id: number;
+  worker_name: string;
+  rating: number;
+  description: string;
+  price: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BidResponseRequest {
+  bid_id: number;
+}
