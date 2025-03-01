@@ -68,44 +68,44 @@ export default function ProfileComponent() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
 
-    if (id === "civil_id_number") {
-      // Oman ID format: X-XXXXXX-XXXXXXX-X (e.g., 3-123456-1234567-1)
-      const cleaned = value.replace(/\D/g, "");
-      let formatted = cleaned;
-      if (cleaned.length > 0) {
-        formatted = cleaned.match(/.{1,1}|.+/g)?.join("-") || "";
-        if (cleaned.length > 1) {
-          formatted =
-            formatted +
-              "-" +
-              cleaned
-                .substring(1, 7)
-                .match(/.{1,6}|.+/g)
-                ?.join("-") || "";
-        }
-        if (cleaned.length > 7) {
-          formatted =
-            formatted +
-              "-" +
-              cleaned
-                .substring(7, 14)
-                .match(/.{1,7}|.+/g)
-                ?.join("-") || "";
-        }
-        if (cleaned.length > 14) {
-          formatted = formatted + "-" + cleaned.substring(14, 15) || "";
-        }
-      }
-      setFormData((prev) => ({
-        ...prev,
-        [id]: formatted.substring(0, 17), // Limit to correct length
-      }));
-    } else {
+    // if (id === "civil_id_number") {
+    //   // Oman ID format: X-XXXXXX-XXXXXXX-X (e.g., 3-123456-1234567-1)
+    //   const cleaned = value.replace(/\D/g, "");
+    //   let formatted = cleaned;
+    //   if (cleaned.length > 0) {
+    //     formatted = cleaned.match(/.{1,1}|.+/g)?.join("-") || "";
+    //     if (cleaned.length > 1) {
+    //       formatted =
+    //         formatted +
+    //           "-" +
+    //           cleaned
+    //             .substring(1, 7)
+    //             .match(/.{1,6}|.+/g)
+    //             ?.join("-") || "";
+    //     }
+    //     if (cleaned.length > 7) {
+    //       formatted =
+    //         formatted +
+    //           "-" +
+    //           cleaned
+    //             .substring(7, 14)
+    //             .match(/.{1,7}|.+/g)
+    //             ?.join("-") || "";
+    //     }
+    //     if (cleaned.length > 14) {
+    //       formatted = formatted + "-" + cleaned.substring(14, 15) || "";
+    //     }
+    //   }
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     [id]: formatted.substring(0, 17), // Limit to correct length
+    //   }));
+    // } else {
       setFormData((prev) => ({
         ...prev,
         [id]: value,
       }));
-    }
+    // }
   };
 
   const handleSelectChange = (value: string, field: keyof ProfileFormData) => {
@@ -318,7 +318,7 @@ export default function ProfileComponent() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="civil_id_number">National ID No *</Label>
+            <Label htmlFor="civil_id_number">Oman ID *</Label>
             <Input
               required
               id="civil_id_number"
