@@ -25,6 +25,9 @@ const OTPVerification = () => {
   const [otp, setOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
   const [remainingAttempts, setRemainingAttempts] = useState(3);
+  
+
+  const [tempOtp, setTempOtp] = useState("");
 
   const sendOtpMutation = useSendOtp();
   const verifyOtpMutation = useVerifyOtp();
@@ -68,6 +71,8 @@ const OTPVerification = () => {
           );
           setResendTimer(waitTime);
         }
+
+        setTempOtp(response.your_otp ?? "");
         toast({
           variant: "destructive",
           title: "Error",
@@ -148,6 +153,9 @@ const OTPVerification = () => {
           </CardTitle>
           <p className="text-center text-sm text-gray-600">
             We sent a verification code to {email}
+          </p>
+          <p className="text-center text-sm text-gray-600">
+            {tempOtp}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

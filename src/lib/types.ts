@@ -224,6 +224,7 @@ export interface ResetPasswordData {
 export interface SendOtpResponse {
   error: boolean;
   message: string;
+  your_otp?: string;
   records?: {
     otp: string;
     otp_expires_at: string;

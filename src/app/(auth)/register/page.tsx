@@ -62,6 +62,7 @@ const Register: React.FC = () => {
         const response = await checkCredentialsMutation.mutateAsync({
           email: formData.email,
           phone: formData.phone,
+          role: "customer",
         });
 
         if (response.error) {

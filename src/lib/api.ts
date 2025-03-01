@@ -87,7 +87,7 @@ export const useCheckCredentials = () => {
   return useMutation<
     CheckCredentialsResponse,
     AxiosError,
-    { email: string; phone: string }
+    { email: string; phone: string; role: string }
   >(async (data) => {
     const response = await api.post<CheckCredentialsResponse>(
       "/checkCredentials",

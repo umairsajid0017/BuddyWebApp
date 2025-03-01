@@ -22,7 +22,7 @@ import { useLogin } from "@/lib/api";
 import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { setAuthCookie } from "./authOptions";
-import { Mail, Lock, AlertCircle, AlertTriangle } from "lucide-react";
+import { Mail, Lock, AlertCircle, AlertTriangle, Eye } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
@@ -40,6 +40,7 @@ export default function Login() {
   });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
   const router = useRouter();
   const backgroundImageUrl = (backgroundSvg as { src: string }).src;
@@ -156,12 +157,23 @@ export default function Login() {
                   <Input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={credentials.password}
                     onChange={handleChange}
                     className="pl-10"
                   />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showPassword ? (
+                      <Eye className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
                 {errors.password && (
                   <Alert variant="destructive">
