@@ -7,7 +7,6 @@ import { PathToSuccess } from "./sections/path-to-success";
 import { StatsSection } from "./sections/stats-section";
 import { DownloadSection } from "./sections/download-section";
 import { QuickStartSection } from "./sections/quick-start-section";
-import { Footer } from "./sections/footer-section";
 
 export default function LandingPageComponent() {
   return (
@@ -27,7 +26,6 @@ export default function LandingPageComponent() {
           <DownloadSection />
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
