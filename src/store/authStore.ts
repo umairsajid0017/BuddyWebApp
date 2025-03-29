@@ -144,6 +144,7 @@ export const useAuth = () => {
         const errorMessage = handleError(error);
         setUser(null);
         setToken(null); // Clear the token on error
+        
         setError(errorMessage);
       } finally {
         setIsInitialized(true);

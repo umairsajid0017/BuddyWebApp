@@ -48,7 +48,7 @@ export function GuestLoginButton() {
         useAuthStore.getState().setToken(token);
         
         // Set auth cookie
-        await setAuthCookie(token);
+        await setAuthCookie(records, token);
         
         toast({
           title: "Logged in as guest",

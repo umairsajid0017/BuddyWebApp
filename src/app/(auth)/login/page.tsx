@@ -64,7 +64,7 @@ export default function Login() {
         } else {
           useAuthStore.getState().setUser(records);
           useAuthStore.getState().setToken(token);
-          await setAuthCookie(token);
+          await setAuthCookie(records, token);
           void router.push("/");
         }
       } else {
