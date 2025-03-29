@@ -30,7 +30,7 @@ export interface User {
 
 export interface LoginCredentials {
   email: string;
-  password: string;
+  password?: string | null;
   login_type?: string;
   role?: string;
 }

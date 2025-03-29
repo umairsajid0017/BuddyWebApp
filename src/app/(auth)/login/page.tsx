@@ -27,6 +27,7 @@ import Loading from "@/components/ui/loading";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { LoginType } from "@/utils/constants";
+import { GoogleSignInButton } from "@/components/ui/google-signin-button";
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
@@ -159,7 +160,7 @@ export default function Login() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
-                    value={credentials.password}
+                    value={credentials.password || ""}
                     onChange={handleChange}
                     className="pl-10"
                   />
@@ -208,6 +209,20 @@ export default function Login() {
               </Button>
             </div>
           </form>
+          
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+          
+          <GoogleSignInButton />
+          
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <p className="text-sm text-gray-600">

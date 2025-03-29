@@ -44,12 +44,29 @@ export const userSchema = z.object({
   otp_verify: z.string(),
 }) satisfies z.ZodType<User>;
 
-export const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, { message: "Password is required" }),
-  login_type: z.literal(LoginType.MANUAL),
-  role: z.string(),
-}) satisfies z.ZodType<LoginCredentials>;
+export const loginSchema = z.discriminatedUnion('login_type', [
+  // Manual login requires email, password
+  z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(1, { message: "Password is required" }),
+    login_type: z.literal(LoginType.MANUAL),
+    role: z.string(),
+  }),
+  // Google login requires only email
+  z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().optional(),
+    login_type: z.literal(LoginType.GOOGLE),
+    role: z.string(),
+  }),
+  // Facebook login
+  z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().optional(),
+    login_type: z.literal(LoginType.FACEBOOK),
+    role: z.string(),
+  }),
+]) satisfies z.ZodType<LoginCredentials>;
 
 export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long"),
