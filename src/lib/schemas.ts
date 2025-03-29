@@ -59,11 +59,11 @@ export const loginSchema = z.discriminatedUnion('login_type', [
     login_type: z.literal(LoginType.GOOGLE),
     role: z.string(),
   }),
-  // Facebook login
+  // Guest login
   z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().optional(),
-    login_type: z.literal(LoginType.FACEBOOK),
+    login_type: z.literal(LoginType.GUEST),
     role: z.string(),
   }),
 ]) satisfies z.ZodType<LoginCredentials>;

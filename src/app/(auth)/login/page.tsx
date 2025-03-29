@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { LoginType } from "@/utils/constants";
 import { GoogleSignInButton } from "@/components/ui/google-signin-button";
+import { GuestLoginButton } from "@/components/ui/guest-login-button";
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
@@ -63,7 +64,7 @@ export default function Login() {
         } else {
           useAuthStore.getState().setUser(records);
           useAuthStore.getState().setToken(token);
-          await setAuthCookie(token);
+          await setAuthCookie(records, token);
           void router.push("/");
         }
       } else {
@@ -222,6 +223,10 @@ export default function Login() {
           </div>
           
           <GoogleSignInButton />
+          
+          <div className="mt-2">
+            <GuestLoginButton />
+          </div>
           
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">

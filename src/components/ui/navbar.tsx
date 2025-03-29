@@ -30,7 +30,9 @@ import {
   User,
   X,
   Bell,
+  LogIn,
 } from "lucide-react";
+import { LoginType } from "@/utils/constants";
 
 export default function NavBar() {
   const { user, logoutUser } = useAuth();
@@ -39,6 +41,9 @@ export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Check if the current user is a guest
+  const isGuestUser = user?.login_type === LoginType.GUEST;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -190,35 +195,59 @@ export default function NavBar() {
                     className="w-56 bg-secondary-900 text-white"
                   >
                     <div className="border-b border-secondary-700 px-2 py-2">
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-xs text-secondary-300">{user.email}</p>
+                      {user.login_type === LoginType.GUEST ? (
+                        <p className="font-medium">Guest User</p>
+                      ) : (
+                        <>
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-xs text-secondary-300">
+                            {user.email}
+                          </p>
+                        </>
+                      )}
                     </div>
 
-                    <DropdownMenuItem
-                      onClick={() => router.push("/profile")}
-                      className="gap-2 py-2 text-white hover:bg-secondary-800"
-                    >
-                      <UserCircle className="h-4 w-4" />
-                      My Account
-                    </DropdownMenuItem>
+                    {!isGuestUser && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => router.push("/profile")}
+                          className="gap-2 py-2 text-white hover:bg-secondary-800"
+                        >
+                          <UserCircle className="h-4 w-4" />
+                          My Account
+                        </DropdownMenuItem>
 
-                    <DropdownMenuItem
-                      onClick={() => router.push("/settings")}
-                      className="gap-2 py-2 text-white hover:bg-secondary-800"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Settings
-                    </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => router.push("/settings")}
+                          className="gap-2 py-2 text-white hover:bg-secondary-800"
+                        >
+                          <Settings className="h-4 w-4" />
+                          Settings
+                        </DropdownMenuItem>
 
-                    <div className="my-1 h-px bg-secondary-700" />
+                        <div className="my-1 h-px bg-secondary-700" />
+                      </>
+                    )}
 
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="gap-2 py-2 text-red-400 hover:bg-secondary-800 focus:text-red-400"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Log out
-                    </DropdownMenuItem>
+                    {user.login_type !== LoginType.GUEST ? (
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="gap-2 py-2 text-red-400 hover:bg-secondary-800 focus:text-red-400"
+                      >
+                        <>
+                          <LogOut className="h-4 w-4" />
+                          Log out
+                        </>
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem
+                        onClick={() => router.push("/login")}
+                        className="gap-2 py-2 text-white hover:bg-secondary-800"
+                      >
+                        <LogIn className="h-4 w-4" />
+                        Log in
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
@@ -252,47 +281,60 @@ export default function NavBar() {
           >
             <X className="h-5 w-5" />
           </Button>
-          <div className="mt-16 flex flex-col space-y-4 items-center">
+          <div className="mt-16 flex flex-col items-center space-y-4">
             <Button
               variant="ghost"
-              onClick={() => {router.push("/bookings")
-                setIsMobileMenuOpen(false)
-              } }
+              onClick={() => {
+                router.push("/bookings");
+                setIsMobileMenuOpen(false);
+              }}
               className="text-white hover:bg-secondary-800"
-              
             >
               Bookings
             </Button>
             <Button
               variant="ghost"
-              onClick={() => {router.push("/bids")
-                setIsMobileMenuOpen(false)
-              } }
+              onClick={() => {
+                router.push("/bids");
+                setIsMobileMenuOpen(false);
+              }}
               className="text-white hover:bg-secondary-800"
             >
               My Bids
             </Button>
             <Button
               variant="ghost"
-              onClick={() => {router.push("/bookings")
-                setIsMobileMenuOpen(false)
-              } }
+              onClick={() => {
+                router.push("/bookings");
+                setIsMobileMenuOpen(false);
+              }}
               className="text-white hover:bg-secondary-800"
             >
               My Bookings
             </Button>
+            {!isGuestUser && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  router.push("/profile");
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-white hover:bg-secondary-800"
+              >
+                My Account
+              </Button>
+            )}
             <Button
               variant="ghost"
-              onClick={() => {router.push("/help-center")
-                setIsMobileMenuOpen(false)
-              } }
+              onClick={() => {
+                router.push("/help-center");
+                setIsMobileMenuOpen(false);
+              }}
               className="text-white hover:bg-secondary-800"
             >
               Help Center
-              </Button>
-        {/* <div onClick={() => setIsMobileMenuOpen(false)}> */}
-              <CreateBookingDialog />
-            {/* </div> */}
+            </Button>
+            <CreateBookingDialog />
           </div>
         </div>
       )}

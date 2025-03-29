@@ -136,7 +136,9 @@ export const useLogout = () => {
         //Delete Cookie
         try {
           const cookieRes = await deleteCookie("token");
+          const authCookieRes = await deleteCookie("auth-storage");
           console.log("Cookie deleted:", cookieRes);
+          console.log("Auth Cookie deleted:", authCookieRes);
         } catch (error) {
           console.log("Error deleting cookie:", error);
         }
