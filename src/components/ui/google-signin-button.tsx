@@ -5,50 +5,71 @@ import { useState } from "react";
 import { auth, googleProvider } from "@/lib/firebase";
 import { signInWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { useLogin } from "@/lib/api";
 import useAuthStore from "@/store/authStore";
 import { setAuthCookie } from "@/app/(auth)/login/authOptions";
-import { LoginType } from "@/utils/constants";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 export function GoogleSignInButton() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const loginMutation = useLogin();
   const { toast } = useToast();
 
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
       
-      // Sign in with Google popup
+      // Sign in with Google popup on the client side
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       
-      // Use the returned user info to call your login API
-      const credentials = {
-        email: user.email || "",
-        // Use the Firebase user's localId (uid) as the password
-        password: user.uid,
-        login_type: LoginType.GOOGLE,
-        role: "customer",
+      if (!user) {
+        throw new Error("Failed to get user data from Google");
+      }
+      
+      // Prepare user data to send to server
+      const userData = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        providerData: user.providerData
       };
       
-      // Call your login API with the Google credentials
-      const data = await loginMutation.mutateAsync(credentials);
+      // Send the user data to our server-side API for login/registration
+      const response = await axios.post('/api/auth/google', { userData });
+      const data = response.data;
       
       if (!data.error && data.token && data.records) {
         const { records, token } = data;
         
-        // Set user data in your store
+        console.log("Authentication successful:", data);
+        
+        // Store user data in auth store
         useAuthStore.getState().setUser(records);
         useAuthStore.getState().setToken(token);
+        
+        // Set auth cookie
         await setAuthCookie(token);
+        
+        // Show toast message based on whether it was a new account or existing login
+        if (response.status === 201) {
+          toast({
+            title: "Account created",
+            description: "Your account has been created successfully.",
+          });
+        } else {
+          toast({
+            title: "Logged in",
+            description: "You have been successfully logged in.",
+          });
+        }
         
         // Redirect to home page
         router.push("/");
       } else {
-        throw new Error(data.message ?? "Login failed");
+        // Handle error case
+        throw new Error(data.message ?? "Authentication failed");
       }
     } catch (error) {
       console.error("Google sign-in error:", error);

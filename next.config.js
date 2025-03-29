@@ -12,6 +12,7 @@ const config = {
       "18.136.228.207",
       "images.unsplash.com",
       "plus.unsplash.com",
+      "explorerbees.org",
     ], // Add 'images.pexels.com' here
     remotePatterns: [
       {
