@@ -3,16 +3,21 @@
 import { Button } from "./button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import useAuthStore from "@/store/authStore";
+import useAuthStore, { useAuth } from "@/store/authStore";
 import { setAuthCookie } from "@/app/(auth)/login/authOptions";
 import { useToast } from "@/hooks/use-toast";
 import { LoginType } from "@/utils/constants";
 import axios from "axios";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
 export function GuestLoginButton() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
+  
+  // Check if current user is already a guest
+  const isAlreadyGuest = user?.login_type === LoginType.GUEST;
 
   const generateRandomData = () => {
     // Generate a random string for email and password
@@ -28,6 +33,16 @@ export function GuestLoginButton() {
   };
 
   const handleGuestLogin = async () => {
+    // Prevent guest users from logging in as guest again
+    if (isAlreadyGuest) {
+      toast({
+        title: "Already a guest",
+        description: "You are already logged in as a guest user.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       setIsLoading(true);
       
@@ -52,7 +67,7 @@ export function GuestLoginButton() {
         
         toast({
           title: "Logged in as guest",
-          description: "You have been logged in as a guest user.",
+          description: "Your session will end when you close the browser.",
         });
         
         // Redirect to home page
@@ -74,31 +89,56 @@ export function GuestLoginButton() {
   };
 
   return (
-    <Button
-      variant="outline"
-      type="button"
-      disabled={isLoading}
-      onClick={handleGuestLogin}
-      className="w-full"
-    >
-      {isLoading ? (
-        <div className="mr-2 h-4 w-4 animate-spin" />
-      ) : (
-        <svg
-          className="mr-2 h-4 w-4"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-      )}
-      Continue as Guest
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="w-full">
+            <Button
+              variant="outline"
+              type="button"
+              disabled={isLoading || isAlreadyGuest}
+              onClick={handleGuestLogin}
+              className={`group relative w-full overflow-hidden transition-all duration-300 ${
+                isAlreadyGuest 
+                  ? "cursor-not-allowed opacity-60" 
+                  : "hover:bg-secondary-100 hover:text-secondary-900"
+              }`}
+            >
+              <span className="relative z-10 flex items-center justify-center">
+                {isLoading ? (
+                  <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <svg
+                    className="mr-2 h-5 w-5 transition-transform duration-300 group-hover:scale-110"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                )}
+                <span className="relative">
+                  {isLoading ? "Logging in..." : "Continue as Guest"}
+                </span>
+              </span>
+              
+              {!isAlreadyGuest && (
+                <span className="absolute bottom-0 left-0 h-0 w-full bg-secondary-100 transition-all duration-300 group-hover:h-full"></span>
+              )}
+            </Button>
+          </div>
+        </TooltipTrigger>
+        {isAlreadyGuest && (
+          <TooltipContent>
+            <p>You are already logged in as a guest user</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
   );
 } 

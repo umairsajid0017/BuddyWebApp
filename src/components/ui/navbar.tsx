@@ -195,11 +195,15 @@ export default function NavBar() {
                     className="w-56 bg-secondary-900 text-white"
                   >
                     <div className="border-b border-secondary-700 px-2 py-2">
-                      <p className="font-medium">{user.name}</p>
-                      {user.login_type !== LoginType.GUEST && (
-                        <p className="text-xs text-secondary-300">
-                          {user.email}
-                        </p>
+                      {user.login_type === LoginType.GUEST ? (
+                        <p className="font-medium">Guest User</p>
+                      ) : (
+                        <>
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-xs text-secondary-300">
+                            {user.email}
+                          </p>
+                        </>
                       )}
                     </div>
 

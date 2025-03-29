@@ -50,8 +50,8 @@ export function GoogleSignInButton() {
         useAuthStore.getState().setToken(token);
         
         // Set auth cookie
-        await setAuthCookie(token);
-        
+        await setAuthCookie(records, token);
+
         // Show toast message based on whether it was a new account or existing login
         if (response.status === 201) {
           toast({
