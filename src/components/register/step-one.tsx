@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { RegisterData } from "@/lib/types";
+import { GoogleSignInButton } from "@/components/ui/google-signin-button";
+import { GuestLoginButton } from "@/components/ui/guest-login-button";
+import { Separator } from "../ui/separator";
 
 interface StepOneProps {
   formData: RegisterData;
@@ -75,6 +78,17 @@ const StepOne: React.FC<StepOneProps> = ({
       <Button type="button" onClick={handleNextStep} className="w-full">
         Next
       </Button>
+      
+      <div className="relative my-4">
+       <Separator />
+       
+      </div>
+      
+      <GoogleSignInButton />
+      
+      <div className="mt-2">
+        <GuestLoginButton />
+      </div>
     </div>
   );
 };

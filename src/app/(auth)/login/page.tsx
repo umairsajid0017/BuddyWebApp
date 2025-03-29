@@ -29,6 +29,7 @@ import Link from "next/link";
 import { LoginType } from "@/utils/constants";
 import { GoogleSignInButton } from "@/components/ui/google-signin-button";
 import { GuestLoginButton } from "@/components/ui/guest-login-button";
+import { Separator } from "@/components/ui/separator";
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
@@ -212,18 +213,10 @@ export default function Login() {
           </form>
           
           <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
+            <Separator />
           </div>
-          
+
           <GoogleSignInButton />
-          
           <div className="mt-2">
             <GuestLoginButton />
           </div>
