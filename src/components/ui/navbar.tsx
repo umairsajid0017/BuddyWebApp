@@ -31,6 +31,7 @@ import {
   X,
   Bell,
   LogIn,
+  Wallet,
 } from "lucide-react";
 import { LoginType } from "@/utils/constants";
 
@@ -215,6 +216,13 @@ export default function NavBar() {
                         >
                           <UserCircle className="h-4 w-4" />
                           My Account
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => router.push("/wallet")}
+                          className="gap-2 py-2 text-white hover:bg-secondary-800"
+                        >
+                          <Wallet className="h-4 w-4" />
+                          Wallet
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
