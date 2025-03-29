@@ -6,6 +6,7 @@ import {
   CancelBidRequest,
   CancelBidResponse,
   BidResponse,
+  BidStatus,
 } from "../types/bid-types";
 
 // Get all bids for the customer
@@ -15,10 +16,37 @@ export const useCustomerBids = (
   return useQuery<BidsResponse, AxiosError>(
     ["customerBids"],
     async () => {
-      const response = await api.get<BidsResponse>("/showPlaceBidsCustomers");
+      // Default to OPEN status (1) if not specified
+      const response = await api.get<BidsResponse>("/showPlaceBidsCustomers", {
+        params: {
+          bid_status: BidStatus.OPEN // Default to showing open bids
+        }
+      });
       return response.data;
     },
     options,
+  );
+};
+
+// Get customer bids with specific status
+export const useCustomerBidsByStatus = (
+  status: BidStatus,
+  options?: UseQueryOptions<BidsResponse, AxiosError>,
+) => {
+  return useQuery<BidsResponse, AxiosError>(
+    ["customerBids", status],
+    async () => {
+      const response = await api.get<BidsResponse>("/showPlaceBidsCustomers", {
+        params: {
+          bid_status: status
+        }
+      });
+      return response.data;
+    },
+    {
+      ...options,
+      enabled: status !== undefined && (options?.enabled ?? true),
+    }
   );
 };
 

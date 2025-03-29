@@ -124,6 +124,7 @@ export const useCreateBid = () => {
       formData.append("category_id", bookingData.category_id.toString());
       formData.append("expected_price", bookingData.expected_price);
       formData.append("address", bookingData.address);
+     
 
       // Append optional fields
       if (bookingData.description) {
