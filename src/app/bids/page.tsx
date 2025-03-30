@@ -1,11 +1,11 @@
 "use client";
 
 import { useCustomerBids, useCancelBid, useBidResponses } from "@/lib/api/bids";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Clock, MoreVertical, PlayCircle } from "lucide-react";
+import { MapPin, Clock, MoreVertical, PlayCircle, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,6 @@ const getStatusBadgeProps = (status: number) => {
 
 const BidsPage = () => {
   const { data: bidsData, isLoading, error, refetch } = useCustomerBids();
-  console.log(bidsData);
   const cancelBid = useCancelBid();
   const { toast } = useToast();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -149,20 +148,40 @@ const BidsPage = () => {
     );
   }
 
-  if (bidsData && !bidsData?.records) {
-    return (
-      <div className="container mx-auto p-6">
-        <h1 className="mb-6 text-3xl font-bold tracking-tight">My Bids</h1>
-        <Card className="p-6">
-          <div className="text-center">
-            <h3 className="mb-2 text-lg font-semibold text-destructive">
-              No Bids Found
-            </h3>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+ if (bidsData && !bidsData?.records) {
+   return (
+     <div className="container mx-auto max-w-4xl p-6">
+       <h1 className="mb-6 text-3xl font-bold tracking-tight">My Bids</h1>
+
+       <Card className="border-destructive/20 shadow-md">
+         <CardContent className="flex flex-col items-center justify-center px-6 pb-4 pt-6">
+           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+             <AlertCircle className="h-8 w-8 text-destructive" />
+           </div>
+
+           <h3 className="mb-2 text-xl font-semibold text-destructive">
+             Unable to Load Bids
+           </h3>
+
+           <p className="max-w-md text-center text-muted-foreground">
+             {bidsData?.message ||
+               "There was an error loading your bids. Please try again later."}
+           </p>
+         </CardContent>
+
+         <CardFooter className="flex justify-center pb-6">
+           <Button
+             variant="outline"
+             className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+             onClick={() => refetch()}
+           >
+             Try Again
+           </Button>
+         </CardFooter>
+       </Card>
+     </div>
+   );
+ }
 
   return (
     <Main>
