@@ -230,23 +230,75 @@ const WalletPage = () => {
 
           {/* Payment Gateway Dialog */}
           <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
-            <DialogContent className="sm:max-w-[700px] h-[600px] p-0">
-              <div className="flex items-center justify-between p-4 border-b">
-                <DialogTitle className="text-xl">Payment Gateway</DialogTitle>
-                <Button variant="ghost" size="icon" onClick={handlePaymentClose}>
-                  <XIcon className="h-4 w-4" />
+            <DialogContent className="max-w-[90vw] md:max-w-[900px] h-[80vh] p-0 rounded-lg overflow-hidden border-0">
+              <div className="flex items-center justify-between p-5 bg-gradient-to-r from-[#1D0D25] to-[#673086] text-white">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 p-2 rounded-full">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 12V7H17.5L15.5 5H8.5L6.5 7H3V12H21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M3 12V19H21V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M15 15C15 16.6569 13.6569 18 12 18C10.3431 18 9 16.6569 9 15C9 13.3431 10.3431 12 12 12C13.6569 12 15 13.3431 15 15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <DialogTitle className="text-2xl font-bold">Payment Gateway</DialogTitle>
+                    <p className="text-sm text-white/70">Secure payment processing</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" onClick={handlePaymentClose} className="text-white hover:bg-white/20">
+                  <XIcon className="h-5 w-5" />
                 </Button>
               </div>
-              {paymentUrl && (
-                <div className="w-full h-[540px] overflow-hidden">
-                  <iframe 
-                    src={paymentUrl}
-                    className="w-full h-full border-none"
-                    title="Payment Gateway"
-                    sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation"
-                  />
+              <div className="w-full h-[calc(80vh-70px)] bg-gradient-to-b from-[#f8f8f8] to-white p-4">
+                {paymentUrl ? (
+                  <div className="w-full h-full overflow-hidden bg-white rounded-lg shadow-inner border border-gray-100">
+                    <div className="relative w-full h-full">
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10" id="loading-indicator">
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-2"></div>
+                          <p className="text-sm text-gray-600">Loading payment gateway...</p>
+                        </div>
+                      </div>
+                      <iframe 
+                        src={paymentUrl}
+                        className="w-full h-full border-none"
+                        title="Payment Gateway"
+                        sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation"
+                        onLoad={() => {
+                          const loadingIndicator = document.getElementById('loading-indicator');
+                          if (loadingIndicator) loadingIndicator.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="flex flex-col items-center">
+                      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                      <p className="text-lg font-medium">Initializing payment...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="p-3 bg-gray-50 flex justify-between items-center border-t">
+                <div className="flex items-center">
+                  <div className="flex space-x-1">
+                    <div className="w-6 h-4 rounded bg-gray-300"></div>
+                    <div className="w-6 h-4 rounded bg-gray-400"></div>
+                    <div className="w-6 h-4 rounded bg-gray-500"></div>
+                    <div className="w-6 h-4 rounded bg-gray-600"></div>
+                  </div>
+                  <span className="ml-2 text-xs text-gray-500">Secure payment</span>
                 </div>
-              )}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handlePaymentClose}
+                  className="text-sm"
+                >
+                  Cancel Payment
+                </Button>
+              </div>
             </DialogContent>
           </Dialog>
         </div>
