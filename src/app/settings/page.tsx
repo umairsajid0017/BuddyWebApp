@@ -1,5 +1,4 @@
-import SettingsComponent from "@/components/settings/settings-component";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import React from "react";
 
 const Settings: React.FC = ()=> {

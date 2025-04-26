@@ -6,12 +6,10 @@ import { Card, CardContent } from "../ui/card";
 import { CURRENCY } from "@/utils/constants";
 
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
-  console.log(service);
 
   const imageUrl = service.images?.[0]?.name
     ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
     : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`;
-  console.log("Image URL", imageUrl);
   return (
     <Link href={`/services/${service.id}`} className="block">
       <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">

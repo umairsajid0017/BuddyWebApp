@@ -76,7 +76,6 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
         lat: serviceResponse.lat ? Number(serviceResponse.lat) : null,
         fixed_price: serviceResponse.fixed_price,
       });
-      console.log(service);
     }
   }, [serviceResponse]);
 

@@ -34,6 +34,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { LoginType } from "@/utils/constants";
+import NotificationsBell from "../notification/notifcation-bell";
 
 export default function NavBar() {
   const { user, logoutUser } = useAuth();
@@ -154,9 +155,7 @@ export default function NavBar() {
                 </Button>
                 <CreateBookingDialog />
                 <TooltipWrapper content="Notifications">
-                  <Button variant="ghost" size="icon" className="ml-2">
-                    <Bell className="h-5 w-5 text-white" />
-                  </Button>
+                  <NotificationsBell />
                 </TooltipWrapper>
               </div>
             </>
