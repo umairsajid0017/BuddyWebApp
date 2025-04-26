@@ -61,7 +61,7 @@ const StepTwo: React.FC<StepTwoProps> = ({ formData, errors, backendErrors, hand
   };
 
   useEffect(() => {
-    const password = formData.password;
+    const password = formData.password || '';
     
     // Update requirements
     const updatedRequirements = passwordRequirements.map(req => ({
@@ -105,7 +105,7 @@ const StepTwo: React.FC<StepTwoProps> = ({ formData, errors, backendErrors, hand
             autoComplete="new-password"
             required
             placeholder="Password"
-            value={formData.password}
+            value={formData.password || ''}
             onChange={handleChange}
             className="pr-10"
           />
