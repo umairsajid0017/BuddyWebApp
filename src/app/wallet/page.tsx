@@ -70,8 +70,7 @@ const WalletPage = () => {
   const paymentGatewayMutation = useInitPaymentGateway();
   const isLoading = paymentGatewayMutation.isLoading;
 
-  if (!user) return <Loading />;
-
+  
   // Register event listener to handle postMessage from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -83,7 +82,20 @@ const WalletPage = () => {
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
+    const handlePaymentClose = useCallback(() => {
+      setIsPaymentOpen(false);
+      setPaymentUrl("");
+      // Refresh data after payment
+      refreshWalletBalance();
+      refreshTransactions();
+      toast({
+        title: "Payment Closed",
+        description:
+          "Your payment session has ended. If your payment was successful, funds will be added to your wallet shortly.",
+      });
+    }, [refreshWalletBalance, refreshTransactions, toast]);
 
+  
   // Get transactions directly from API response
   const transactions = transactionsData?.records || [];
 
@@ -182,18 +194,6 @@ const WalletPage = () => {
     }
   };
 
-  const handlePaymentClose = useCallback(() => {
-    setIsPaymentOpen(false);
-    setPaymentUrl("");
-    // Refresh data after payment
-    refreshWalletBalance();
-    refreshTransactions();
-    toast({
-      title: "Payment Closed",
-      description:
-        "Your payment session has ended. If your payment was successful, funds will be added to your wallet shortly.",
-    });
-  }, [refreshWalletBalance, refreshTransactions, toast]);
 
   // Improved message handler with origin check
   useEffect(() => {
@@ -214,6 +214,8 @@ const WalletPage = () => {
     return () => window.removeEventListener("message", handleMessage);
   }, [handlePaymentClose]); // Add handlePaymentClose as dependency
 
+  if (!user) return <Loading />;
+
   return (
     <Main>
       <div className="space-y-8">
@@ -221,8 +223,8 @@ const WalletPage = () => {
           <h1 className="text-3xl font-bold">My Wallet</h1>
 
           {/* Payment Gateway Dialog */}
-          <Dialog 
-            open={isPaymentOpen} 
+          <Dialog
+            open={isPaymentOpen}
             onOpenChange={(open) => {
               if (!open) {
                 handlePaymentClose();
@@ -274,7 +276,6 @@ const WalletPage = () => {
                     </p>
                   </div>
                 </div>
-              
               </div>
               <ScrollArea className="h-[calc(80vh-134px)]">
                 <div className="min-h-full bg-gradient-to-b from-[#f8f8f8] to-white p-4">
@@ -379,8 +380,6 @@ const WalletPage = () => {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end gap-2">
-          
-
             <Dialog open={isAddMoneyOpen} onOpenChange={setIsAddMoneyOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -397,8 +396,9 @@ const WalletPage = () => {
                     Add Money to Wallet
                   </DialogTitle>
                   <DialogDescription className="text-center text-sm">
-                    Enter the amount you want to add to your wallet. You'll be
-                    redirected to a payment gateway to complete the transaction.
+                    Enter the amount you want to add to your wallet. You&apos;ll
+                    be redirected to a payment gateway to complete the
+                    transaction.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-6 py-6">

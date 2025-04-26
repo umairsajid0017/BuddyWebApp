@@ -163,7 +163,9 @@ export default function NotificationsMenu({
           <div className="flex flex-col items-center justify-center px-4 py-12 text-center text-muted-foreground">
             <BellRing className="mb-4 h-10 w-10 opacity-50" />
             <p>No notifications yet</p>
-            <p className="text-sm">We'll notify you when something arrives</p>
+            <p className="text-sm">
+              We&apos;ll notify you when something arrives
+            </p>
           </div>
         ) : (
           <ul className="divide-y">
