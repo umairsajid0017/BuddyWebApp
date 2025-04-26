@@ -7,27 +7,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import TooltipWrapper from "./tooltip-wrapper";
-import InboxComponent from "../inbox/inbox-component";
 import Link from "next/link";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./dropdown-menu";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { SearchComponent } from "../services/search-services/search-component";
 import { CreateBookingDialog } from "../bookings/create-booking-dialogue";
 import {
-  LayoutDashboard,
   UserCircle,
-  Briefcase,
-  BookMarked,
-  LifeBuoy,
   Settings,
   LogOut,
   Menu,
-  SearchIcon,
-  User,
   X,
   Bell,
   LogIn,
@@ -38,7 +30,7 @@ import NotificationsBell from "../notification/notifcation-bell";
 
 export default function NavBar() {
   const { user, logoutUser } = useAuth();
-  const [isOpenAccount, setIsOpenAccount] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
@@ -72,9 +64,15 @@ export default function NavBar() {
       await logoutUser();
       console.log("Logged out successfully");
       router.push("/");
+      setIsProfileOpen(false);
     } catch (error) {
       console.log("Error logging out", error);
     }
+  };
+
+  const navigateTo = (path: string) => {
+    router.push(path);
+    setIsProfileOpen(false);
   };
 
   return (
@@ -164,15 +162,12 @@ export default function NavBar() {
           {!isSearchVisible && (
             <div className="flex items-center">
               {user ? (
-                <DropdownMenu
-                  open={isOpenAccount}
-                  onOpenChange={setIsOpenAccount}
-                >
-                  <DropdownMenuTrigger asChild>
+                <Popover open={isProfileOpen} onOpenChange={setIsProfileOpen}>
+                  <PopoverTrigger asChild>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="relative hover:bg-secondary-800"
+                      className="relative rounded-full hover:bg-secondary-800"
                     >
                       <Avatar className="h-9 w-9">
                         <AvatarImage
@@ -189,74 +184,77 @@ export default function NavBar() {
                       </Avatar>
                       <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-secondary-900 bg-green-500" />
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
+                  </PopoverTrigger>
+                  <PopoverContent
                     align="end"
-                    className="w-56 bg-secondary-900 text-white"
+                    className="w-56 bg-white text-gray-800"
                   >
-                    <div className="border-b border-secondary-700 px-2 py-2">
+                    <div className="border-b border-gray-200 px-4 py-3">
                       {user.login_type === LoginType.GUEST ? (
                         <p className="font-medium">Guest User</p>
                       ) : (
                         <>
                           <p className="font-medium">{user.name}</p>
-                          <p className="text-xs text-secondary-300">
-                            {user.email}
-                          </p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
                         </>
                       )}
                     </div>
 
-                    {!isGuestUser && (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => router.push("/profile")}
-                          className="gap-2 py-2 text-white hover:bg-secondary-800"
-                        >
-                          <UserCircle className="h-4 w-4" />
-                          My Account
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => router.push("/wallet")}
-                          className="gap-2 py-2 text-white hover:bg-secondary-800"
-                        >
-                          <Wallet className="h-4 w-4" />
-                          Wallet
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                          onClick={() => router.push("/settings")}
-                          className="gap-2 py-2 text-white hover:bg-secondary-800"
-                        >
-                          <Settings className="h-4 w-4" />
-                          Settings
-                        </DropdownMenuItem>
-
-                        <div className="my-1 h-px bg-secondary-700" />
-                      </>
-                    )}
-
-                    {user.login_type !== LoginType.GUEST ? (
-                      <DropdownMenuItem
-                        onClick={handleLogout}
-                        className="gap-2 py-2 text-red-400 hover:bg-secondary-800 focus:text-red-400"
-                      >
+                    <div className="py-2">
+                      {!isGuestUser && (
                         <>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start gap-2 px-4 py-2 text-gray-800 hover:bg-gray-100"
+                            onClick={() => navigateTo("/profile")}
+                          >
+                            <UserCircle className="h-4 w-4" />
+                            My Account
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start gap-2 px-4 py-2 text-gray-800 hover:bg-gray-100"
+                            onClick={() => navigateTo("/wallet")}
+                          >
+                            <Wallet className="h-4 w-4" />
+                            Wallet
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start gap-2 px-4 py-2 text-gray-800 hover:bg-gray-100"
+                            onClick={() => navigateTo("/settings")}
+                          >
+                            <Settings className="h-4 w-4" />
+                            Settings
+                          </Button>
+
+                          <div className="my-1 h-px bg-gray-200" />
+                        </>
+                      )}
+
+                      {user.login_type !== LoginType.GUEST ? (
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start gap-2 px-4 py-2 text-red-500 hover:bg-gray-100 focus:text-red-500"
+                          onClick={handleLogout}
+                        >
                           <LogOut className="h-4 w-4" />
                           Log out
-                        </>
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem
-                        onClick={() => router.push("/login")}
-                        className="gap-2 py-2 text-white hover:bg-secondary-800"
-                      >
-                        <LogIn className="h-4 w-4" />
-                        Log in
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="default"
+                          className="w-full justify-start gap-2 px-4 py-2 text-text-200"
+                          onClick={() => navigateTo("/login")}
+                        >
+                          <LogIn className="h-4 w-4" />
+                          Log in
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               ) : (
                 <Button
                   onClick={() => router.push("/login")}
