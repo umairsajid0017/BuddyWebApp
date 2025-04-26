@@ -1,3 +1,4 @@
+// @ts-nocheck
 importScripts(
   "https://www.gstatic.com/firebasejs/9.20.0/firebase-app-compat.js",
 );
