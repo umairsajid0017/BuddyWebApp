@@ -1,12 +1,11 @@
-"use client"
-
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { InboxItem } from "@/lib/types"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ImageIcon, Mic, PaperclipIcon, SendIcon, ArrowLeft, Trash2, Check } from "lucide-react"
+import { ImageIcon, Mic, PaperclipIcon, SendIcon, ArrowLeft, Trash2 } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
 interface Message {
@@ -48,7 +47,7 @@ const initialConversations: Conversation[] = [
 
 export default function InboxPage() {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations)
-  const [activeConversation, setActiveConversation] = useState<Conversation | null>(conversations[0]!)
+  const [activeConversation, setActiveConversation] = useState<Conversation | null>(conversations[0] ?? null)
   const [message, setMessage] = useState("")
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false)
 
@@ -103,7 +102,7 @@ export default function InboxPage() {
     const updatedConversations = conversations.filter(conv => conv.id !== conversationId)
     setConversations(updatedConversations)
     if (activeConversation?.id === conversationId) {
-      setActiveConversation(updatedConversations[0] || null)
+      setActiveConversation(updatedConversations[0] ?? null)
       setIsMobileChatOpen(false)
     }
   }
@@ -179,7 +178,7 @@ export default function InboxPage() {
                   {msg.type === 'text' ? (
                     <p>{msg.content}</p>
                   ) : (
-                    <img src={msg.content} alt="Shared image" className="max-w-full rounded" />
+                    <Image src={msg.content} alt="Shared image" className="max-w-full rounded" width={300} height={200} />
                   )}
                   <span className="text-xs mt-1 block">{msg.timestamp}</span>
                   {msg.senderId === 'user' && (

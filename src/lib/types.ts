@@ -146,6 +146,8 @@ interface InboxItemInterface {
   read: boolean;
 }
 
+export type InboxItem = InboxItemInterface;
+
 export interface SearchServicesResponse {
   service_id: number;
   service_name: string;
@@ -159,7 +161,7 @@ export interface SearchServicesResponse {
   tag_line: string;
 }
 
-export type InboxItem = Partial<Record<keyof InboxItemInterface, unknown>>;
+// export type InboxItem = Partial<Record<keyof InboxItemInterface, unknown>>;
 
 export interface ChangePasswordData {
   current_password: string;

@@ -37,8 +37,9 @@ type AuthPersist = (
 ) => StateCreator<AuthState>;
 
 const handleError = (error: unknown): string => {
-  if (error instanceof AxiosError) {
-    return error.response?.data?.message || error.message;
+  if (error instanceof AxiosError && error.response) {
+    const responseData = error.response?.data as { message?: string };
+    return responseData?.message ?? error.message;
   } else if (error instanceof ZodError) {
     return "Invalid data received from server";
   } else if (error instanceof Error) {
@@ -128,13 +129,11 @@ export const useAuth = () => {
     if (!isInitialized) {
       try {
         if (user && token) {
-          // If we have a user and token in the store, validate it with the server
           const { data } = await userQuery.refetch();
           const parsedUser = userSchema.parse(data);
           setUser(parsedUser);
           setError(null);
         } else {
-          // If no user or token in store, check with the server
           const { data } = await userQuery.refetch();
           const parsedUser = userSchema.parse(data);
           setUser(parsedUser);

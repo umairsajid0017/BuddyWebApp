@@ -30,6 +30,7 @@ const config = {
       },
     ];
   },
+  //TODO: Remove this when deploying to production
   experimental: {
     serverActions: {
       allowedOrigins: [
@@ -37,6 +38,7 @@ const config = {
         "https://symmetrical-fishstick-9v79vr94vj7h79vg-3000.app.github.dev/",
       ],
     },
+    missingSuspenseWithCSRBailout: false,
   },
 };
 

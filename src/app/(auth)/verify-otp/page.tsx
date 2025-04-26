@@ -191,7 +191,9 @@ const OTPVerification = () => {
           </Button>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600">Didn't receive the code?</p>
+            <p className="text-sm text-gray-600">
+              Didn&apos;t receive the code?
+            </p>
             <Button
               variant="link"
               onClick={handleSendOTP}

@@ -5,6 +5,7 @@ import { SearchResponse } from "@/lib/types";
 
 // Types
 interface SearchParams {
+  name?: string;
   keyword?: string;
   category_id?: number;
   price_from?: number;

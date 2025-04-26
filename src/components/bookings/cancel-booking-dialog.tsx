@@ -41,7 +41,7 @@ export const CancelBookingDialog: React.FC<CancelBookingDialogProps> = ({
         <Card className="flex items-center justify-start">
           <CardHeader>
             <Image
-              src={process.env.NEXT_PUBLIC_IMAGE_URL + booking.service.image}
+              src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking?.service?.images[0]?.name}
               alt={booking.service.name}
               width={96}
               height={96}

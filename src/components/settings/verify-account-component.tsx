@@ -568,7 +568,7 @@ export default function VerifyAccountComponent() {
                     <div className="text-center">
                       <h3 className="text-lg font-semibold">Take Live Photo</h3>
                       <p className="mt-2 max-w-[300px] text-sm text-gray-500">
-                        Please ensure you're in a well-lit area and look
+                        Please ensure you&apos;re in a well-lit area and look
                         directly at the camera. Keep your face centered and
                         clearly visible.
                       </p>

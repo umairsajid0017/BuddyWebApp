@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ZodError } from "zod";
+import { ZodError, ZodIssue } from "zod";
 import {
   Card,
   CardContent,
@@ -46,7 +46,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
   const router = useRouter();
-  const backgroundImageUrl = (backgroundSvg as { src: string }).src;
+  const backgroundImageUrl = backgroundSvg.src;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -74,10 +74,11 @@ export default function Login() {
     } catch (error: unknown) {
       if (error instanceof ZodError) {
         const newErrors: LoginErrors = {};
-        error.errors.forEach((err) => {
+        (error.errors as ZodIssue[]).forEach((err) => {
           const path = err.path[0] as keyof LoginCredentials;
           newErrors[path] = err.message;
         });
+        //@ts-ignore
         setErrors(newErrors);
         console.log("Validation errors:", newErrors);
       } else if (error instanceof Error) {

@@ -62,7 +62,7 @@ export function NewBookingDialog() {
           <DialogHeader>
             <DialogTitle>New Booking</DialogTitle>
             <DialogDescription>
-              Make a new booking for a service. Click save when you're done.
+              Make a new booking for a service. Click save when you&apos;re done.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

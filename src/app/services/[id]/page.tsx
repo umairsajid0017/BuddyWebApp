@@ -70,7 +70,6 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
     if (serviceResponse) {
       setService({
         ...serviceResponse,
-        name: serviceResponse.name,
         ratings: [],
         long: serviceResponse.long ? Number(serviceResponse.long) : null,
         lat: serviceResponse.lat ? Number(serviceResponse.lat) : null,
