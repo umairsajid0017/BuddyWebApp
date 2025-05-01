@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
+import { IMAGE_PATHS } from "@/constants/imagePaths";
 
 export function Hero() {
   return (
     <section
       className="relative my-6 flex min-h-[438px] items-center justify-between rounded-lg py-20 text-white"
       style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1729194515785-fcd7d4f292d9?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+        backgroundImage: `url(${IMAGE_PATHS.LANDING_PAGE.MAIN_BG})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

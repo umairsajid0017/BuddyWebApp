@@ -1,49 +1,43 @@
 import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { IMAGE_PATHS } from "@/constants/imagePaths";
 
 const services = [
   {
     title: "Masonry Services",
     color: "bg-green-600",
-    image:
-      "https://images.unsplash.com/photo-1673865641469-34498379d8af?q=80&w=2080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: IMAGE_PATHS.LANDING_PAGE.MASONRY,
   },
   {
     title: "Electrical Work",
     color: "bg-orange-400",
-    image:
-      "https://images.unsplash.com/photo-1682345262055-8f95f3c513ea?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: IMAGE_PATHS.LANDING_PAGE.ELECTRICAL,
   },
   {
     title: "Plumbing",
     color: "bg-green-800",
-    image:
-      "https://plus.unsplash.com/premium_photo-1663045495725-89f23b57cfc5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D ",
+    image: IMAGE_PATHS.LANDING_PAGE.PLUMBING,
   },
   {
     title: "Interior Design",
     color: "bg-purple-800",
-    image:
-      "https://plus.unsplash.com/premium_photo-1681980018817-b36ab8848616?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: IMAGE_PATHS.LANDING_PAGE.INTERIOR,
   },
   {
     title: "Carpentry Services",
     color: "bg-yellow-700",
-    image:
-      "https://images.unsplash.com/photo-1590880795696-20c7dfadacde?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: IMAGE_PATHS.LANDING_PAGE.CARPENTRY,
   },
   {
     title: "Mechanic Services",
     color: "bg-blue-700",
-    image:
-      "https://plus.unsplash.com/premium_photo-1677009835876-4a29ddc4cc2c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: IMAGE_PATHS.LANDING_PAGE.MECHANIC,
   },
   {
     title: "Cleaning Services",
     color: "bg-pink-600",
-    image:
-      "https://plus.unsplash.com/premium_photo-1661478280979-25712a1378c6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: IMAGE_PATHS.LANDING_PAGE.OFFICE_CLEANING
   },
 ];
 
