@@ -36,6 +36,7 @@ export interface LoginResponse {
   token: string;
   records: User;
   message?: string;
+  error_code?: string;
 }
 
 export interface CheckCredentialsResponse {

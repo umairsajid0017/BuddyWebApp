@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { IMAGE_PATHS } from "@/constants/imagePaths";
 
-export function Hero() {
+export function HeroSection() {
   return (
     <section
       className="relative my-6 flex min-h-[438px] items-center justify-between rounded-lg py-20 text-white"

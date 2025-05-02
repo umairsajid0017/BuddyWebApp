@@ -1,6 +1,6 @@
 import { ServiceCategories } from "./service-categories";
 import { Features } from "./features";
-import { Hero } from "./hero-section";
+import { HeroSection } from "./hero-section";
 import { PopularServices } from "./popular-services";
 import { BenefitsSection } from "./sections/benefits-section";
 import { PathToSuccess } from "./sections/path-to-success";
@@ -13,7 +13,7 @@ export default function LandingPageComponent() {
     <div className="flex min-h-screen flex-col bg-background">
       <main className="flex-1">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Hero />
+          <HeroSection />
           <ServiceCategories />
           <PopularServices />
           <Features />
