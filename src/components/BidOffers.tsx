@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Star, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { CURRENCY } from "@/utils/constants";
-import { Offer } from "@/lib/types/bid-types";
+import { CURRENCY } from "@/constants/constantValues";
+import { Offer } from "@/types/bid-types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface BidOffersProps {

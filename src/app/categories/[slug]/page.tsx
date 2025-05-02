@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { CategoryService } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookmarkIcon, StarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,10 +9,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useServicesByCategory } from "@/hooks/useServicesByCategories";
-import { useCategory } from "@/lib/apis/get-categories";
+import { useCategory, useFilters } from "@/apis/apiCalls";
 import FilterBar from "@/components/services/filter-bar";
-import useFiltersStore from "@/store/filterStore";
-import { CURRENCY } from "@/utils/constants";
+import { CURRENCY } from "@/constants/constantValues";
+import { getImageUrl } from "@/helpers/utils";
+import { CategoryService, Service } from "@/types/service-types";
 
 const ServiceCard: React.FC<{ service: CategoryService }> = ({ service }) => (
   <Link href={`/services/${service.service_id}`} className="block">
@@ -22,7 +22,7 @@ const ServiceCard: React.FC<{ service: CategoryService }> = ({ service }) => (
         <Image
           src={
             service.images?.[0]?.name
-              ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
+              ? getImageUrl(service.images[0].name)
               : '/assets/placeholder.jpg'
           }
           alt={service.service_name}
@@ -102,9 +102,9 @@ const CategoryHeader: React.FC<{ categoryId: string }> = ({ categoryId }) => {
 
   return (
     <div className="mb-8">
-      <h1 className="text-2xl font-bold text-text-800">{category.title}</h1>
+      <h1 className="text-2xl font-bold text-text-800">{category.records.title}</h1>
       <p className="mt-2 text-sm text-text-600">
-        Browse all services in {category.title}
+        Browse all services in {category.records.title}
       </p>
     </div>
 
@@ -114,7 +114,7 @@ const CategoryHeader: React.FC<{ categoryId: string }> = ({ categoryId }) => {
 const CategoryPage: React.FC = () => {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("id") ?? "";
-  const { filters } = useFiltersStore();
+  const { filters } = useFilters();
 
   console.log("Category ID from query:", categoryId);
 

@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import {
   initializeFirebaseMessaging,
   setupMessageListener,
-} from "@/lib/firebase-messaging";
+} from "@/helpers/firebase-messaging";
 import { useToast } from "@/hooks/use-toast";
-import { saveNotificationToFirestore } from "@/lib/notifcations";
-import { useAuth } from "@/store/authStore";
+import { saveNotificationToFirestore } from "@/helpers/notifcations";
+import { useAuth } from '@/apis/apiCalls'
 
 export default function FcmProvider({
   children,

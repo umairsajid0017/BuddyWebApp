@@ -1,7 +1,6 @@
 'use server'
-import { User } from '@/lib/types'
 import { cookies } from 'next/headers'
-
+import { User } from '@/types/general-types'
 export async function setAuthCookie(authData: User, token: string) {
   cookies().set('token', token, {
     httpOnly: true,

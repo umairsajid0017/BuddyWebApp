@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ServiceRating } from "@/lib/types/service-types"
+import { ServiceRating } from "@/types/service-types"
 
 interface ReviewsSectionProps {
   ratings: ServiceRating[]

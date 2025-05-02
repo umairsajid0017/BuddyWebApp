@@ -1,9 +1,9 @@
-import { type Service } from "@/lib/types";
 import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import PopularServices from "./popular-services-component";
 import Link from "next/link";
-import useCategoriesStore from "@/store/categoriesStore";
+import { useCategories } from '@/apis/apiCalls'
+import { Service } from "@/types/service-types";
 
 interface PopularServicesSectionProps {
   services: Service[];
@@ -12,7 +12,7 @@ interface PopularServicesSectionProps {
 const PopularServicesSection: React.FC<PopularServicesSectionProps> = ({
   services,
 }) => {
-  const { categories } = useCategoriesStore();
+  const { categories } = useCategories();
 
   // State to store the selected category id for filtering
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);

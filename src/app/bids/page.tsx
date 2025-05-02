@@ -1,6 +1,6 @@
 "use client";
 
-import { useCustomerBids, useCancelBid, useBidResponses } from "@/lib/api/bids";
+import { useCancelBid, useBidResponses, useCustomerBidsByStatus } from "@/apis/apiCalls";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,13 +24,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { CURRENCY } from "@/utils/constants";
-import { BidStatus } from "@/lib/types/bid-types";
+import { BidStatus, CURRENCY } from "@/constants/constantValues";
+import { Bid } from "@/types/bid-types";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { BidOffers } from "@/components/BidOffers";
 import Main from "@/components/ui/main";
 import { ImageViewer } from "@/components/ImageViewer";
+import { getImageUrl } from "@/helpers/utils";
 
 const getStatusBadgeProps = (status: number) => {
   switch (status) {
@@ -66,7 +67,7 @@ const getStatusBadgeProps = (status: number) => {
 };
 
 const BidsPage = () => {
-  const { data: bidsData, isLoading, error, refetch } = useCustomerBids();
+  const { data: bidsData, isLoading, error, refetch } = useCustomerBidsByStatus(BidStatus.OPEN);
   const cancelBid = useCancelBid();
   const { toast } = useToast();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -191,7 +192,7 @@ const BidsPage = () => {
         </div>
         <ScrollArea className="h-[calc(100vh-200px)]">
           <div className="space-y-6">
-            {bidsData && bidsData?.records && bidsData?.records?.map((bid) => {
+            {bidsData && bidsData?.records && bidsData?.records?.map((bid: Bid) => {
               const statusProps = getStatusBadgeProps(bid.status);
               return (
                 <Card key={bid.id} className="overflow-hidden">
@@ -249,11 +250,11 @@ const BidsPage = () => {
                                 className="relative h-24 w-24 overflow-hidden rounded-lg cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setSelectedImage(`${process.env.NEXT_PUBLIC_IMAGE_URL}/${image.name}`);
+                                  setSelectedImage(getImageUrl(image.name)); 
                                 }}
                               >
                                 <Image
-                                  src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/${image.name}`}
+                                  src={getImageUrl(image.name)} 
                                   alt="Bid image"
                                   fill
                                   className="object-cover transition-transform hover:scale-110"

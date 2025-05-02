@@ -1,15 +1,16 @@
-import { Service } from "@/lib/types";
 import { BookmarkIcon, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "../ui/card";
-import { CURRENCY } from "@/utils/constants";
+import { Service } from "@/types/service-types";
+import { CURRENCY } from "@/constants/constantValues";
+import { getImageUrl } from "@/helpers/utils";
 
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
 
   const imageUrl = service.images?.[0]?.name
-    ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
-    : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`;
+    ? getImageUrl(service.images[0].name)
+    : getImageUrl(service.image);
   return (
     <Link href={`/services/${service.id}`} className="block">
       <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">

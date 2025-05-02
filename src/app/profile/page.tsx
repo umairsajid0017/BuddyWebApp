@@ -1,24 +1,13 @@
 "use client";
+import { useAuth, useServices } from '@/apis/apiCalls'
 import UserProfile from "@/components/account/user-profile-component";
 import PopularServicesSection from "@/components/services/popular-services-section";
 import Loading from "@/components/ui/loading";
 import Main from "@/components/ui/main";
-import { useServices } from "@/lib/api";
-import { useAuth } from "@/store/authStore";
-import useServicesStore from "@/store/servicesStore";
-import { useEffect } from "react";
 
 const Profile: React.FC = () => {
-  const { services, setServices } = useServicesStore();
   const { user } = useAuth();
-  const { data: servicesResponse, isLoading } = useServices();
-
-  useEffect(() => {
-    if (servicesResponse) {
-      setServices(servicesResponse);
-      console.log("Service on home:", servicesResponse);
-    }
-  }, [servicesResponse, setServices]);
+  const { services, isLoading } = useServices();
 
   if (isLoading || !user) return <Loading />;
 

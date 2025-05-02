@@ -4,22 +4,21 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
-import { useService, useServices } from "@/lib/api";
+import { useServiceDetails, useServices } from "@/apis/apiCalls";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import useServicesStore from "@/store/servicesStore";
 import Main from "@/components/ui/main";
 import PopularServicesSection from "@/components/services/popular-services-section";
-import { Service } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { ServiceRating } from "@/lib/types/service-types";
+import { Service, ServiceRating } from "@/types/service-types";
 import ReviewsSection from "@/components/services/reviews-section";
 import UserProfileCard from "@/components/services/user-profile-card";
 import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
-import { CURRENCY } from "@/utils/constants";
+import { CURRENCY } from "@/constants/constantValues";
 import { ServiceImageGallery } from "@/components/services/service-image-gallery";
 import { CollapsibleText } from "@/components/ui/collapsible-text";
+
 
 interface ServiceDetailsProps {
   params: {
@@ -50,30 +49,18 @@ const ServiceDetailsSkeleton: React.FC = () => (
 );
 
 const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
-  const { services, setServices } = useServicesStore();
-  const { data: serviceResponse, isLoading, error } = useService(+params.id);
-  const {
-    data: servicesResponse,
-    isLoading: allServicesLoading,
-    error: allServicesError,
-  } = useServices();
-
+  const { data: serviceResponse, isLoading, error } = useServiceDetails(+params.id);
+  const { services } = useServices();
   const [service, setService] = useState<Service>();
-
-  useEffect(() => {
-    if (servicesResponse) {
-      setServices(servicesResponse);
-    }
-  }, [servicesResponse, allServicesLoading, setServices]);
 
   useEffect(() => {
     if (serviceResponse) {
       setService({
-        ...serviceResponse,
+        ...serviceResponse.records,
         ratings: [],
-        long: serviceResponse.long ? Number(serviceResponse.long) : null,
-        lat: serviceResponse.lat ? Number(serviceResponse.lat) : null,
-        fixed_price: serviceResponse.fixed_price,
+        long: serviceResponse.records.long ? Number(serviceResponse.records.long) : null,
+        lat: serviceResponse.records.lat ? Number(serviceResponse.records.lat) : null,
+        fixed_price: serviceResponse.records.fixed_price,
       });
     }
   }, [serviceResponse]);

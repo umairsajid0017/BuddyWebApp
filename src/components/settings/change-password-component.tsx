@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { useChangePassword } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
+import { useChangePassword } from "@/apis/apiCalls";
 
 export default function ChangePasswordComponent() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -42,6 +42,7 @@ export default function ChangePasswordComponent() {
       const response = await changePasswordMutation.mutateAsync({
         current_password: currentPassword,
         new_password: newPassword,
+        confirm_password: confirmPassword,
       });
 
       if (response.error) {

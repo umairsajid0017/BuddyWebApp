@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { chatService, type ChatMessage } from "@/lib/services/chatService";
-import { useAuth } from "@/store/authStore";
+import { useAuth } from '@/apis/apiCalls'
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,15 +17,17 @@ import {
   Forward,
   Info,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getImageUrl } from "@/helpers/utils";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {  chatService } from "@/services/chatService";
+import { ChatMessageFirebase } from "@/types/chat-types";
+import { Worker } from "@/types/general-types";
 
-import {type Worker} from "@/lib/types/booking-types";
 
 interface BookingChatProps {
   isOpen: boolean;
@@ -36,8 +37,8 @@ interface BookingChatProps {
 }
 
 const MessageComponent = React.memo<{
-  message: ChatMessage;
-  onAction: (action: string, message: ChatMessage) => void;
+  message: ChatMessageFirebase;
+  onAction: (action: string, message: ChatMessageFirebase) => void;
   userId?: string;
   providerName: string;
   starredMessages: Set<string>;
@@ -175,14 +176,14 @@ export const BookingChat: React.FC<BookingChatProps> = ({
   taskId,
 }) => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessageFirebase[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [chatRoomId, setChatRoomId] = useState<string | null>(null);
   const [starredMessages, setStarredMessages] = useState<Set<string>>(
     new Set(),
   );
-  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+  const [replyingTo, setReplyingTo] = useState<ChatMessageFirebase | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -220,7 +221,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
   }, [chatRoomId]);
 
   const handleMessageAction = React.useCallback(
-    async (action: string, message: ChatMessage) => {
+    async (action: string, message: ChatMessageFirebase) => {
       switch (action) {
         case "copy":
           await navigator.clipboard.writeText(message.text);
@@ -268,7 +269,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
     if (!newMessage.trim() || !user || !chatRoomId) return;
 
     try {
-      const messageData: Omit<ChatMessage, "id" | "timestamp"> = {
+      const messageData: Omit<ChatMessageFirebase, "id" | "timestamp"> = {
         text: newMessage,
         sender: user.id.toString(),
         receiver: provider.id.toString(),
@@ -310,7 +311,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
           </Button>
           <Avatar className="h-10 w-10">
             <AvatarImage
-              src={process.env.NEXT_PUBLIC_IMAGE_URL! + provider.image}
+              src={getImageUrl(provider.image || undefined)}
             />
             <AvatarFallback>{provider.name[0]}</AvatarFallback>
           </Avatar>

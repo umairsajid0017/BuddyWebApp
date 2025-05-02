@@ -12,17 +12,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import Main from "@/components/ui/main"
-import { useAuth } from "@/store/authStore"
+import { useAuth } from "@/apis/apiCalls"
 import Loading from "@/components/ui/loading"
 import { CURRENCY } from "@/utils/constants"
-import { 
-  useWalletCredit, 
-  useInitPaymentGateway, 
+import {
+  useWalletCredit,
   useCustomerTransactions,
-  AddToWalletData,
-  Transaction
-} from "@/lib/api/wallet"
+  useInitPaymentGateway
+} from "@/apis/apiCalls"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Transaction } from "@/types/wallet-types"
+import { AddToWalletData } from "@/apis/api-request-types"
 
 const WalletPage = () => {
   const [filter, setFilter] = useState("all");
@@ -41,34 +41,18 @@ const WalletPage = () => {
     data: walletData,
     isLoading: isBalanceLoading,
     refetch: refreshWalletBalance,
-  } = useWalletCredit({
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to fetch wallet balance",
-        variant: "destructive",
-      });
-    },
-  });
+  } = useWalletCredit();
 
   // Use the transactions query hook
   const {
     data: transactionsData,
     isLoading: isTransactionsLoading,
     refetch: refreshTransactions,
-  } = useCustomerTransactions({
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to fetch transactions",
-        variant: "destructive",
-      });
-    },
-  });
+  } = useCustomerTransactions();
 
   // Use the payment gateway mutation hook
   const paymentGatewayMutation = useInitPaymentGateway();
-  const isLoading = paymentGatewayMutation.isLoading;
+  const isLoading = paymentGatewayMutation.isPending;
 
   
   // Register event listener to handle postMessage from iframe

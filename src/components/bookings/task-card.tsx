@@ -7,41 +7,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Booking } from "@/lib/types/booking-types";
+import { Booking } from "@/types/booking-types";
 import BookingDetailsSheet from "./bookings-details-sheet";
-import { CURRENCY } from "@/utils/constants";
-import { BookingStatus, getStatusLabel } from "@/lib/types/status";
+import { CURRENCY } from "@/constants/constantValues";
+import { BookingStatus } from "@/constants/constantValues";
 import { formatDistanceToNow } from "date-fns";
 import { MapPin, Clock } from "lucide-react";
+import { getImageUrl, getStatusBadgeVariant, getStatusLabel } from "@/helpers/utils";
+import { TaskCardProps } from "@/types/general-types";
 
-interface TaskCardProps {
-  booking: Booking;
-}
 
-const getStatusBadgeVariant = (status: BookingStatus) => {
-  switch (status) {
-    case BookingStatus.OPEN:
-    case BookingStatus.CONFIRMED:
-    case BookingStatus.STARTED:
-    case BookingStatus.WORKER_HAS_STARTED_THE_WORK:
-    case BookingStatus.WORKER_IS_ON_HIS_WAY:
-    case BookingStatus.WORKER_IS_ON_YOUR_DOORSTEP:
-      return "default";
-    case BookingStatus.COMPLETED:
-      return "success";
-    case BookingStatus.CANCELED:
-    case BookingStatus.CANCELED_BY_WORKER:
-    case BookingStatus.CANCELED_BY_CUSTOMER:
-    case BookingStatus.TIMEOUT_CANCELED:
-    case BookingStatus.DECLINED:
-      return "destructive";
-    case BookingStatus.PENDING:
-    case BookingStatus.NOT_STARTED:
-      return "outline";
-    default:
-      return "secondary";
-  }
-};
 
 const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
   const statusVariant = getStatusBadgeVariant(booking.status);
@@ -51,7 +26,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
     <Card className="w-full max-w-sm">
       <CardHeader className="p-0">
         <img
-          src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking?.images[0]?.name}
+          src={getImageUrl(booking?.images[0]?.name)}
           alt={booking.service.name}
           className="h-40 w-full rounded-t-lg object-cover"
         />

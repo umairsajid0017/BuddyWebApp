@@ -2,15 +2,17 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { SearchResponse } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import { Search, Search as SearchIcon, Star } from "lucide-react";
-import { useSearchServices } from "@/lib/apis/search-services";
-import { cn } from "@/lib/utils";
-import { CURRENCY } from "@/utils/constants";
+import { useSearchServices } from "@/apis/apiCalls";
+import { cn, getImageUrl } from "@/helpers/utils";
 import { Button } from "@/components/ui/button";
 import TooltipWrapper from "@/components/ui/tooltip-wrapper";
+import { CURRENCY } from "@/constants/constantValues";
+import { Category } from "@/types/category-types";
+import { Service } from "@/types/service-types";
+import { SearchResponse } from "@/apis/api-response-types";
 
 const CategoryResult = ({
   category,
@@ -27,7 +29,7 @@ const CategoryResult = ({
       <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md bg-muted">
         {category.image ? (
           <Image
-            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${category.image}`}
+            src={getImageUrl(category.image)}
             alt={category.title}
             layout="fill"
             objectFit="cover"
@@ -49,8 +51,8 @@ const ServiceResult = ({
   service,
   onSelect,
 }: {
-  service: SearchResponse["records"]["services"][0];
-  onSelect: (service: SearchResponse["records"]["services"][0]) => void;
+  service: Service;
+  onSelect: (service: Service) => void;
 }) => (
   <div
     className="cursor-pointer rounded-lg p-3 transition-all hover:bg-accent/50"
@@ -60,7 +62,7 @@ const ServiceResult = ({
       <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-md bg-muted">
         {service.images?.[0] ? (
           <Image
-            src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${service.images[0].name}`}
+            src={getImageUrl(service.images[0].name)}
             alt={service.name}
             layout="fill"
             objectFit="cover"
@@ -184,7 +186,7 @@ export function SearchComponent({
                 Categories
               </h3>
             </div>
-            {categories.map((category) => (
+            {categories.map((category: Category) => (
               <CategoryResult
                 key={category.id}
                 category={category}
@@ -200,7 +202,7 @@ export function SearchComponent({
                 Services
               </h3>
             </div>
-            {services.map((service) => (
+            {services.map((service: Service) => (
               <ServiceResult
                 key={service.id}
                 service={service}

@@ -2,16 +2,18 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { useServices } from "@/lib/api";
-import { SearchResponse } from "@/lib/types";
+import { useServices } from "@/apis/apiCalls";
 import { Card, CardContent } from "@/components/ui/card";
 import { StarIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useSearchServices } from "@/lib/apis/search-services";
-import { CURRENCY } from "@/utils/constants";
+import { useSearchServices } from "@/apis/apiCalls";
+import { CURRENCY } from "@/constants/constantValues";
+import { SearchResponse } from "@/apis/api-response-types";
+import { Service } from "@/types/service-types";
+import { getImageUrl } from "@/helpers/utils";
 
 //TODO: This service card component is used in multiple places. It should be moved to a shared component.
 const ServiceCard: React.FC<{ service: SearchResponse["records"]["services"][0] }> = ({
@@ -22,7 +24,7 @@ const ServiceCard: React.FC<{ service: SearchResponse["records"]["services"][0] 
       <div className="relative h-44 overflow-hidden bg-gray-200">
         <Image
           src={service.images?.[0]?.name 
-            ? `${process.env.NEXT_PUBLIC_IMAGE_URL}${service.images[0].name}`
+            ? getImageUrl(service.images[0].name)
             : `/placeholder.svg?height=176&width=264`}
           alt={service.name}
           layout="fill"
@@ -133,7 +135,7 @@ const SearchResults: React.FC = () => {
       </h1>
       {services?.records?.services && services.records.services.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {services.records.services.map((service) => (
+          {services.records.services.map((service: Service) => (
             <ServiceCard key={service.id} service={service} />
           ))}
         </div>

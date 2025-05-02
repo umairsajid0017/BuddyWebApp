@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import { CameraIcon, Router } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { User } from "@/lib/types";
-import { splitFullName } from "@/utils/helper-functions";
+import { User } from "@/types/general-types";
+import { getImageUrl, splitFullName } from "@/helpers/utils";
 
 // type UserInfo = {
 //   firstName: string
@@ -31,7 +31,7 @@ const UserProfile: React.FC<{ user: User }> = ({ user }) => {
             <Avatar className="h-24 w-24">
               <AvatarImage
                 src={
-                  process.env.NEXT_PUBLIC_IMAGE_URL! + user.image ||
+                  getImageUrl(user.image) ||
                   "https://api.dicebear.com/9.x/dylan/svg?seed=Destiny"
                 }
                 alt="Profile picture"

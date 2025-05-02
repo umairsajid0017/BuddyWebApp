@@ -3,10 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
-import { RegisterData } from "@/lib/types";
 import { GoogleSignInButton } from "@/components/ui/google-signin-button";
 import { GuestLoginButton } from "@/components/ui/guest-login-button";
 import { Separator } from "../ui/separator";
+import { RegisterData } from "@/apis/api-request-types";
 
 interface StepOneProps {
   formData: RegisterData;

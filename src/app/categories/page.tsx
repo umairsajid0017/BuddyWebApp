@@ -1,4 +1,4 @@
-import { useCategories } from "@/lib/apis/get-categories";
+import { useCategories } from "@/apis/apiCalls";
 import AllCategoriesComponent from "@/components/services/all-categories-component";
 import DashboardSkeleton from "@/components/dashboard/dashboard-skeleton";
 

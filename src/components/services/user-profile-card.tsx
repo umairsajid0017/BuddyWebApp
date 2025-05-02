@@ -1,12 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { MapPin, Phone, Mail, Star, Calendar } from "lucide-react";
-import { type User } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "../ui/separator";
 import { useState } from "react";
 import { CollapsibleText } from "../ui/collapsible-text";
+import { User } from "@/types/general-types";
+import { getImageUrl } from "@/helpers/utils";
 
 // Collapsible text component
 
@@ -21,11 +22,7 @@ export default function UserProfileCard({ user }: UserProfileCardProps) {
       <CardHeader className="flex flex-col items-center text-center">
         <Avatar className="h-24 w-24">
           <AvatarImage
-            src={
-              user.image
-                ? process.env.NEXT_PUBLIC_IMAGE_URL + user.image
-                : undefined
-            }
+            src={getImageUrl(user.image)}
             alt={user.name ?? ""}
           />
           <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>

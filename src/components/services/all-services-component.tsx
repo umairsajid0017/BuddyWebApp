@@ -1,14 +1,15 @@
 "use client";
 
 import React from "react";
-import { useServices } from "@/lib/api";
+
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import ServiceCard from "./services-card";
 import FilterBar from "@/components/services/filter-bar";
-import { Service } from "@/lib/types";
-import useFiltersStore from "@/store/filterStore";
+import { Service } from "@/types/service-types";
+import { useFilters } from '@/apis/apiCalls'
 import { SearchIcon } from "lucide-react";
+import { useServices } from "@/apis/apiCalls";
 
 const ServiceSkeleton: React.FC = () => (
   <Card className="p-4">
@@ -23,9 +24,8 @@ const ServiceSkeleton: React.FC = () => (
 );
 
 const AllServices: React.FC = () => {
-  const { data: servicesResponse, isLoading, error } = useServices();
-  const { filters } = useFiltersStore();
-  const services = servicesResponse ?? [];
+  const { services, isLoading, error } = useServices();
+  const { filters } = useFilters();
 
   const filteredAndSortedServices = React.useMemo(() => {
     if (!services) return [];

@@ -13,13 +13,11 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CameraIcon } from "lucide-react";
-import { useAuth } from "@/store/authStore";
-import { splitFullName } from "@/utils/helper-functions";
-import { useUpdateProfile } from "@/lib/api";
-import { profileSchema } from "@/lib/schemas";
-import { ZodError } from "zod";
+import { useAuth } from "@/apis/apiCalls";
+import { useUpdateProfile } from "@/apis/apiCalls";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { getImageUrl, splitFullName } from "@/helpers/utils";
 
 interface ProfileFormData {
   name: string;
@@ -67,45 +65,10 @@ export default function ProfileComponent() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-
-    // if (id === "civil_id_number") {
-    //   // Oman ID format: X-XXXXXX-XXXXXXX-X (e.g., 3-123456-1234567-1)
-    //   const cleaned = value.replace(/\D/g, "");
-    //   let formatted = cleaned;
-    //   if (cleaned.length > 0) {
-    //     formatted = cleaned.match(/.{1,1}|.+/g)?.join("-") || "";
-    //     if (cleaned.length > 1) {
-    //       formatted =
-    //         formatted +
-    //           "-" +
-    //           cleaned
-    //             .substring(1, 7)
-    //             .match(/.{1,6}|.+/g)
-    //             ?.join("-") || "";
-    //     }
-    //     if (cleaned.length > 7) {
-    //       formatted =
-    //         formatted +
-    //           "-" +
-    //           cleaned
-    //             .substring(7, 14)
-    //             .match(/.{1,7}|.+/g)
-    //             ?.join("-") || "";
-    //     }
-    //     if (cleaned.length > 14) {
-    //       formatted = formatted + "-" + cleaned.substring(14, 15) || "";
-    //     }
-    //   }
-    //   setFormData((prev) => ({
-    //     ...prev,
-    //     [id]: formatted.substring(0, 17), // Limit to correct length
-    //   }));
-    // } else {
-      setFormData((prev) => ({
-        ...prev,
-        [id]: value,
-      }));
-    // }
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
 
   const handleSelectChange = (value: string, field: keyof ProfileFormData) => {
@@ -162,13 +125,11 @@ export default function ProfileComponent() {
     }
 
     try {
-      // Validate the form data
-      const validatedData = profileSchema.parse(formData);
-
       const response = await updateProfileMutation.mutateAsync({
-        formData: validatedData,
+        formData: formData,
         image: selectedImage || undefined,
       });
+      
       toast({
         title: "Success",
         description: response.message || "Profile updated successfully",
@@ -181,20 +142,10 @@ export default function ProfileComponent() {
       }
       setSelectedImage(null);
     } catch (error) {
-      if (error instanceof ZodError) {
-        // Handle validation errors
-        const errors = error.errors.map((err) => err.message);
-        toast({
-          title: "Error",
-          description: errors.join("\n"),
-        });
-      } else {
-        toast({
-          title: "Error",
-          description:
-            error instanceof Error ? error.message : "Failed to update profile",
-        });
-      }
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update profile",
+      });
     }
   };
 
@@ -209,7 +160,7 @@ export default function ProfileComponent() {
             className="h-24 w-24 cursor-pointer"
             onClick={handleImageClick}
           >
-            {updateProfileMutation.isLoading ? (
+            {updateProfileMutation.isPending ? (
               <div className="flex h-full w-full items-center justify-center bg-muted">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
@@ -217,9 +168,7 @@ export default function ProfileComponent() {
               <AvatarImage
                 src={
                   previewUrl ||
-                  (user?.image
-                    ? process.env.NEXT_PUBLIC_IMAGE_URL + user.image
-                    : undefined)
+                  getImageUrl(user?.image)
                 }
                 alt={user?.name ?? ""}
               />
@@ -342,9 +291,9 @@ export default function ProfileComponent() {
         <Button
           type="submit"
           className="w-full"
-          disabled={updateProfileMutation.isLoading}
+          disabled={updateProfileMutation.isPending}
         >
-          {updateProfileMutation.isLoading ? (
+          {updateProfileMutation.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Updating...

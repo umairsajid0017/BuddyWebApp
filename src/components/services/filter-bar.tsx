@@ -1,6 +1,6 @@
 import React from "react";
 import FilterDropdown from "@/components/ui/filter-dropdown";
-import useFiltersStore from "@/store/filterStore";
+import { useFilters } from '@/apis/apiCalls'
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 
@@ -10,7 +10,7 @@ const serviceOptions = [
   { label: "Full Stack Development", value: "full_stack" },
   { label: "Frontend Development", value: "frontend" },
 ];
-import { CURRENCY } from "@/utils/constants";
+import { CURRENCY } from "@/constants/constantValues";
 
 const budgetOptions = [
   { label: "All Prices", value: "" },
@@ -34,7 +34,7 @@ const sortOptions = [
 ];
 
 const FilterBar: React.FC = () => {
-  const { filters, setFilter, resetFilters } = useFiltersStore();
+  const { filters, setFilter, resetFilters } = useFilters();
 
   return (
     <div className="mb-6">

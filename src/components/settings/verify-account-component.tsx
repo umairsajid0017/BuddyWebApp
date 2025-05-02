@@ -21,10 +21,10 @@ import {
   useLivePhotoVerification,
   usePassportVerification,
   useVerificationCheck,
-} from "@/lib/api";
+} from "@/apis/apiCalls";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { VerificationRecord, VerificationStatus } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
+import { CnicVerificationRecord, VerificationStatus } from "@/types/verification-types";
 
 export default function VerifyAccountComponent() {
   const [idFront, setIdFront] = useState<File | null>(null);
@@ -32,7 +32,7 @@ export default function VerifyAccountComponent() {
   const [livePhoto, setLivePhoto] = useState<File | null>(null);
   const [passportFront, setPassportFront] = useState<File | null>(null);
   const [verificationStatus, setVerificationStatus] =
-    useState<VerificationRecord | null>(null);
+    useState<CnicVerificationRecord | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isFrontCamera, setIsFrontCamera] = useState(true);
@@ -444,9 +444,9 @@ export default function VerifyAccountComponent() {
           <Button
             className="w-full"
             onClick={handleVerifyCnic}
-            disabled={cnicVerificationMutation.isLoading}
+            disabled={cnicVerificationMutation.isPending}
           >
-            {cnicVerificationMutation.isLoading ? (
+            {cnicVerificationMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Verifying...
@@ -586,9 +586,9 @@ export default function VerifyAccountComponent() {
           <Button
             className="w-full"
             onClick={handleVerifyLivePhoto}
-            disabled={livePhotoVerificationMutation.isLoading || !livePhoto}
+            disabled={livePhotoVerificationMutation.isPending || !livePhoto}
           >
-            {livePhotoVerificationMutation.isLoading ? (
+            {livePhotoVerificationMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Verifying...
@@ -643,9 +643,9 @@ export default function VerifyAccountComponent() {
           <Button
             className="w-full"
             onClick={handleVerifyPassport}
-            disabled={passportVerificationMutation.isLoading}
+            disabled={passportVerificationMutation.isPending}
           >
-            {passportVerificationMutation.isLoading ? (
+            {passportVerificationMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Verifying...

@@ -3,11 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { RegisterData } from "@/lib/types";
 import Loading from "@/components/ui/loading";
 import { Eye, EyeOff, Check, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/helpers/utils";
 import { z } from "zod";
+import { RegisterData } from "@/apis/api-request-types";
 
 interface StepTwoProps {
   formData: RegisterData;

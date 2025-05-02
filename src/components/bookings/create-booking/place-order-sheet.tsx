@@ -12,9 +12,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Mic, Video, ImageIcon, Pause, Play, Trash2 } from "lucide-react";
 import { ServiceCard } from "./booking-service-card";
-import { Service } from "@/lib/types";
+import { Service } from "@/types/service-types";
 import { Progress } from "@/components/ui/progress";
-import { MediaFiles } from "@/lib/types/common";
+import { MediaFiles } from "@/types/general-types";
 
 interface PlaceOrderSheetProps {
   isOpen: boolean;

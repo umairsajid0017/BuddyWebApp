@@ -2,12 +2,14 @@
 
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useBookingsByStatus } from "@/lib/api/bookings";
+import { useBookingsByStatus } from "@/apis/apiCalls";
 import { CreateBookingDialog } from "./create-booking-dialogue";
 import { Skeleton } from "@/components/ui/skeleton";
 import TaskCard from "./task-card";
 import Image from "next/image";
-import { BookingStatus, getStatusLabel } from "@/lib/types/status";
+import { getStatusLabel } from "@/helpers/utils";
+import { BookingStatus } from "@/constants/constantValues";
+import { Booking } from "@/types/booking-types";
 
 const DISPLAY_STATUSES = [
   {
@@ -106,7 +108,7 @@ const BookingsComponent: React.FC = () => {
               <LoadingBookings />
             ) : (bookingsResponse?.records ?? []).length > 0 ? (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {bookingsResponse?.records.map((booking) => (
+                {bookingsResponse?.records.map((booking: Booking) => (
                   <TaskCard key={booking.id} booking={booking} />
                 ))}
               </div>

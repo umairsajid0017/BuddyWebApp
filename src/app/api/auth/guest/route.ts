@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LoginType } from "@/utils/constants";
+import { LoginType } from "@/constants/constantValues";
 import axios from "axios";
+import { Endpoints } from "@/apis/endpoints";
 
-const LOGIN_URL = process.env.NEXT_PUBLIC_API_URL! + "login";
-const REGISTER_URL = process.env.NEXT_PUBLIC_API_URL! + "register";
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +28,7 @@ export async function POST(request: NextRequest) {
       registerFormData.append('login_type', LoginType.GUEST);
       registerFormData.append('role', 'customer');
       
-      const registerResponse = await axios.post(REGISTER_URL, registerFormData, {
+      const registerResponse = await axios.post(Endpoints.REGISTER, registerFormData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -48,7 +47,7 @@ export async function POST(request: NextRequest) {
       loginFormData.append('login_type', LoginType.GUEST);
       loginFormData.append('role', 'customer');
       
-      const loginResponse = await axios.post(LOGIN_URL, loginFormData, {
+      const loginResponse = await axios.post(Endpoints.LOGIN, loginFormData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

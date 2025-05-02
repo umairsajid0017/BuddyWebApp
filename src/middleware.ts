@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { LoginType } from "./utils/constants";
+import { LoginType } from "./constants/constantValues";
 
 const PROTECTED_ROUTES = ["/dashboard", "/settings", "/services", "/bookings"];
 const GUEST_RESTRICTED_ROUTES = ["/settings", "/profile", "/account", "/payment"];

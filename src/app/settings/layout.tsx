@@ -25,8 +25,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import kebabCase from "@/utils/helper-functions";
 import Loading from "@/components/ui/loading";
+import kebabCase from "@/helpers/utils";
 
 const settingsItems = [
   { href: "/settings/profile", icon: UserIcon, label: "Edit Profile" },

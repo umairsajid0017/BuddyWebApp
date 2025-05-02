@@ -3,7 +3,7 @@
 import { Button } from "./button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import useAuthStore, { useAuth } from "@/store/authStore";
+import { useAuth } from '@/apis/apiCalls'
 import { setAuthCookie } from "@/app/(auth)/login/authOptions";
 import { useToast } from "@/hooks/use-toast";
 import { LoginType } from "@/utils/constants";
@@ -57,10 +57,6 @@ export function GuestLoginButton() {
         const { records, token } = data;
         
         console.log("Guest login successful:", data);
-        
-        // Store user data in auth store
-        useAuthStore.getState().setUser(records);
-        useAuthStore.getState().setToken(token);
         
         // Set auth cookie
         await setAuthCookie(records, token);

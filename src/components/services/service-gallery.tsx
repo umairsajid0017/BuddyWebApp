@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { ServiceImage } from "@/lib/types";
+
 import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn, getImageUrl } from "@/helpers/utils";
+import { ImageType } from "@/types/general-types";
+import Image from "next/image";
 
 interface ServiceGalleryProps {
   mainImage: string;
-  images: ServiceImage[];
+  images: ImageType[];
   serviceName: string;
 }
 
@@ -30,12 +31,6 @@ export const ServiceGallery: React.FC<ServiceGalleryProps> = ({
     return null;
   }
 
-  const getImageUrl = (name: string) => {
-    if (name.startsWith("http")) {
-      return name;
-    }
-    return `${process.env.NEXT_PUBLIC_IMAGE_URL}/${name}`;
-  };
 
   const handlePrevious = () => {
     setCurrentImageIndex((prev) =>

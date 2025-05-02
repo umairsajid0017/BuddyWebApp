@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { LoginType } from "@/utils/constants";
 import axios from "axios";
+import { Endpoints } from "@/apis/endpoints";
 
-const LOGIN_URL = process.env.NEXT_PUBLIC_API_URL! + "login";
-const REGISTER_URL = process.env.NEXT_PUBLIC_API_URL! + "register";
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,8 +31,8 @@ export async function POST(request: NextRequest) {
       loginFormData.append('login_type', LoginType.GOOGLE);
       loginFormData.append('role', 'customer');
 
-      console.log("URL: ", LOGIN_URL);
-      const loginResponse = await axios.post(LOGIN_URL, loginFormData);
+      console.log("URL: ", Endpoints.LOGIN);
+      const loginResponse = await axios.post(Endpoints.LOGIN, loginFormData);
       console.log("loginResponse: ", loginResponse.data);
 
       // Check for error in the response data, even if HTTP status is 200
@@ -50,7 +49,7 @@ export async function POST(request: NextRequest) {
           registerFormData.append('login_type', LoginType.GOOGLE);
           registerFormData.append('role', 'customer');
           
-          const registerResponse = await axios.post(REGISTER_URL, registerFormData, {
+          const registerResponse = await axios.post(Endpoints.REGISTER, registerFormData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
@@ -69,7 +68,7 @@ export async function POST(request: NextRequest) {
           loginAfterRegisterFormData.append('login_type', LoginType.GOOGLE);
           loginAfterRegisterFormData.append('role', 'customer');
           
-          const loginAfterRegisterResponse = await axios.post(LOGIN_URL, loginAfterRegisterFormData, {
+          const loginAfterRegisterResponse = await axios.post(Endpoints.LOGIN, loginAfterRegisterFormData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },

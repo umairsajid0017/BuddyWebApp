@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/store/authStore";
+import { useAuth } from '@/apis/apiCalls'
 import { useRouter } from "next/navigation";
 import TooltipWrapper from "./tooltip-wrapper";
 import Link from "next/link";
@@ -25,8 +25,10 @@ import {
   LogIn,
   Wallet,
 } from "lucide-react";
-import { LoginType } from "@/utils/constants";
+
 import NotificationsBell from "../notification/notifcation-bell";
+import { LoginType } from "@/constants/constantValues";
+import { getImageUrl } from "@/helpers/utils";
 
 export default function NavBar() {
   const { user, logoutUser } = useAuth();
@@ -171,11 +173,7 @@ export default function NavBar() {
                     >
                       <Avatar className="h-9 w-9">
                         <AvatarImage
-                          src={
-                            user.image
-                              ? process.env.NEXT_PUBLIC_IMAGE_URL + user.image
-                              : undefined
-                          }
+                          src={getImageUrl(user.image)}
                           alt={user.name || "User"}
                         />
                         <AvatarFallback>

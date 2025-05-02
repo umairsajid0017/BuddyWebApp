@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSendOtp, useResetPassword } from "@/lib/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -16,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { useSendOtp } from "@/apis/apiCalls";
 
 const emailSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -33,7 +33,6 @@ export function ResetPasswordComponent() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const sendOtpMutation = useSendOtp();
-  const resetPasswordMutation = useResetPassword();
 
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,9 +89,9 @@ export function ResetPasswordComponent() {
           <Button
             type="submit"
             className="w-full"
-            disabled={sendOtpMutation.isLoading}
+            disabled={sendOtpMutation.isPending}
           >
-            {sendOtpMutation.isLoading && (
+            {sendOtpMutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Send Reset Code

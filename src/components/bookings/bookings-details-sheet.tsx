@@ -15,9 +15,10 @@ import { MapPin, Calendar, Clock, MessageCircle, PlayCircle } from "lucide-react
 import Image from "next/image";
 import { CancelBookingDialog } from "./cancel-booking-dialog";
 import { BookingChat } from "./booking-chat";
-import { Booking } from "@/lib/types/booking-types";
+import { Booking } from "@/types/booking-types";
 import { ImageViewer } from "@/components/ImageViewer";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getImageUrl } from "@/helpers/utils";
 
 type BookingDetailsSheetProps = {
   booking: Booking;
@@ -60,10 +61,10 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                     <div
                       key={image.id}
                       className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
-                      onClick={() => setSelectedImage(`${process.env.NEXT_PUBLIC_IMAGE_URL}/${image.name}`)}
+                      onClick={() => setSelectedImage(getImageUrl(image.name))} 
                     >
                       <Image
-                        src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/${image.name}`}
+                        src={getImageUrl(image.name)}
                         alt={`Booking image ${index + 1}`}
                         fill
                         className="object-cover transition-transform hover:scale-110"

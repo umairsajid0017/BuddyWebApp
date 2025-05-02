@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CreateBookingResponse } from "@/lib/types/booking-types";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
@@ -18,9 +17,11 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
-import { CURRENCY } from "@/utils/constants";
+import { CURRENCY } from "@/constants/constantValues";
 import { Badge } from "@/components/ui/badge";
-import { BookingStatus, getStatusLabel } from "@/lib/types/status";
+import { BookingStatus } from "@/constants/constantValues";
+import { getStatusLabel } from "@/helpers/utils";
+import { CreateBookingResponse } from "@/apis/api-response-types";
 
 interface BookingDirectConfirmationProps {
   isOpen: boolean;

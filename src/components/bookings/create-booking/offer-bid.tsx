@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Service } from "@/lib/types";
+import { Service } from "@/types/service-types";
 import { DollarSign, Coins } from "lucide-react";
-import { CURRENCY } from "@/utils/constants";
+import { CURRENCY } from "@/constants/constantValues";
 
 interface StartBookingDialogProps {
   isOpen: boolean;

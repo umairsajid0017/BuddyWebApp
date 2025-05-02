@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { useServices, useDeleteService } from "@/lib/api";
-import useServicesStore from "@/store/servicesStore";
-import { Card, CardContent } from "../ui/card";
-import { StarIcon } from "lucide-react";
-import { Service } from "@/lib/types";
+import React, { useState } from "react";
+import { useServices } from "@/apis/apiCalls";
+import { Card } from "../ui/card";
+import { Service } from "@/types/service-types";
 import { Skeleton } from "../ui/skeleton";
-import Image from "next/image";
-import { number } from "zod";
 import ServiceCard from "./services-card";
 
 interface PopularServicesProps {
@@ -91,7 +87,7 @@ const PopularServices: React.FC<PopularServicesProps> = ({ services }) => {
         // <Card key={service.id} className="">
         //   <div className="relative h-44 overflow-hidden rounded-lg bg-gray-200">
         //     <Image
-        //       src={process.env.NEXT_PUBLIC_IMAGE_URL + service.image}
+        //       src={getImageUrl(service.image)}
         //       alt={service.name}
         //       layout="fill"
         //       objectFit="cover"

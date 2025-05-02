@@ -3,7 +3,6 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ZodError, ZodIssue } from "zod";
 import {
   Card,
   CardContent,
@@ -15,27 +14,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import useAuthStore from "@/store/authStore";
-import { loginSchema } from "@/lib/schemas";
-import { type LoginCredentials } from "@/lib/types";
-import { useLogin } from "@/lib/api";
-import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
+import { useAuth, useLogin } from '@/apis/apiCalls';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { setAuthCookie } from "./authOptions";
-import { Mail, Lock, AlertCircle, AlertTriangle, Eye } from "lucide-react";
+import { Mail, Lock, AlertTriangle, Eye } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { LoginType } from "@/utils/constants";
 import { GoogleSignInButton } from "@/components/ui/google-signin-button";
 import { GuestLoginButton } from "@/components/ui/guest-login-button";
 import { Separator } from "@/components/ui/separator";
+import { LoginType } from "@/constants/constantValues";
+import { LoginCredentials } from "@/apis/api-request-types";
+import backgroundSvg from '@/components/ui/assets/background-pattern.svg';
 
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
 export default function Login() {
   const { toast } = useToast();
-  const [credentials, setCredentials] = useState<LoginCredentials>({
+  const [formData, setFormData] = useState<LoginCredentials>({
     email: "",
     password: "",
     login_type: LoginType.MANUAL,
@@ -46,48 +43,26 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
   const router = useRouter();
-  const backgroundImageUrl = backgroundSvg.src;
+  const backgroundImageUrl = backgroundSvg;
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setServerError(null);
-    try {
-      const validatedCredentials = loginSchema.parse(credentials);
-      const data = await loginMutation.mutateAsync(validatedCredentials);
 
-      if (!data.error && data.token && data.records) {
-        const { records, token } = data;
-        console.log("User logged in:", records, token);
-        if (records.otp_verify === "0") {
-          console.log("OTP not verified");
-          void router.push(`/verify-otp?email=${records.email}`);
-        } else {
-          useAuthStore.getState().setUser(records);
-          useAuthStore.getState().setToken(token);
-          await setAuthCookie(records, token);
-          void router.push("/");
-        }
+    try {
+      const response = await loginMutation.mutateAsync(formData);
+      const { records, token } = response;
+
+      if (records.otp_verify === "0") {
+        void router.push(`/verify-otp?email=${records.email}`);
       } else {
-        throw new Error(data.message ?? "Login failed");
+        await setAuthCookie(records, token);
+        void router.push("/");
       }
-    } catch (error: unknown) {
-      if (error instanceof ZodError) {
-        const newErrors: LoginErrors = {};
-        (error.errors as ZodIssue[]).forEach((err) => {
-          const path = err.path[0] as keyof LoginCredentials;
-          newErrors[path] = err.message;
-        });
-        //@ts-ignore
-        setErrors(newErrors);
-        console.log("Validation errors:", newErrors);
-      } else if (error instanceof Error) {
+    } catch (error) {
+      if (error instanceof Error) {
         setServerError(error.message);
-        toast({
-          title: "Login failed",
-          description: error.message,
-          variant: "destructive",
-        });
       } else {
         setServerError("An unexpected error occurred");
       }
@@ -98,7 +73,7 @@ export default function Login() {
     const { name, value } = e.target;
     if (name === "email") setErrors((prev) => ({ ...prev, email: "" }));
     if (name === "password") setErrors((prev) => ({ ...prev, password: "" }));
-    setCredentials((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -141,7 +116,7 @@ export default function Login() {
                     placeholder="Enter your email"
                     autoComplete="email"
                     required
-                    value={credentials.email}
+                    value={formData.email}
                     onChange={handleChange}
                     className="pl-10"
                   />
@@ -163,7 +138,7 @@ export default function Login() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
-                    value={credentials.password || ""}
+                    value={formData.password || ""}
                     onChange={handleChange}
                     className="pl-10"
                   />
@@ -205,10 +180,12 @@ export default function Login() {
               <Button
                 type="submit"
                 className="w-full"
-                variant={loginMutation.isLoading ? "outline" : "default"}
-                disabled={loginMutation.isLoading}
+                disabled={loginMutation.isPending}
               >
-                {loginMutation.isLoading ? <Loading /> : "Sign in"}
+                {loginMutation.isPending ? (
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : null}
+                Sign In
               </Button>
             </div>
           </form>

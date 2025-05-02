@@ -15,13 +15,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import TooltipWrapper from "../ui/tooltip-wrapper";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { InboxItem } from "@/lib/types";
+import { InboxDropdownProps, InboxItem } from "@/types/chat-types";
 
-interface InboxDropdownProps {
-  items: InboxItem[];
-  onMarkAsRead: (id: string) => void;
-  onDelete: (id: string) => void;
-}
+
 
 export default function InboxDropdown({
   items = [],
@@ -29,7 +25,7 @@ export default function InboxDropdown({
   onDelete,
 }: InboxDropdownProps) {
   const router = useRouter();
-  const unreadCount = items.filter((item) => !item.read).length;
+  const unreadCount = items.filter((item: InboxItem) => !item.read).length;
   const [open, setOpen] = React.useState(false);
 
   const handleMarkAsRead = (e: React.MouseEvent, id: string) => {

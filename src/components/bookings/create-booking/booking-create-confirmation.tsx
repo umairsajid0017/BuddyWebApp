@@ -9,15 +9,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CreateBidResponse } from "@/lib/types/booking-types";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Clock, IndianRupee, AlertCircle } from "lucide-react"; // Add icons
-import { CURRENCY } from "@/utils/constants";
+import { CURRENCY } from "@/constants/constantValues";
+import { BidResponse } from "@/apis/api-response-types";
 
 interface BookingConfirmationProps {
   isOpen: boolean;
   onClose: () => void;
-  bidDetails?: CreateBidResponse["records"];
+  bidDetails?: BidResponse["records"];
 }
 
 export function BookingConfirmation({

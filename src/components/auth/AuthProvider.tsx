@@ -1,21 +1,23 @@
 'use client'
 
 import { useEffect, type ReactNode } from 'react'
-import { useAuth } from '@/store/authStore'
+import { useAuth } from '@/apis/apiCalls'
 
 interface AuthProviderProps {
   children: ReactNode
 }
 
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const { checkAuth, isInitialized, user } = useAuth()
+  const { user, isLoading } = useAuth()
 
   useEffect(() => {
-    if (!isInitialized) {
-      void checkAuth()
-    }
-    console.log('AuthProvider: User:', user)
-  }, [checkAuth, isInitialized])
+    // The auth state is now managed by React Query
+    // No need for explicit initialization
+  }, [])
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
 
   return <>{children}</>
 }

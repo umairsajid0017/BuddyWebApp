@@ -1,6 +1,6 @@
-import { InboxItem } from "@/lib/types";
 import React, { useState } from "react";
 import InboxDropdown from "./inbox-dropdown";
+import { InboxItem } from "@/types/chat-types";
 
 const InboxComponent: React.FC = () => {
   const [message, setMessage] = useState<InboxItem[]>([

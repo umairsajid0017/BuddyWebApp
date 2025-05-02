@@ -12,7 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Card, CardContent, CardHeader } from "../ui/card";
-import { Booking } from "@/lib/types/booking-types";
+import { Booking } from "@/types/booking-types";
+import { getImageUrl } from "@/helpers/utils";
 
 type CancelBookingDialogProps = {
   booking: Booking;
@@ -41,7 +42,7 @@ export const CancelBookingDialog: React.FC<CancelBookingDialogProps> = ({
         <Card className="flex items-center justify-start">
           <CardHeader>
             <Image
-              src={process.env.NEXT_PUBLIC_IMAGE_URL! + booking?.service?.images[0]?.name}
+              src={getImageUrl(booking?.service?.images[0]?.name)}
               alt={booking.service.name}
               width={96}
               height={96}

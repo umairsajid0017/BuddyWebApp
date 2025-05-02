@@ -1,16 +1,16 @@
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { Check, Trash2, X, BellRing, MoreVertical } from "lucide-react";
-import { Notification } from "@/lib/types/notification";
+import { Notification } from "@/types/notification-types";
 import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
   clearAllNotifications,
-} from "@/lib/notifcations";
+} from "@/helpers/notifcations";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/store/authStore";
+import { useAuth } from '@/apis/apiCalls'
 
 interface NotificationsMenuProps {
   notifications: Notification[];

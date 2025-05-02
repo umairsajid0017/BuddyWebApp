@@ -10,9 +10,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useAuth } from "@/store/authStore";
-import { Notification } from "@/lib/types/notification";
-import { subscribeToUserNotifications } from "@/lib/notifcations";
+import { useAuth } from '@/apis/apiCalls'
+import { Notification } from "@/types/notification-types";
+import { subscribeToUserNotifications } from "@/helpers/notifcations";
 import NotificationsMenu from "./notifications-menu";
 
 export default function NotificationsBell() {

@@ -3,8 +3,9 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
-import { Service } from "@/lib/types";
-import { CURRENCY } from "@/utils/constants";
+import { Service } from "@/types/service-types";
+import { CURRENCY } from "@/constants/constantValues";
+import { getImageUrl } from "@/helpers/utils";
 
 interface ServiceCardProps {
   service: Service;
@@ -22,8 +23,8 @@ export function ServiceCard({ service, compact = false }: ServiceCardProps) {
             <Image
               src={
                 service.images?.[0]?.name
-                  ? `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.images[0].name}`
-                  : `${process.env.NEXT_PUBLIC_IMAGE_URL}/${service.image}`
+                  ? getImageUrl(service.images[0].name)
+                  : getImageUrl(service.image)
               }
               alt={service.name}
               layout="fill"

@@ -6,7 +6,7 @@ import React from "react";
 import AuthProvider from "@/components/auth/AuthProvider";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import QueryClientWrapper from "@/components/client-query/clientQueryWrapper";
+import QueryClientWrapper from "@/helpers/clientQueryWrapper";
 import NavBar from "@/components/ui/navbar";
 import NavbarWrapper from "@/components/ui/navbar-wrapper";
 import { Toaster } from "@/components/ui/toaster";

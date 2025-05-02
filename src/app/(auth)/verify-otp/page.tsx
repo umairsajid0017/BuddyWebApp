@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useSendOtp, useVerifyOtp } from "@/lib/api";
+import { useSendOtp, useVerifyOtp } from "@/apis/apiCalls";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -182,9 +182,9 @@ const OTPVerification = () => {
           <Button
             className="w-full"
             onClick={handleVerifyOTP}
-            disabled={!otp || verifyOtpMutation.isLoading}
+            disabled={!otp || verifyOtpMutation.isPending}
           >
-            {verifyOtpMutation.isLoading && (
+            {verifyOtpMutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Verify Email
@@ -197,10 +197,10 @@ const OTPVerification = () => {
             <Button
               variant="link"
               onClick={handleSendOTP}
-              disabled={resendTimer > 0 || sendOtpMutation.isLoading}
+              disabled={resendTimer > 0 || sendOtpMutation.isPending }
               className="text-sm"
             >
-              {sendOtpMutation.isLoading ? (
+              {sendOtpMutation.isPending ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : resendTimer > 0 ? (
                 `Resend in ${formatTime(resendTimer)}`

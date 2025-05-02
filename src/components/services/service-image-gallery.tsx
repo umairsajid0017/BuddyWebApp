@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { ServiceImage } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, getImageUrl } from "@/helpers/utils";
+import { ImageType } from "@/types/general-types";
 
 interface ServiceImageGalleryProps {
   mainImage: string;
-  images: ServiceImage[];
+  images: ImageType[];
   serviceName: string;
 }
 
@@ -25,8 +25,6 @@ export const ServiceImageGallery: React.FC<ServiceImageGalleryProps> = ({
 
   console.log("All Images", allImages);
 
-  const getImageUrl = (name: string) =>
-    `${process.env.NEXT_PUBLIC_IMAGE_URL}/${name}`;
 
   return (
     <div className="w-full">

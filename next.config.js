@@ -4,22 +4,22 @@
  */
 await import("./src/env.js");
 
+const imageUrl = new URL(process.env.NEXT_PUBLIC_IMAGE_URL || 'http://localhost');
+const imageHostname = imageUrl.hostname;
+const imageProtocol = imageUrl.protocol === 'https:' ? 'https' : 'http';
+
 /** @type {import("next").NextConfig} */
 const config = {
   images: {
-    domains: [
-      "images.pexels.com",
-      "18.136.228.207",
-      "images.unsplash.com",
-      "plus.unsplash.com",
-      "explorerbees.org",
-    ], // Add 'images.pexels.com' here
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "18.136.228.207",
-        pathname: "/BuddyAppBackend/media/images/**",
+        protocol: imageProtocol,
+        hostname: imageHostname,
       },
+      {
+        protocol: imageProtocol,
+        hostname: `**.${imageHostname}`,
+      }
     ],
   },
   async rewrites() {
@@ -30,14 +30,7 @@ const config = {
       },
     ];
   },
-  //TODO: Remove this when deploying to production
   experimental: {
-    serverActions: {
-      allowedOrigins: [
-        "localhost",
-        "https://symmetrical-fishstick-9v79vr94vj7h79vg-3000.app.github.dev/",
-      ],
-    },
     missingSuspenseWithCSRBailout: false,
   },
 };

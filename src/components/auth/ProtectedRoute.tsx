@@ -1,44 +1,31 @@
 'use client'
 
-import { useAuth } from '@/store/authStore'
+import { useAuth } from '@/apis/apiCalls'
 import { useRouter } from 'next/navigation'
-import { useEffect, ReactNode, useState } from 'react'
+import { useEffect } from 'react'
 import SplashScreen from '../ui/splash-screen'
 
 interface ProtectedRouteProps {
-  children: ReactNode
+  children: React.ReactNode
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, isLoading, isInitialized } = useAuth();
-  const router = useRouter();
-  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const { user, isLoading } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
-    // Wait until auth is initialized
-    if (isInitialized) {
-      if (!user && !isLoading) {
-        // Redirect to login if no user and not loading
-        router.push('/login');
-      } else {
-        // Set flag to true once we've checked auth state
-        setHasCheckedAuth(true);
-      }
+    if (!isLoading && !user) {
+      router.push('/login')
     }
-  }, []);
+  }, [user, isLoading, router])
 
-  // Show splash screen until initialization and auth check are done
-  if (!isInitialized || isLoading || !hasCheckedAuth) {
-    return <SplashScreen />;
+  if (isLoading) {
+    return <div>Loading...</div>
   }
 
-  // If no user after auth check, render nothing (redirect in effect will handle it)
   if (!user) {
-    return null;
+    return null
   }
 
-  // Render the protected content if user is authenticated
-  return <>{children}</>;
-};
-
-export default ProtectedRoute;
+  return <>{children}</>
+}

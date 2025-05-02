@@ -5,11 +5,8 @@ import {
   useVerifyOtp,
   useCheckCredentials,
   useSendOtp,
-} from "@/lib/api";
-import { VerifyOtpError, type RegisterData } from "@/lib/types";
-import { ZodError } from "zod";
+} from "@/apis/apiCalls";
 import { useRouter } from "next/navigation";
-import { registerSchema } from "@/lib/schemas";
 import {
   Card,
   CardContent,
@@ -18,14 +15,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Image from "next/image";
-
 import backgroundSvg from "@/components/ui/assets/background-pattern.svg";
 import StepOne from "@/components/register/step-one";
 import StepTwo from "@/components/register/step-two";
 import StepThree from "@/components/register/step-three";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { LoginType } from "@/utils/constants";
+import { RegisterData } from "@/apis/api-request-types";
+import { LoginType } from "@/constants/constantValues";
+import { VerifyOtpError } from "@/types/general-types";
 
 const Register: React.FC = () => {
   const { toast } = useToast();
@@ -38,12 +36,8 @@ const Register: React.FC = () => {
     role: "customer",
     login_type: LoginType.MANUAL,
   });
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof RegisterData, string>>
-  >({});
-  const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>(
-    {},
-  );
+  const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
+  const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
   const router = useRouter();
   const registerMutation = useRegister();
   const checkCredentialsMutation = useCheckCredentials();
@@ -57,47 +51,42 @@ const Register: React.FC = () => {
   };
 
   const handleNextStep = async () => {
-    if (validateStep1()) {
-      try {
-        const response = await checkCredentialsMutation.mutateAsync({
-          email: formData.email,
-          phone: formData.phone,
-          role: "customer",
-        });
+    try {
+      const response = await checkCredentialsMutation.mutateAsync({
+        email: formData.email,
+        phone: formData.phone,
+        role: "customer",
+      });
 
-        if (response.error) {
-          // Handle validation errors
-          const newErrors: Partial<Record<keyof RegisterData, string>> = {};
+      if (response.error) {
+        const newErrors: Partial<Record<keyof RegisterData, string>> = {};
 
-          if (response.records.email) {
-            newErrors.email = "This email is already registered";
-          }
-          if (response.records.phone) {
-            newErrors.phone = "This phone number is already registered";
-          }
-
-          setErrors(newErrors);
-
-          toast({
-            variant: "destructive",
-            title: "Validation Error",
-            description: response.message,
-          });
-
-          return;
+        if (response.records.email) {
+          newErrors.email = "This email is already registered";
+        }
+        if (response.records.phone) {
+          newErrors.phone = "This phone number is already registered";
         }
 
-        // If credentials are unique, proceed to step 2
-        setStep(2);
-      } catch (error) {
-        console.error("Error checking credentials:", error);
+        setErrors(newErrors);
+
         toast({
           variant: "destructive",
-          title: "Error",
-          description:
-            "An error occurred while checking credentials. Please try again.",
+          title: "Validation Error",
+          description: response.message,
         });
+
+        return;
       }
+
+      setStep(2);
+    } catch (error) {
+      console.error("Error checking credentials:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An error occurred while checking credentials. Please try again.",
+      });
     }
   };
 
@@ -106,40 +95,15 @@ const Register: React.FC = () => {
     setBackendErrors({});
   };
 
-  const validateStep1 = () => {
-    try {
-      registerSchema
-        .pick({ name: true, email: true, phone: true })
-        .parse(formData);
-      setErrors({});
-      return true;
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const newErrors: Partial<Record<keyof RegisterData, string>> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as keyof RegisterData] = err.message;
-          }
-        });
-        setErrors(newErrors);
-      }
-      return false;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setBackendErrors({});
 
     try {
-      // First validate with Zod
-      registerSchema.parse(formData);
-
       const response = await registerMutation.mutateAsync(formData);
 
       if (response.error) {
-        // Handle validation errors from API
         if (typeof response.message === "string") {
           toast({
             variant: "destructive",
@@ -147,9 +111,7 @@ const Register: React.FC = () => {
             description: response.message,
           });
         } else {
-          // Handle multiple validation errors
-          const validationErrors: Partial<Record<keyof RegisterData, string>> =
-            {};
+          const validationErrors: Partial<Record<keyof RegisterData, string>> = {};
 
           Object.entries(response.message).forEach(([field, messages]) => {
             if (Array.isArray(messages)) {
@@ -167,11 +129,9 @@ const Register: React.FC = () => {
         return;
       }
 
-      // If registration successful, send OTP
       try {
         const otpResponse = await sendOtpMutation.mutateAsync({
           email: formData.email,
-          // type: "register"
           role: "customer",
         });
 
@@ -197,28 +157,12 @@ const Register: React.FC = () => {
         });
       }
     } catch (error) {
-      if (error instanceof ZodError) {
-        const newErrors: Partial<Record<keyof RegisterData, string>> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as keyof RegisterData] = err.message;
-          }
-        });
-        setErrors(newErrors);
-
-        toast({
-          variant: "destructive",
-          title: "Validation Error",
-          description: "Please check all required fields.",
-        });
-      } else {
-        console.error("Registration error:", error);
-        toast({
-          variant: "destructive",
-          title: "Registration Failed",
-          description: "An unexpected error occurred. Please try again.",
-        });
-      }
+      console.error("Registration error:", error);
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: "An unexpected error occurred. Please try again.",
+      });
     }
   };
 
@@ -248,23 +192,18 @@ const Register: React.FC = () => {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data as VerifyOtpError;
-        const errorMessage =
-          errorData.errors?.otp?.[0] ||
-          errorData.message ||
-          "Verification failed";
-        setErrors({ otp: errorMessage });
+        setErrors({ otp: errorData.message });
         toast({
           variant: "destructive",
           title: "Verification Failed",
-          description: errorMessage,
+          description: errorData.message,
         });
       } else {
-        const errorMessage = "An unexpected error occurred";
-        setErrors({ otp: errorMessage });
+        console.error("Verification error:", error);
         toast({
           variant: "destructive",
-          title: "Verification Error",
-          description: errorMessage,
+          title: "Verification Failed",
+          description: "An unexpected error occurred. Please try again.",
         });
       }
     }
@@ -332,7 +271,7 @@ const Register: React.FC = () => {
               handleChange={handleChange}
               handleSubmit={handleSubmit}
               handleBackStep={handleBackStep}
-              isLoading={registerMutation.isLoading}
+              isLoading={registerMutation.isPending}
             />
           )}
           {step === 3 && <StepThree handleVerifyEmail={handleVerifyEmail} />}
