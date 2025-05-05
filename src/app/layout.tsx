@@ -12,6 +12,7 @@ import NavbarWrapper from "@/components/ui/navbar-wrapper";
 import { Toaster } from "@/components/ui/toaster";
 import Footer from "@/components/ui/footer";
 import FcmProvider from "@/components/FcmProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "Buddy Customer",
@@ -27,14 +28,16 @@ export default function RootLayout({
       <body>
         <QueryClientWrapper>
           {/* <AuthProvider> */}
-          <FcmProvider>
-            <div className="flex min-h-screen flex-col">
-              <NavbarWrapper />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-            {/* </AuthProvider> */}
-          </FcmProvider>
+          <ErrorBoundary>
+            <FcmProvider>
+              <div className="flex min-h-screen flex-col">
+                <NavbarWrapper />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+            </FcmProvider>
+          </ErrorBoundary>
+          {/* </AuthProvider> */}
           <Toaster />
         </QueryClientWrapper>
       </body>

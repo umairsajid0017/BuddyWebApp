@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logApiError } from '@/helpers/errorLogger';
 
 let authToken: string | null = null;
 
@@ -21,6 +22,18 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    logApiError(error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptors for detailed error logging
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    logApiError(error);
     return Promise.reject(error);
   }
 );
