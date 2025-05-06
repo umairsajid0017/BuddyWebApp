@@ -1,3 +1,4 @@
+import { RoleType } from "@/constants/constantValues";
 import { Category } from "@/types/category-types";
 import { MediaFiles } from "@/types/general-types";
 
@@ -51,7 +52,7 @@ export interface ResetPasswordData {
 
 export interface SendOtpData {
   email: string;
-  role: "customer";
+  role: RoleType.CUSTOMER;
 }
 
 export interface RegisterData extends LoginCredentials {

@@ -4,38 +4,50 @@ import { Button } from "./button";
 import { useState } from "react";
 import { auth, googleProvider } from "@/helpers/firebase";
 import { signInWithPopup } from "firebase/auth";
-import { useRouter } from "next/navigation";
-import { useLogin, useAuth } from "@/apis/apiCalls";
+  import { useRouter } from "next/navigation";
 import { generateConsistentPassword } from "@/helpers/utils";
-import { LoginType } from "@/utils/constants";
+import { LoginType, RoleType } from "@/constants/constantValues";
 import { setAuthCookie } from "@/app/(auth)/login/authOptions";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
+import { ROUTES } from "@/constants/routes";
+import useAuthStore from "@/store/authStore";
 
 export function GoogleSignInButton() {
   const router = useRouter();
   const { toast } = useToast();
-  const loginMutation = useLogin();
-  const { user } = useAuth();
+  const { user, setUser, setToken } = useAuthStore();
 
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const googleUser = result.user;
+      console.log("googleUser", googleUser.providerData);
       
       if (!googleUser.email) {
         throw new Error("Email not provided by Google");
       }
 
-      const password = generateConsistentPassword(googleUser.email);
+      if (!googleProvider || !googleUser.providerData[0]?.uid) {
+        throw new Error("UID not provided by Google");
+      }
 
-      const response = await loginMutation.mutateAsync({
+      const password = generateConsistentPassword(googleUser.providerData[0]?.uid);
+
+      const response = await axios.post(ROUTES.GOOGLE_AUTH, { userData: {
         email: googleUser.email,
         password,
         login_type: LoginType.GOOGLE,
-      });
+        role: RoleType.CUSTOMER,
+        uid: googleUser.providerData[0]?.uid,
+        provider_data: googleUser.providerData,
+      } });
 
-      if (response.token && response.records) {
-        await setAuthCookie(response.records, response.token);
+      console.log("response", response.data);
+      if (response.data.token && response.data.records) {
+        await setAuthCookie(response.data.records, response.data.token);
+        setUser(response.data.records);
+        setToken(response.data.token);
         router.push("/");
       }
     } catch (error: any) {

@@ -1,6 +1,7 @@
 export const ROUTES = {
     HOME: "/",
     LOGIN: "/login",
+    GOOGLE_AUTH: "/api/auth/google",
     REGISTER: "/register",
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",

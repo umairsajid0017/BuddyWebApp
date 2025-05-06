@@ -6,6 +6,12 @@ export enum LoginType {
   GUEST = "guest",
 }
 
+export enum RoleType {
+  CUSTOMER = "customer",
+  WORKER = "worker",
+}
+
+
 export enum BidStatus {
   OPEN = 1,
   CLOSED = 2,

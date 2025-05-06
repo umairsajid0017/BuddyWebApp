@@ -22,7 +22,7 @@ import StepThree from "@/components/register/step-three";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { RegisterData } from "@/apis/api-request-types";
-import { LoginType } from "@/constants/constantValues";
+import { LoginType, RoleType } from "@/constants/constantValues";
 import { VerifyOtpError } from "@/types/general-types";
 
 const Register: React.FC = () => {
@@ -32,8 +32,8 @@ const Register: React.FC = () => {
     name: "",
     email: "",
     password: "",
-    phone: "",
-    role: "customer",
+    phone: "",  
+    role: RoleType.CUSTOMER,
     login_type: LoginType.MANUAL,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
@@ -55,7 +55,7 @@ const Register: React.FC = () => {
       const response = await checkCredentialsMutation.mutateAsync({
         email: formData.email,
         phone: formData.phone,
-        role: "customer",
+        role: RoleType.CUSTOMER,
       });
 
       if (response.error) {
@@ -132,7 +132,7 @@ const Register: React.FC = () => {
       try {
         const otpResponse = await sendOtpMutation.mutateAsync({
           email: formData.email,
-          role: "customer",
+          role: RoleType.CUSTOMER,
         });
 
         if (!otpResponse.error) {
