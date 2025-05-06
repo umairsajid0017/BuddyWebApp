@@ -13,6 +13,7 @@ import { CURRENCY } from "@/constants/constantValues";
 import { Category } from "@/types/category-types";
 import { Service } from "@/types/service-types";
 import { SearchResponse } from "@/apis/api-response-types";
+import { getCategoryRoute, getServiceRoute, ROUTES } from "@/constants/routes";
 
 const CategoryResult = ({
   category,
@@ -109,9 +110,13 @@ const createSlug = (title: string) => {
 export function SearchComponent({
   onClose,
   className,
+  givenKeyword,
+  isHeroSection = false,
 }: {
   onClose?: () => void;
   className?: string;
+  givenKeyword?: string;
+  isHeroSection?: boolean;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -125,7 +130,16 @@ export function SearchComponent({
   });
 
   useEffect(() => {
+    if (givenKeyword && givenKeyword.length > 1) {
+      setSearchTerm(givenKeyword);
+      setDebouncedSearchTerm(givenKeyword);
+      setShowDropdown(true);
+    }
+  }, [givenKeyword]);
+
+  useEffect(() => {
     const timerId = setTimeout(() => {
+      if(searchTerm.length > 1) 
       setDebouncedSearchTerm(searchTerm);
     }, 300);
 
@@ -153,7 +167,11 @@ export function SearchComponent({
     setSearchTerm(category.title);
     setShowDropdown(false);
     const slug = createSlug(category.title);
-    router.push(`/categories/${slug}?id=${category.id}`);
+    if(isHeroSection) {
+      router.push(ROUTES.LOGIN);
+    } else {
+      router.push(getCategoryRoute(slug, category.id));
+    }
   };
 
   const handleSelectService = (
@@ -161,7 +179,11 @@ export function SearchComponent({
   ) => {
     setSearchTerm(service.name);
     setShowDropdown(false);
-    router.push(`/services/${service.id}`);
+    if(isHeroSection) {
+      router.push(ROUTES.LOGIN);
+    } else {
+      router.push(getServiceRoute(service.id.toString()));
+    }
   };
 
   const renderSearchResults = () => {
@@ -239,6 +261,7 @@ export function SearchComponent({
                 "placeholder:text-muted-foreground/60",
                 "focus:border-input focus:outline-none focus:ring-1 focus:ring-ring/20",
                 "transition-all duration-200",
+                "text-text-900"
               )}
             />
           </TooltipWrapper>

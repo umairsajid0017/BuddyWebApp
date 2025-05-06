@@ -7,14 +7,15 @@ import { IMAGE_PATHS } from "@/constants/imagePaths";
 import { useCategories } from "@/apis/apiCalls";
 import { Category } from "@/types/category-types";
 import { useState } from "react";
+import { SearchComponent } from "../services/search-services/search-component";
 
 export function HeroSection() {
     const { categories, isLoading: categoriesLoading } = useCategories();
     const [category, setCategory] = useState<Category | null>(null);
-    const [search, setSearch] = useState<string>("");
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
     const handleCategoryClick = (category: Category) => {
         setCategory(category);
-        setSearch(category.title);
+        setSearchKeyword(category.title);
     }
 
   return (
@@ -33,7 +34,7 @@ export function HeroSection() {
             away
           </h1>
           <div className="flex w-full flex-col gap-4 sm:flex-row">
-            <Input
+            {/* <Input
               type="text"
               placeholder="Search for any service..."
               value={search}
@@ -43,7 +44,9 @@ export function HeroSection() {
             <Button className="h-12 rounded-lg bg-primary hover:bg-primary-600 sm:h-14 sm:rounded-l-none">
               <Search className="mr-2 h-4 w-4" />
               Search
-            </Button>
+            </Button> */}
+            <SearchComponent givenKeyword={searchKeyword} isHeroSection={true} />
+            
           </div>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">

@@ -679,14 +679,14 @@ export const useSearchServices = (
   searchParams: SearchParams,
   options?: UseQueryOptions<SearchResponse, AxiosError>,
 ) => {
-  const { user } = useAuth();
+  // const { user } = useAuth();
 
   return useQuery<SearchResponse, AxiosError>({
     queryKey: ["services", "search", searchParams],
     queryFn: async (): Promise<SearchResponse> => {
       try {
-        const queryString = buildQueryString(searchParams);
-        const { data } = await http.get<SearchResponse>(Endpoints.SEARCH_ALL, { params: { query: queryString } });
+        // const queryString = buildQueryString(searchParams);
+        const { data } = await http.get<SearchResponse>(Endpoints.SEARCH_ALL, {"keyword": searchParams.keyword});
         return data;
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -696,8 +696,8 @@ export const useSearchServices = (
       }
     },
     enabled:
-      Object.values(searchParams).some((param) => param !== undefined) &&
-      Boolean(user),
+      Object.values(searchParams).some((param) => param !== undefined),
+      // Boolean(user),
     ...options,
     retry: (failureCount: number, error: unknown) => {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
