@@ -27,7 +27,8 @@ import { Separator } from "@/components/ui/separator";
 import { LoginType } from "@/constants/constantValues";
 import { LoginCredentials } from "@/apis/api-request-types";
 import backgroundSvg from '@/components/ui/assets/background-pattern.svg';
-
+import useAuthStore from "@/store/authStore";
+import { setAuthToken } from "@/apis/axios";
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
 export default function Login() {
@@ -45,6 +46,8 @@ export default function Login() {
   const router = useRouter();
   const backgroundImageUrl = backgroundSvg;
 
+  const { setUser, setToken } = useAuthStore();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -58,6 +61,10 @@ export default function Login() {
         void router.push(`/verify-otp?email=${records.email}`);
       } else {
         await setAuthCookie(records, token);
+        setAuthToken(token);
+        setUser(records);
+        setToken(token);
+        localStorage.setItem("token", token);
         void router.push("/");
       }
     } catch (error) {

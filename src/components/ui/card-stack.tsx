@@ -12,6 +12,7 @@ export default function CardStack<T>({ items, renderItem, interval = 3000 }: Car
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
 
+  console.log("items", items);
   const nextIndex = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % items.length)
   }, [items.length])
