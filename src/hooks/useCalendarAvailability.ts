@@ -41,21 +41,22 @@ export const useCalendarAvailability = (workerId?: string) => {
     },
     enabled: !!workerId,
   });
+  //TODO: Implement the calendar availability
 
-  const availableDates = new Set(
-    [
-      ...(currentMonthData?.records.availability_details ?? []),
-      ...(nextMonthData?.records.availability_details ?? []),
-    ].map((availability) => availability.date_is),
-  );
+  // const availableDates = new Set(
+  //   [
+  //     ...(currentMonthData?.records.availability_details ?? []),
+  //     ...(nextMonthData?.records.availability_details ?? []),
+  //   ].map((availability) => availability.date_is),
+  // );
 
-  const isDateAvailable = (date: Date) => {
-    const dateString = format(date, "yyyy-MM-dd");
-    return availableDates.has(dateString);
-  };
+  // const isDateAvailable = (date: Date) => {
+  //   const dateString = format(date, "yyyy-MM-dd");
+  //   return availableDates.has(dateString);
+  // };
 
   return {
     isLoading: false,
-    isDateAvailable,
+    isDateAvailable: false,
   };
 };

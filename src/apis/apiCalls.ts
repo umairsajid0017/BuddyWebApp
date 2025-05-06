@@ -207,7 +207,10 @@ export const useServiceDetails = (
   return useQuery<ServiceResponse, AxiosError>({
     queryKey: ["service", id],
     queryFn: async (): Promise<ServiceResponse> => {
-      const { data } = await http.get<ServiceResponse>(Endpoints.GET_SERVICE_DETAIL , {params: {id}});
+      const { data } = await http.get<ServiceResponse>(
+        Endpoints.GET_SERVICE_DETAIL,
+        { service_id: id },
+      );
       return data;
     },
     ...options,
