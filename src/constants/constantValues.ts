@@ -33,7 +33,7 @@ export enum BidStatus {
 export enum BookingStatus {
   OPEN = 1,
   CLOSED = 2,
-  CANCELED = 3,
+  CANCELED = 10,
   PENDING = 4,
   CONFIRMED = 5,
   STARTED = 6,
