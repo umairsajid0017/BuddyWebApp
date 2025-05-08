@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     // Try to log in the user first
     console.log("Attempting to login Google user:", userData.email);
     const loginResponse = await googleAuth.login(userData);
+    console.log("loginResponse", loginResponse);
 
     // If login successful, return user data
     if (!loginResponse.error) {

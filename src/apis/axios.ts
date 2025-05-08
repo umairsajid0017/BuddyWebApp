@@ -5,7 +5,10 @@ let authToken: string | null = null;
 
 export const setAuthToken = (token: string | null) => {
   authToken = token;
-  localStorage.setItem('token', token || '');
+  // Only access localStorage in browser environment
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('token', token || '');
+  }
 };
 
 const api = axios.create({
@@ -17,10 +20,19 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    console.log(token);
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+      // Browser environment - use localStorage
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Error accessing localStorage:', error);
+      }
+    } else if (authToken) {
+      // Server environment - use in-memory token
+      config.headers.Authorization = `Bearer ${authToken}`;
     }
     return config;
   },
