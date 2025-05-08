@@ -65,6 +65,8 @@ import { Offer } from "@/types/bid-types";
 import { User } from "@/types/general-types";
 import { setAuthToken } from "./axios";
 import { format } from "date-fns";
+import { deleteCookie } from "@/helpers/cookies";
+import useAuthStore from "@/store/authStore";
 
 const handleError = (error: unknown): string => {
   if (error instanceof AxiosError && error.response) {
@@ -121,15 +123,46 @@ export const useLogin = () => {
   });
 };
 
+
 export const useLogout = () => {
   const queryClient = useQueryClient();
-
-  return useMutation<any, AxiosError, void>({
+  return useMutation({
     mutationFn: async () => {
-      const { data } = await http.post<any>(Endpoints.LOGOUT);
-      return data;
+      try {
+        // Clear all auth-related state
+        useAuthStore.getState().setUser(null);
+        useAuthStore.getState().setToken(null);
+        useAuthStore.getState().setError(null);
+
+        // Clear all React Query cache
+        queryClient.clear();
+
+        // Clear any auth-related items from localStorage
+        localStorage.removeItem("auth-storage");
+        localStorage.removeItem("token");
+
+        //Delete Cookie
+        try {
+          const cookieRes = await deleteCookie("token");
+          const authCookieRes = await deleteCookie("auth-storage");
+          console.log("Cookie deleted:", cookieRes);
+          console.log("Auth Cookie deleted:", authCookieRes);
+        } catch (error) {
+          console.log("Error deleting cookie:", error);
+        }
+        return { success: true };
+      } catch (error) {
+        console.error("Logout error:", error);
+        throw error;
+      }
     },
-  });
+    onSettled: () => {
+      // Ensure state is cleared regardless of success/failure
+        useAuthStore.getState().setUser(null);
+        useAuthStore.getState().setToken(null);
+      },
+    },
+  );
 };
 
 export const useUser = () => {

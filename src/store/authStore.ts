@@ -11,6 +11,7 @@ import { useRegister, useLogin, useLogout, useUser } from "@/apis/apiCalls";
 import { User } from "@/types/general-types";
 import { LoginCredentials, RegisterData } from "@/apis/api-request-types";
 import { userSchema } from "@/types/schemas";
+import { setAuthCookie } from "@/app/(auth)/login/authOptions";
 
 interface AuthState {
   user: User | null;
@@ -81,7 +82,7 @@ export const useAuth = () => {
     setIsInitialized,
   } = useAuthStore();
 
-  const logoutMutation = useLogout();
+ const logoutMutation = useLogout();
   const userQuery = useUser();
 
  
@@ -95,7 +96,7 @@ export const useAuth = () => {
       setError(errorMessage);
       throw new Error(errorMessage);
     }
-  };
+  };;
 
   const checkAuth = async () => {
     if (!isInitialized) {

@@ -32,6 +32,7 @@ import { getImageUrl } from "@/helpers/utils";
 
 export default function NavBar() {
   const { user, logoutUser } = useAuth();
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -64,6 +65,7 @@ export default function NavBar() {
   const handleLogout = async () => {
     try {
       await logoutUser();
+
       console.log("Logged out successfully");
       router.push("/");
       setIsProfileOpen(false);
@@ -72,7 +74,7 @@ export default function NavBar() {
     }
   };
 
-  const navigateTo = (path: string) => {
+  const navigateTo = (path: string) => {``
     router.push(path);
     setIsProfileOpen(false);
   };
