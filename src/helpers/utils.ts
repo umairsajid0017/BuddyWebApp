@@ -1,5 +1,5 @@
 import { SearchParams } from "@/apis/api-request-types";
-import { BookingStatus } from "@/constants/constantValues";
+import { BidStatus, BookingStatus } from "@/constants/constantValues";
 import { ImageType } from "@/types/general-types";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -114,6 +114,40 @@ export const getStatusBadgeVariant = (status: BookingStatus) => {
       return "outline";
     default:
       return "secondary";
+  }
+};
+
+
+export const getStatusBadgeProps = (status: number) => {
+  switch (status) {
+    case BidStatus.OPEN:
+      return { variant: "default" as const, label: "Open" };
+    case BidStatus.CLOSED:
+      return { variant: "secondary" as const, label: "Closed" };
+    case BidStatus.CANCELED:
+    case BidStatus.CANCELED_BY_WORKER:
+    case BidStatus.CANCELED_BY_CUSTOMER:
+    case BidStatus.TIMEOUT_CANCELED:
+      return { variant: "destructive" as const, label: "Canceled" };
+    case BidStatus.PENDING:
+      return { variant: "outline" as const, label: "Pending" };
+    case BidStatus.CONFIRMED:
+      return { variant: "default" as const, label: "Confirmed" };
+    case BidStatus.STARTED:
+    case BidStatus.WORKER_HAS_STARTED_THE_WORK:
+      return { variant: "default" as const, label: "In Progress" };
+    case BidStatus.COMPLETED:
+      return { variant: "success" as const, label: "Completed" };
+    case BidStatus.DECLINED:
+      return { variant: "destructive" as const, label: "Declined" };
+    case BidStatus.WORKER_IS_ON_HIS_WAY:
+      return { variant: "default" as const, label: "Worker En Route" };
+    case BidStatus.WORKER_IS_ON_YOUR_DOORSTEP:
+      return { variant: "default" as const, label: "Worker Arrived" };
+    case BidStatus.NOT_STARTED:
+      return { variant: "outline" as const, label: "Not Started" };
+    default:
+      return { variant: "secondary" as const, label: "Unknown" };
   }
 };
 

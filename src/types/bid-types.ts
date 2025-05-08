@@ -1,6 +1,6 @@
 import { Category } from "./category-types";
-import { ImageType, MediaFiles } from "./general-types";
-
+import { ImageType, MediaFiles, Worker } from "./general-types";
+import { Service } from "./service-types";
 export interface Bid {
   id: number;
   customer_id: number;
@@ -18,15 +18,22 @@ export interface Bid {
   canceled_time: string | null;
   deleted_at: string | null;
   category: Category;
+  service: Service;
 }
 
 export interface Offer {
-  id: number;
-  worker_id: number;
-  worker_name: string;
-  rating: number;
-  description: string;
-  price: number;
+ 
+  bid: Bid;
+  bid_id: number;
   created_at: string;
+  deleted_at: string | null;
+  id: number;
+  is_bid: number;
+  is_repeat: number;
+  proposed_price: string;
+  status: number;
   updated_at: string;
+  worker: Worker;
+  worker_id: number;
 }
+

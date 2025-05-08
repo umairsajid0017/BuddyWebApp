@@ -47,8 +47,8 @@ export default function DashboardComponent() {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* <DashboardStats /> */}
-      <div className="h-[400px] mb-10">
-        <CardStack 
+      <div className="mb-10 h-[400px]">
+        <CardStack
           items={specialOfferItems}
           renderItem={(item) => (
             <div className="relative h-full w-full">
@@ -79,11 +79,14 @@ export default function DashboardComponent() {
           interval={3000}
         />
       </div>
-      <PopularServicesSection services={services} />
       <div className="mt-6">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">All Categories</h3>
-          <Button variant="link" className="text-sm" onClick={() => router.push('/categories')}>
+          <Button
+            variant="link"
+            className="text-sm"
+            onClick={() => router.push("/categories")}
+          >
             See All
           </Button>
         </div>
@@ -93,6 +96,7 @@ export default function DashboardComponent() {
           ))}
         </div>
       </div>
+      <PopularServicesSection services={services} />
     </div>
   );
 }

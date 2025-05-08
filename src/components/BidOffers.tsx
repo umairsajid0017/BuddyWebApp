@@ -13,9 +13,10 @@ interface BidOffersProps {
   isLoading: boolean;
   error: any;
   message?: string;
+  handleAcceptOffer: (offerId: number) => void;
 }
 
-export function BidOffers({ isOpen, onClose, offers, isLoading, error, message }: BidOffersProps) {
+export function BidOffers({ isOpen, onClose, offers, isLoading, error, message, handleAcceptOffer }: BidOffersProps) {
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-[400px] sm:w-[540px]">
@@ -63,24 +64,21 @@ export function BidOffers({ isOpen, onClose, offers, isLoading, error, message }
             <div key={offer.id} className="space-y-4 rounded-lg border p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{offer.worker_name}</h3>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm">{offer.rating}</span>
-                  </div>
+                  <h3 className="font-semibold">{offer.worker.name}</h3>
+                 
                 </div>
                 <span className="font-semibold">
-                  {CURRENCY} {offer.price}
+                  {CURRENCY} {offer.proposed_price}
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground">{offer.description}</p>
+              <p className="text-sm text-muted-foreground">{offer.bid.description}</p>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(offer.created_at), { addSuffix: true })}
                 </span>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm">Message</Button>
-                  <Button size="sm">Accept Offer</Button>
+                  <Button size="sm" onClick={() => handleAcceptOffer(offer.id)}>Accept Offer</Button>
                 </div>
               </div>
             </div>

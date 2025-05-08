@@ -1,6 +1,6 @@
 "use client";
 
-import { useCancelBid, useBidResponses, useCustomerBidsByStatus } from "@/apis/apiCalls";
+import { useCancelBid, useBidResponses, useCustomerBidsByStatus, useAcceptOffer } from "@/apis/apiCalls";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -31,43 +31,12 @@ import { useToast } from "@/hooks/use-toast";
 import { BidOffers } from "@/components/BidOffers";
 import Main from "@/components/ui/main";
 import { ImageViewer } from "@/components/ImageViewer";
-import { getImageUrl } from "@/helpers/utils";
+import { getImageUrl, getStatusBadgeProps } from "@/helpers/utils";
 
-const getStatusBadgeProps = (status: number) => {
-  switch (status) {
-    case BidStatus.OPEN:
-      return { variant: "default" as const, label: "Open" };
-    case BidStatus.CLOSED:
-      return { variant: "secondary" as const, label: "Closed" };
-    case BidStatus.CANCELED:
-    case BidStatus.CANCELED_BY_WORKER:
-    case BidStatus.CANCELED_BY_CUSTOMER:
-    case BidStatus.TIMEOUT_CANCELED:
-      return { variant: "destructive" as const, label: "Canceled" };
-    case BidStatus.PENDING:
-      return { variant: "outline" as const, label: "Pending" };
-    case BidStatus.CONFIRMED:
-      return { variant: "default" as const, label: "Confirmed" };
-    case BidStatus.STARTED:
-    case BidStatus.WORKER_HAS_STARTED_THE_WORK:
-      return { variant: "default" as const, label: "In Progress" };
-    case BidStatus.COMPLETED:
-      return { variant: "success" as const, label: "Completed" };
-    case BidStatus.DECLINED:
-      return { variant: "destructive" as const, label: "Declined" };
-    case BidStatus.WORKER_IS_ON_HIS_WAY:
-      return { variant: "default" as const, label: "Worker En Route" };
-    case BidStatus.WORKER_IS_ON_YOUR_DOORSTEP:
-      return { variant: "default" as const, label: "Worker Arrived" };
-    case BidStatus.NOT_STARTED:
-      return { variant: "outline" as const, label: "Not Started" };
-    default:
-      return { variant: "secondary" as const, label: "Unknown" };
-  }
-};
 
 const BidsPage = () => {
   const { data: bidsData, isLoading, error, refetch } = useCustomerBidsByStatus(BidStatus.OPEN);
+  const acceptOffer = useAcceptOffer();
   const cancelBid = useCancelBid();
   const { toast } = useToast();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -111,6 +80,30 @@ const BidsPage = () => {
       });
     }
   };
+
+  const handleAcceptOffer = async (offerId: number) => {
+    try {
+      if (!selectedBid) return;
+     const response = await acceptOffer.mutateAsync({
+        response_id: offerId,
+        bid_id: selectedBid as number,
+        status: 1,
+      });
+      console.log("response", response);
+      toast({
+        title: "Offer Accepted",
+        description: response.message,
+      });
+      refetch();
+    } catch (error: any) {
+      toast({ 
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+  
 
   if (isLoading) {
     return (
@@ -207,7 +200,7 @@ const BidsPage = () => {
                       >
                         <div className="flex items-center gap-3">
                           <h3 className="text-xl font-semibold">
-                            {bid.category.title}
+                            {bid.service.name}
                           </h3>
 
                           <Badge
@@ -383,6 +376,7 @@ const BidsPage = () => {
         isLoading={isLoadingResponses}
         error={responsesError}
         message={bidResponsesData?.message}
+        handleAcceptOffer={handleAcceptOffer}
       />
     </Main>
   );
