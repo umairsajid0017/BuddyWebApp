@@ -64,7 +64,7 @@ const useAuthStore = create<AuthState>(
       storage: createJSONStorage(() => localStorage),
       partialize: (state): PersistedAuthState => ({
         user: state.user,
-        token: state.token, // Persist the token as well
+        token: state.token, 
       }),
     },
   ),

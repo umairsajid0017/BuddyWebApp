@@ -5,6 +5,7 @@ let authToken: string | null = null;
 
 export const setAuthToken = (token: string | null) => {
   authToken = token;
+  localStorage.setItem('token', token || '');
 };
 
 const api = axios.create({

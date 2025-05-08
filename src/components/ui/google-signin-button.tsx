@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { ROUTES } from "@/constants/routes";
 import useAuthStore from "@/store/authStore";
+import { setAuthToken } from "@/apis/axios";
 
 export function GoogleSignInButton() {
   const router = useRouter();
@@ -45,9 +46,10 @@ export function GoogleSignInButton() {
 
       console.log("response", response.data);
       if (response.data.token && response.data.records) {
-        await setAuthCookie(response.data.records, response.data.token);
-        setUser(response.data.records);
-        setToken(response.data.token);
+       useAuthStore.getState().setUser(response.data.records);
+       useAuthStore.getState().setToken(response.data.token);
+       setAuthToken(response.data.token);
+       await setAuthCookie(response.data.records, response.data.token);
         router.push("/");
       }
     } catch (error: any) {

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useSendOtp } from "@/apis/apiCalls";
+import { RoleType } from "@/constants/constantValues";
 
 const emailSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -43,7 +44,7 @@ export function ResetPasswordComponent() {
 
       const response = await sendOtpMutation.mutateAsync({ 
         email,
-        role: "customer"
+        role: RoleType.CUSTOMER
       });
 
       if (response.error) {

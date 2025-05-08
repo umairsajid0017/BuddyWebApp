@@ -24,7 +24,7 @@ import Link from "next/link";
 import { GoogleSignInButton } from "@/components/ui/google-signin-button";
 import { GuestLoginButton } from "@/components/ui/guest-login-button";
 import { Separator } from "@/components/ui/separator";
-import { LoginType } from "@/constants/constantValues";
+import { LoginType, RoleType } from "@/constants/constantValues";
 import { LoginCredentials } from "@/apis/api-request-types";
 import backgroundSvg from '@/components/ui/assets/background-pattern.svg';
 import useAuthStore from "@/store/authStore";
@@ -37,7 +37,7 @@ export default function Login() {
     email: "",
     password: "",
     login_type: LoginType.MANUAL,
-    role: "customer",
+    role: RoleType.CUSTOMER,
   });
   const [errors, setErrors] = useState<LoginErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);

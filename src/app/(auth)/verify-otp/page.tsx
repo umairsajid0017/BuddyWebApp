@@ -13,6 +13,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { RoleType } from "@/constants/constantValues";
 
 const OTPVerification = () => {
   const searchParams = useSearchParams();
@@ -51,7 +52,7 @@ const OTPVerification = () => {
     try {
       const response = await sendOtpMutation.mutateAsync({
         email: email!,
-        role: "customer",
+        role: RoleType.CUSTOMER,
       });
 
       if (!response.error) {

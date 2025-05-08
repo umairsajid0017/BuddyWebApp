@@ -9,12 +9,15 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 import { LoginType } from "@/constants/constantValues";
+import useAuthStore from "@/store/authStore";
+import { setAuthToken } from "@/apis/axios";
+import { ROUTES } from "@/constants/routes";
 
 export function GuestLoginButton() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, setUser, token, setToken } = useAuthStore();
   
   // Check if current user is already a guest
   const isAlreadyGuest = user?.login_type === LoginType.GUEST;
@@ -50,27 +53,17 @@ export function GuestLoginButton() {
       const guestData = generateRandomData();
       
       // Call the server-side API for guest registration and login
-      const response = await axios.post('/api/auth/guest', { guestData });
-      const data = response.data;
-      
-      if (!data.error && data.token && data.records) {
-        const { records, token } = data;
-        
-        console.log("Guest login successful:", data);
-        
-        // Set auth cookie
-        await setAuthCookie(records, token);
-        
-        toast({
-          title: "Logged in as guest",
-          description: "Your session will end when you close the browser.",
-        });
-        
-        // Redirect to home page
+      const response = await axios.post(ROUTES.GUEST_LOGIN, { guestData });
+      console.log("response", response.data);
+       if (response.data.token && response.data.records) {
+        await setAuthCookie(response.data.records, response.data.token);
+        setUser(response.data.records);
+        console.log("setting auth token", response.data.token);
+        setToken(response.data.token);
+        console.log("token", token);
+        setAuthToken(response.data.token);
+        localStorage.setItem("token", response.data.token);
         router.push("/");
-      } else {
-        // Handle error case
-        throw new Error(data.message ?? "Guest login failed");
       }
     } catch (error) {
       console.error("Guest login error:", error);
