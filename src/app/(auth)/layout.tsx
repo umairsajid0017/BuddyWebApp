@@ -4,31 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { ModeToggle } from "@/components/mode-toggle";
-import { cn } from "@/helpers/utils";
-import { ThemeProvider } from "@/components/theme-provider";
-
-const navigationLinks = [
-  //   {
-  //     title: "Home",
-  //     href: "/",
-  //   },
-  //   {
-  //     title: "About",
-  //     href: "/about",
-  //   },
-  //   {
-  //     title: "Contact",
-  //     href: "/contact",
-  //   },
-];
+import { ROUTES } from "@/constants/routes";
 
 export default function AuthLayout({
   children,
@@ -36,15 +12,10 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/login";
+  const isLoginPage = pathname === ROUTES.LOGIN;
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="light"
-      enableSystem
-      disableTransitionOnChange
-    >
+
       <div className="relative mx-auto flex w-full flex-col items-center justify-center bg-background">
         {/* Background with gradient and pattern */}
         <div className="fixed inset-0 -z-10">
@@ -82,7 +53,7 @@ export default function AuthLayout({
                     size="sm"
                     className="hidden sm:flex"
                   >
-                    <Link href="/register">Sign up</Link>
+                    <Link href={ROUTES.REGISTER}>Sign up</Link>
                   </Button>
                 ) : (
                   <Button
@@ -91,7 +62,7 @@ export default function AuthLayout({
                     size="sm"
                     className="hidden sm:flex"
                   >
-                    <Link href="/login">Sign in</Link>
+                    <Link href={ROUTES.LOGIN}>Sign in</Link>
                   </Button>
                 )}
               </div>
@@ -99,11 +70,11 @@ export default function AuthLayout({
               <div className="container flex items-center justify-between md:hidden">
                 {isLoginPage ? (
                   <Button asChild variant="default" size="sm">
-                    <Link href="/register">Sign up</Link>
+                    <Link href={ROUTES.REGISTER}>Sign up</Link>
                   </Button>
                 ) : (
                   <Button asChild variant="default" size="sm">
-                    <Link href="/login">Sign in</Link>
+                    <Link href={ROUTES.LOGIN}>Sign in</Link>
                   </Button>
                 )}
               </div>
@@ -116,6 +87,5 @@ export default function AuthLayout({
           {children}
         </main>
       </div>
-    </ThemeProvider>
   );
 }

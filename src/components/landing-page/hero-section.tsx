@@ -4,8 +4,20 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { IMAGE_PATHS } from "@/constants/imagePaths";
+import { useCategories } from "@/apis/apiCalls";
+import { Category } from "@/types/category-types";
+import { useState } from "react";
+import { SearchComponent } from "../services/search-services/search-component";
 
 export function HeroSection() {
+    const { categories, isLoading: categoriesLoading } = useCategories();
+    const [category, setCategory] = useState<Category | null>(null);
+    const [searchKeyword, setSearchKeyword] = useState<string>("");
+    const handleCategoryClick = (category: Category) => {
+        setCategory(category);
+        setSearchKeyword(category.title);
+    }
+
   return (
     <section
       className="relative my-6 flex min-h-[438px] items-center justify-between rounded-lg py-20 text-white"
@@ -22,27 +34,32 @@ export function HeroSection() {
             away
           </h1>
           <div className="flex w-full flex-col gap-4 sm:flex-row">
-            <Input
+            {/* <Input
               type="text"
               placeholder="Search for any service..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               className="h-12 rounded-lg border-0 px-4 text-text-900 focus-visible:ring-0 focus-visible:ring-offset-0 sm:h-14 sm:rounded-r-none"
             />
             <Button className="h-12 rounded-lg bg-primary hover:bg-primary-600 sm:h-14 sm:rounded-l-none">
               <Search className="mr-2 h-4 w-4" />
               Search
-            </Button>
+            </Button> */}
+            <SearchComponent givenKeyword={searchKeyword} isHeroSection={true} />
+            
           </div>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">
           <span>Quick Find:</span>
-          {["Mason", "Plumber", "Mechanic", "Decorator"].map((company) => (
+          {categories.map((category) => (
             <Button
               size="sm"
-              key={company}
+              key={category.id}
               variant="outline"
               className="border-white bg-transparent font-semibold text-white hover:bg-white hover:text-primary"
+              onClick={() => handleCategoryClick(category)}
             >
-              {company}
+              {category.title}
             </Button>
           ))}
         </div>

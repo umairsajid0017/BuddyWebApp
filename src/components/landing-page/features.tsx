@@ -27,7 +27,7 @@ export function Features() {
   return (
     <section className="py-10">
       <div className="container">
-        <h2 className="font-regular mb-8 leading-relaxed text-text-800 lg:text-5xl">
+        <h2 className="font-regular mb-8 leading-relaxed text-text-800 lg:text-5xl text-center">
           A whole world of freelance <br />
           talent at your fingertips
         </h2>

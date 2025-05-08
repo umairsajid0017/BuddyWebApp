@@ -5,6 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const { userData } = await request.json();
 
+    console.log("userData", userData);
+
     if (!userData || !userData.email) {
       return NextResponse.json(
         { error: true, message: "User data is required" },

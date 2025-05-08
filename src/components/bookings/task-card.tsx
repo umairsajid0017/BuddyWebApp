@@ -16,9 +16,24 @@ import { MapPin, Clock } from "lucide-react";
 import { getImageUrl, getStatusBadgeVariant, getStatusLabel } from "@/helpers/utils";
 import { TaskCardProps } from "@/types/general-types";
 
-
+const getStatusColor = (status: BookingStatus) => {
+  switch (status) {
+    case BookingStatus.COMPLETED:
+      return "#b4ffb4";
+    case BookingStatus.CANCELED:
+      return "red";
+    case BookingStatus.STARTED:
+    case BookingStatus.CONFIRMED:
+      return "#4883ff";
+    case BookingStatus.PENDING:
+      return "#ffe3af";
+    default:
+      return "gray";
+  }
+}
 
 const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
+  console.log(booking.status);
   const statusVariant = getStatusBadgeVariant(booking.status);
   const statusLabel = getStatusLabel(booking.status);
 
@@ -51,7 +66,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between p-4 pt-0">
-        <Badge variant={statusVariant as any} className="mt-2">
+        <Badge variant={statusVariant as any} className="mt-2" style={{ backgroundColor: getStatusColor(booking.status) }}>
           {statusLabel}
         </Badge>
         <BookingDetailsSheet booking={booking} />

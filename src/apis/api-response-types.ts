@@ -1,7 +1,7 @@
 import { Offer } from '@/types/bid-types';
 
 import { Booking } from "@/types/booking-types";
-import { User } from "../types/general-types";
+import { AvailabilityDetail, User } from "../types/general-types";
 import { CategoryService, Service } from "../types/service-types";
 import { Bid } from "@/types/bid-types";
 import { FAQ } from "@/types/faq-types";
@@ -222,3 +222,8 @@ export interface CategoryServiceResponse {
   records: CategoryService[];
 }
 
+export interface AvailabilityResponse {
+  records: {
+    availability_details: AvailabilityDetail[];
+  };
+}

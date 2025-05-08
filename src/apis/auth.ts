@@ -1,4 +1,4 @@
-import { LoginType } from "@/constants/constantValues";
+import { LoginType, RoleType } from "@/constants/constantValues";
 import { Endpoints } from './endpoints';
 import { http } from './httpMethods';
 import { LoginResponse, RegisterResponse } from './api-response-types';
@@ -9,6 +9,8 @@ interface BaseAuthData {
   password: string;
   name?: string;
   phone?: string;
+  login_type?: LoginType;
+  role?: string;
 }
 
 // Common interface for auth methods
@@ -26,7 +28,7 @@ const createAuth = (loginType: LoginType): AuthMethods => ({
     formData.append('password', authData.password);
     formData.append('phone', authData.phone || "");
     formData.append('login_type', loginType);
-    formData.append('role', 'customer');
+    formData.append('role', authData.role || RoleType.CUSTOMER);
 
     const { data } = await http.post<RegisterResponse>(Endpoints.REGISTER, formData, {
       headers: {
@@ -40,14 +42,18 @@ const createAuth = (loginType: LoginType): AuthMethods => ({
     const formData = new FormData();
     formData.append('email', authData.email);
     formData.append('password', authData.password);
-    formData.append('login_type', loginType);
-    formData.append('role', 'customer');
+    formData.append('login_type', authData.login_type || LoginType.GUEST);
+    formData.append('role', authData.role || RoleType.CUSTOMER);
+
+    console.log("formData", formData);
+    console.log("authData", authData);
 
     const { data } = await http.post<LoginResponse>(Endpoints.LOGIN, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
+    console.log("data", data);
     return data;
   },
 });
@@ -66,36 +72,36 @@ export const googleAuth = {
     uid: string;
     photoURL: string;
     providerData: any[];
+    password: string;
   }) => {
-    const googleId = userData.providerData?.[0]?.uid;
-    if (!googleId) {
-      throw new Error('Google ID not found');
-    }
 
+    console.log("register userData", userData);
+
+    const phone = "+968" + userData.uid.slice(0, 8);
+    console.log("phone", phone);
     return createAuth(LoginType.GOOGLE).register({
       email: userData.email,
-      password: googleId,
+      password: userData.password,
       name: userData.displayName,
-      phone: "+968" + (googleId.slice(-8)),
+      phone: phone,
     });
   },
 
-  // Override login method to handle Google-specific data
   login: async (userData: {
     email: string;
     displayName: string;
     uid: string;
     photoURL: string;
     providerData: any[];
+    password: string;
   }) => {
-    const googleId = userData.providerData?.[0]?.uid;
-    if (!googleId) {
-      throw new Error('Google ID not found');
-    }
+    console.log("userData", userData);
 
     return createAuth(LoginType.GOOGLE).login({
       email: userData.email,
-      password: googleId,
+      password: userData.password,
+      login_type: LoginType.GOOGLE,
+      role: RoleType.CUSTOMER,
     });
   },
 }; 
