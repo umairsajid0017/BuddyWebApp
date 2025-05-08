@@ -29,7 +29,7 @@ import NotificationsBell from "../notification/notifcation-bell";
 import { LoginType } from "@/constants/constantValues";
 import { getImageUrl } from "@/helpers/utils";
 import { useAuth } from "@/store/authStore";
-
+import { Endpoints } from "@/apis/endpoints";
 export default function NavBar() {
   const { user, logoutUser } = useAuth();
 
@@ -150,7 +150,7 @@ export default function NavBar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  onClick={() => router.push("/privacy-policy")}
+                  onClick={() => router.push(Endpoints.PRIVACY_POLICY)}
                   className="font-semibold text-white hover:bg-secondary-800 hover:text-white"
                 >
                   Privacy Policy

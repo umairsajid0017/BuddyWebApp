@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import Image from "next/image";
+import { Endpoints } from "@/apis/endpoints";
 
 export default function Footer() {
   return (
@@ -81,13 +82,13 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="mb-4 text-lg font-bold">Policies</h3>
             <Link
-              href="https://buddy.site/privacy-policy.php"
+              href={Endpoints.PRIVACY_POLICY}
               className="text-sm text-gray-300 hover:text-white"
             >
               <p className="text-sm text-gray-300">Privacy Policy</p>
             </Link>
             <Link
-              href="https://buddy.site/refund-policy.php"
+              href={Endpoints.REFUND_POLICY}
               className="text-sm text-gray-300 hover:text-white"
             >
               <p className="text-sm text-gray-300">Refund Policy</p>
