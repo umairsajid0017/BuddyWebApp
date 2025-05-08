@@ -4,11 +4,11 @@ import UserProfile from "@/components/account/user-profile-component";
 import PopularServicesSection from "@/components/services/popular-services-section";
 import Loading from "@/components/ui/loading";
 import Main from "@/components/ui/main";
+import useAuthStore from '@/store/authStore';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
   const { services, isLoading } = useServices();
-
+const {user} = useAuthStore();
   if (isLoading || !user) return <Loading />;
 
   return (

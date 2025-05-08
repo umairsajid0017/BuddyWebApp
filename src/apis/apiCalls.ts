@@ -443,7 +443,7 @@ export const useUpdateProfile = () => {
       }
 
       const { data } = await http.post<UserResponse>(
-        Endpoints.ADD_BOOKMARK,
+        Endpoints.UPDATE_PROFILE,
         formDataToSend,
         {
           headers: {

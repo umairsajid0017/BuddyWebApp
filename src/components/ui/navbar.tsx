@@ -4,7 +4,6 @@ import Image from "next/image";
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from '@/apis/apiCalls'
 import { useRouter } from "next/navigation";
 import TooltipWrapper from "./tooltip-wrapper";
 import Link from "next/link";
@@ -29,6 +28,7 @@ import {
 import NotificationsBell from "../notification/notifcation-bell";
 import { LoginType } from "@/constants/constantValues";
 import { getImageUrl } from "@/helpers/utils";
+import { useAuth } from "@/store/authStore";
 
 export default function NavBar() {
   const { user, logoutUser } = useAuth();

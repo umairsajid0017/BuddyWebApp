@@ -37,8 +37,7 @@ const UserProfile: React.FC<{ user: User }> = ({ user }) => {
                 alt="Profile picture"
               />
               <AvatarFallback>
-                {splitFullName(user.name).firstName[0]}
-                {splitFullName(user.name).lastName[0]}
+                {user.name[0]}
               </AvatarFallback>
             </Avatar>
         
@@ -101,7 +100,7 @@ const UserProfile: React.FC<{ user: User }> = ({ user }) => {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Account Statistics</CardTitle>
         </CardHeader>
@@ -113,7 +112,7 @@ const UserProfile: React.FC<{ user: User }> = ({ user }) => {
             <StatItem label="Cancelled" value="2" />
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };

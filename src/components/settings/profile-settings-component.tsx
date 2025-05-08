@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CameraIcon } from "lucide-react";
-import { useAuth } from "@/apis/apiCalls";
 import { useUpdateProfile } from "@/apis/apiCalls";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getImageUrl, splitFullName } from "@/helpers/utils";
+import  useAuthStore, { useAuth } from "@/store/authStore";
 
 interface ProfileFormData {
   name: string;
@@ -134,6 +134,10 @@ export default function ProfileComponent() {
         title: "Success",
         description: response.message || "Profile updated successfully",
       });
+      
+      if(!response.error) {
+        useAuthStore.getState().setUser(response.records);
+      }
 
       // Clear image preview
       if (previewUrl) {
