@@ -117,5 +117,6 @@ export function StartBookingDialog({
         </div>
       </DialogContent>
     </Dialog>
+
   );
 }

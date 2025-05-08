@@ -78,6 +78,7 @@ export interface CreateBidData {
 
 export interface CreateBookingData {
   worker_id: string;
+  service_id: string;
   description?: string;
   images?: File[];
   audio?: File;

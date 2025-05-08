@@ -151,3 +151,14 @@ export interface MediaFiles {
 
 
 
+export interface AvailabilityDetail {
+  id: number;
+  user_id: number;
+  service_id: number;
+  date_is: string;
+  is_available: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+

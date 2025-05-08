@@ -27,60 +27,53 @@ import { PlaceOrderSheet } from "./create-booking/place-order-sheet";
 import { StartBookingDialog } from "./create-booking/offer-bid";
 import { BookingConfirmation } from "./create-booking/booking-create-confirmation";
 import { ServiceCard } from "./create-booking/booking-service-card";
-import { useServices, useCategories } from "@/apis/apiCalls";
-import { useCreateBid, useDirectBooking } from "@/apis/apiCalls";
+import { useDirectBooking, useCreateBid, useServices, useCategories, useCalendarAvailability } from "@/apis/apiCalls";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/apis/apiCalls";
+import { useAuth } from "@/store/authStore";
 
 import { CURRENCY } from "@/utils/constants";
-import { useLocationUpdate } from "@/helpers/location";
-import { useCalendarAvailability } from "@/hooks/useCalendarAvailability";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDirectConfirmation } from "./create-booking/booking-direct-confirmation";
 import { BackgroundGradient } from "../ui/background-gradient";
 import { Service } from "@/types/service-types";
 import { MediaFiles } from "@/types/general-types";
-import { CreateBookingResponse } from "@/apis/api-response-types";
+import { useLocationUpdate } from "@/helpers/location";
 import { CreateBidData, CreateBookingData } from "@/apis/api-request-types";
-import { Category } from "@/types/category-types";
-import { Bid } from "@/types/bid-types";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+
 
 interface CreateBookingDialogProps {
   initialService?: Service;
   mode?: "book" | "bid";
 }
 
-interface BidFormState {
-  category_id: number;
-  expected_price: string;
+type BookFormState = {
+  service: Service | null;
+  description: string;
+  budget: number;
+  date: Date | undefined;
+  mediaFiles: MediaFiles | undefined;
   address: string;
-  description?: string;
-  images?: File[];
-  audio?: File;
-  category?: Category;
-  date?: Date;
-}
+};
 
-interface BookFormState {
-  worker_id: string;
-  booking_date: string;
+type BidFormState = {
+  category: { id: number; title: string } | null;
+  description: string;
+  budget: number;
+  date: Date | undefined;
+  mediaFiles: MediaFiles | undefined;
   address: string;
-  description?: string;
-  images?: File[];
-  audio?: File;
-  date?: Date;
-}
+};
 
-type FormState = BidFormState | BookFormState;
+type FormState = BookFormState | BidFormState;
 
 const isBookingForm = (form: FormState): form is BookFormState => {
-  return "worker_id" in form;
+  return "service" in form;
 };
 
 const isBidForm = (form: FormState): form is BidFormState => {
-  return "category_id" in form;
+  return "category" in form;
 };
 
 export function CreateBookingDialog({
@@ -92,28 +85,31 @@ export function CreateBookingDialog({
   const createBid = useCreateBid();
   const directBooking = useDirectBooking();
   const { updateUserLocation } = useLocationUpdate();
+  if(mode === "book" && !initialService) {
+    throw new Error("Initial service is required");
+  }
   const { isLoading: isLoadingAvailability, isDateAvailable } =
-    useCalendarAvailability(initialService?.user?.id?.toString());
-
-  const { services, isLoading: servicesLoading } = useServices();
-  const { categories, isLoading: categoriesLoading } = useCategories();
+    useCalendarAvailability(
+      mode === "book" && initialService?.id 
+        ? initialService.id.toString() 
+        : undefined
+    );
 
   const [formState, setFormState] = useState<FormState>(() => {
+    const baseState = {
+      description: "",
+      budget: 200,
+      time: "",
+      date: mode === "bid" ? new Date() : undefined,
+      mediaFiles: undefined,
+      address: "",
+    };
+
     if (mode === "book") {
-      return {
-        worker_id: initialService?.user.id.toString() ?? "",
-        booking_date: "",
-        address: "",
-        date: new Date(),
-      } as BookFormState;
+      return { ...baseState, service: initialService ?? null } as BookFormState;
     }
 
-    return {
-      category_id: 0,
-      expected_price: "",
-      address: "",
-      date: new Date(),
-    } as BidFormState;
+    return { ...baseState, category: null } as BidFormState;
   });
 
   const [isOpen, setIsOpen] = useState(false);
@@ -122,11 +118,20 @@ export function CreateBookingDialog({
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
     useState(false);
-  const [bidDetails, setBidDetails] = useState<Bid>();
-  const [bookingDetails, setBookingDetails] = useState<
-    CreateBookingResponse["records"] | null
+
+  //TODO: Fix the type for the bid details
+  const [bidDetails, setBidDetails] = useState<
+  any | null
+  >(null);
+  //TODO: Fix the type for the booking details
+  const [bookingDetails, setBookingDetails] = useState<any | null
   >(null);
   const [isBookingLoading, setIsBookingLoading] = useState(false);
+
+  const { services, isLoading } = useServices();
+  const { categories, isLoading: categoriesLoading } = useCategories();
+  console.log("Services:", services);
+  console.log("Categories:", categories)
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -139,16 +144,20 @@ export function CreateBookingDialog({
     setFormState(
       mode === "book"
         ? ({
-            worker_id: initialService?.user.id.toString() ?? "",
-            booking_date: "",
+            service: initialService ?? null,
+            description: "",
+            budget: 200,
+            date: undefined,
+            mediaFiles: undefined,
             address: "",
-            date: new Date(),
           } as BookFormState)
         : ({
-            category_id: 0,
-            expected_price: "",
+            category: null,
+            description: "",
+            budget: 200,
+            date: undefined,
+            mediaFiles: undefined,
             address: "",
-            date: new Date(),
           } as BidFormState),
     );
   };
@@ -159,7 +168,7 @@ export function CreateBookingDialog({
       mode === "book"
         ? isBookingForm(formState) &&
           Boolean(
-            formState.worker_id && formState.date && formState.address.trim(),
+            formState.service && formState.date && formState.address.trim(),
           )
         : isBidForm(formState) &&
           Boolean(
@@ -178,12 +187,7 @@ export function CreateBookingDialog({
     description: string,
     mediaFiles?: MediaFiles,
   ) => {
-    setFormState((prev) => ({
-      ...prev,
-      description,
-      images: mediaFiles?.images,
-      audio: mediaFiles?.audio,
-    }));
+    setFormState((prev) => ({ ...prev, description, mediaFiles }));
     setIsPlaceOrderOpen(false);
     if (mode === "bid") {
       console.log("Bid mode");
@@ -196,7 +200,7 @@ export function CreateBookingDialog({
 
   const handleDirectBooking = async (mediaFiles?: MediaFiles) => {
     const bookingState = formState as BookFormState;
-    if (!user || !initialService) return;
+    if (!user || !bookingState.service) return;
 
     try {
       setIsBookingLoading(true);
@@ -208,14 +212,19 @@ export function CreateBookingDialog({
       const formattedDate = bookingState.date
         ? format(bookingState.date, "yyyy-MM-dd")
         : "";
-
+        
+      if(!initialService) {
+        throw new Error("Initial service is required");
+      }
       const payload: CreateBookingData = {
+
         description: bookingState.description,
-        images: mediaFiles?.images,
-        audio: mediaFiles?.audio,
+        images: mediaFiles?.images || bookingState.mediaFiles?.images,
+        audio: mediaFiles?.audio || bookingState.mediaFiles?.audio,
         address: bookingState.address,
         booking_date: formattedDate,
-        worker_id: initialService.user.id.toString(),
+        worker_id: initialService?.user.id.toString() ?? "",
+        service_id: initialService.id.toString(),
       };
 
       console.log("Direct booking payload:", payload);
@@ -247,8 +256,8 @@ export function CreateBookingDialog({
         category_id: bidState.category.id.toString(),
         description: bidState.description,
         expected_price: bidAmount.toString(),
-        images: bidState.images,
-        audio: bidState.audio,
+        images: bidState.mediaFiles?.images,
+        audio: bidState.mediaFiles?.audio,
         address: bidState.address,
       };
 
@@ -268,18 +277,16 @@ export function CreateBookingDialog({
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormState((prev) => ({
-      ...prev,
-      time: e.target.value,
-    }));
+    setFormState((prev) => ({ ...prev, time: e.target.value }));
   };
 
   const handleDateSelect = (date: Date | undefined) => {
     if (!date) return;
 
-    if (mode === "book" && !isDateAvailable(date)) {
-      return;
-    }
+    //TODO: Fix the date availability
+    // if (mode === "book" && !isDateAvailable(date)) {
+    //   return;
+    // }
 
     if (mode === "bid") {
       const today = new Date();
@@ -294,29 +301,16 @@ export function CreateBookingDialog({
     setFormState((prev) => ({ ...prev, date }));
   };
 
-  const handleCalendarSelect = (date: Date | undefined) => {
-    if (!date) return;
-
-    if (isBookingForm(formState)) {
-      setFormState((prev) => {
-        if (isBookingForm(prev)) {
-          return {
-            ...prev,
-            booking_date: format(date, "yyyy-MM-dd"),
-            date,
-          };
-        }
-        return prev;
-      });
-    }
-  };
-
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <BackgroundGradient className="w-fit" containerClassName="w-fit">
           <DialogTrigger asChild>
-            <Button variant="default" className="relative z-10 font-bold" effect={"shine"}>
+            <Button
+              variant="default"
+              className="relative z-10 font-bold"
+              effect={"shine"}
+            >
               <Plus className="h-4 w-4" />
               {mode === "book" ? "Book Now" : "Create a Bid"}
             </Button>
@@ -345,18 +339,12 @@ export function CreateBookingDialog({
                   onValueChange={(value) => {
                     if (isBidForm(formState)) {
                       const category = categories?.find(
-                        (s: Category) => s.id.toString() === value,
+                        (s) => s.id.toString() === value,
                       );
-                      setFormState((prev) => {
-                        if (isBidForm(prev)) {
-                          return {
-                            ...prev,
-                            category_id: category?.id ?? 0,
-                            category,
-                          };
-                        }
-                        return prev;
-                      });
+                      setFormState((prev) => ({
+                        ...prev,
+                        category: category ?? null,
+                      }));
                     }
                   }}
                   value={
@@ -367,7 +355,7 @@ export function CreateBookingDialog({
                 >
                   <SelectTrigger
                     className="col-span-3 w-full"
-                    disabled={isLoadingAvailability}
+                    disabled={isLoading}
                   >
                     <SelectValue placeholder="Select a category">
                       {isBidForm(formState)
@@ -381,7 +369,7 @@ export function CreateBookingDialog({
                         Loading categories...
                       </SelectItem>
                     ) : categories?.length ? (
-                      categories.map((category: Category) => (
+                      categories.map((category) => (
                         <SelectItem
                           key={category.id}
                           value={category.id.toString()}
@@ -408,7 +396,7 @@ export function CreateBookingDialog({
                   variant="outline"
                   className={`w-full justify-start text-left font-normal ${!formState.date && "text-muted-foreground"}`}
                   onClick={() => handleDateSelect(new Date())}
-                  disabled={mode === "book" && isLoadingAvailability}
+                  disabled={mode === "book"}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {isLoadingAvailability ? (
@@ -432,16 +420,20 @@ export function CreateBookingDialog({
                   className="flex w-full items-center justify-center rounded-md border"
                   disabled={
                     mode === "book"
-                      ? (date) => !isDateAvailable(date)
+                      ? (date) => {
+                          const isAvailable = isDateAvailable(date);
+                          console.log("Is available:", isAvailable);
+                          return !isAvailable;
+                        }
                       : (date) =>
                           format(date, "yyyy-MM-dd") !==
                           format(new Date(), "yyyy-MM-dd")
                   }
                   modifiers={
                     mode === "book"
-                      ? {
-                          available: (date) => isDateAvailable(date),
-                        }
+                      ? { available: (date) => {
+                          return isDateAvailable(date);
+                        } }
                       : {
                           available: (date) =>
                             format(date, "yyyy-MM-dd") ===
@@ -465,10 +457,7 @@ export function CreateBookingDialog({
                 className="col-span-3"
                 value={formState.address}
                 onChange={(e) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    address: e.target.value,
-                  }))
+                  setFormState((prev) => ({ ...prev, address: e.target.value }))
                 }
                 placeholder="Enter your address"
               />
@@ -533,14 +522,22 @@ export function CreateBookingDialog({
         isOpen={isPlaceOrderOpen}
         onClose={() => setIsPlaceOrderOpen(false)}
         onContinue={handlePlaceOrderContinue}
-        service={initialService}
+        service={
+          isBookingForm(formState)
+            ? (formState.service ?? undefined)
+            : undefined
+        }
       />
 
       <StartBookingDialog
         isOpen={isStartBookingOpen}
         onClose={() => setIsStartBookingOpen(false)}
         onSubmitBid={handleBidPlacement}
-        service={initialService}
+        service={
+          isBookingForm(formState)
+            ? (formState.service ?? undefined)
+            : undefined
+        }
         isLoading={createBid.isPending}
       />
 

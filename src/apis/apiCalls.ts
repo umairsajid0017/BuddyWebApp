@@ -5,13 +5,14 @@ import { http } from "./httpMethods";
 import { BidStatus, BookingStatus } from "@/constants/constantValues";
 import { Endpoints } from './endpoints';
 import { buildQueryString } from '@/helpers/utils';
-import { BidResponse, BidsResponse, BookingsResponse, CancelBidResponse, CategoriesResponse, CategoryResponse, CategoryServicesResponse, CheckCredentialsResponse, CnicVerificationResponse, CreateBookingResponse, FAQResponse, GeneralResponse, LivePhotoVerificationResponse, LoginResponse, OfferResponse, PassportVerificationResponse, PaymentGatewayResponse, RegisterResponse, SearchResponse, SendOtpResponse, ServiceResponse, ServicesResponse, SpecialOffersResponse, TransactionResponse, UserDetailResponse, UserResponse, VerificationCheckResponse, WalletCreditResponse } from "@/apis/api-response-types";
+import { AvailabilityResponse, BidResponse, BidsResponse, BookingsResponse, CancelBidResponse, CategoriesResponse, CategoryResponse, CategoryServicesResponse, CheckCredentialsResponse, CnicVerificationResponse, CreateBookingResponse, FAQResponse, GeneralResponse, LivePhotoVerificationResponse, LoginResponse, OfferResponse, PassportVerificationResponse, PaymentGatewayResponse, RegisterResponse, SearchResponse, SendOtpResponse, ServiceResponse, ServicesResponse, SpecialOffersResponse, TransactionResponse, UserDetailResponse, UserResponse, VerificationCheckResponse, WalletCreditResponse } from "@/apis/api-response-types";
 import { AddToWalletData, CancelBidRequest, ChangePasswordData, CnicVerificationRequest, CreateBidData, CreateBookingData, LivePhotoVerificationRequest, LoginCredentials, PassportVerificationRequest, ProfileFormData, RegisterData, ResetPasswordData, SearchParams, SendOtpData, VerifyOtpData } from "./api-request-types";
 import { Service } from "@/types/service-types";
 import { Category } from "@/types/category-types";
 import { Offer } from "@/types/bid-types";
 import { User } from "@/types/general-types";
 import { setAuthToken } from './axios';
+import { format } from "date-fns";
 
 const handleError = (error: unknown): string => {
   if (error instanceof AxiosError && error.response) {
@@ -505,7 +506,7 @@ export const useBookingsByStatus = (status: BookingStatus) => {
   return useQuery({
     queryKey: ["bookings", status],
     queryFn: async () => {
-      const { data } = await http.get<BookingsResponse>(Endpoints.BOOKINGS_AGAINST_STATUS, { params: { status } });
+      const { data } = await http.get<BookingsResponse>(Endpoints.BOOKINGS_AGAINST_STATUS, { status: status.toString() });
       return data;
     },
   });
@@ -577,6 +578,7 @@ export const useDirectBooking = () => {
       formData.append("worker_id", bookingData.worker_id);
       formData.append("booking_date", bookingData.booking_date);
       formData.append("address", bookingData.address);
+      formData.append("service_id", bookingData.service_id);
 
       if (bookingData.description) {
         formData.append("description", bookingData.description);
@@ -595,6 +597,9 @@ export const useDirectBooking = () => {
           "Content-Type": "multipart/form-data",
         },
       });
+      if(data.error) {
+        throw new Error(data.message);
+      }
 
       return data;
     },
@@ -782,5 +787,38 @@ export const useFilters = () => {
     filters,
     setFilter,
     resetFilters,
+  };
+};
+
+export const useCalendarAvailability = (service_id?: string) => {
+
+  const { data: currentMonthData, isLoading } = useQuery<AvailabilityResponse>({
+    queryKey: ["availability", service_id],
+    queryFn: async () => {
+      const { data } = await http.get<AvailabilityResponse>(
+        Endpoints.GET_AVAILABLE_WORKERS_BY_MONTH,
+        {
+          service_id: service_id as string,
+        },
+      );
+      return data;
+    },
+    enabled: !!service_id,
+  });
+
+  const availableDates = new Set(
+    Array.isArray(currentMonthData?.records) 
+      ? currentMonthData.records.map(availability => availability.date_is)
+      : []
+  );
+
+  const isDateAvailable = (date: Date) => {
+    const dateString = format(date, "yyyy-MM-dd");
+    return availableDates.has(dateString);
+  };
+
+  return {
+    isLoading,
+    isDateAvailable,
   };
 };
