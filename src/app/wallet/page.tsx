@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import Main from "@/components/ui/main"
 import { useAuth } from "@/apis/apiCalls"
 import Loading from "@/components/ui/loading"
-import { CURRENCY } from "@/utils/constants"
+import { CURRENCY } from "@/constants/constantValues"
 import {
   useWalletCredit,
   useCustomerTransactions,

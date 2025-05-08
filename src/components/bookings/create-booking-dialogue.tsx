@@ -32,7 +32,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/store/authStore";
 
-import { CURRENCY } from "@/utils/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDirectConfirmation } from "./create-booking/booking-direct-confirmation";
 import { BackgroundGradient } from "../ui/background-gradient";
@@ -212,7 +211,7 @@ export function CreateBookingDialog({
       const formattedDate = bookingState.date
         ? format(bookingState.date, "yyyy-MM-dd")
         : "";
-        
+
       if(!initialService) {
         throw new Error("Initial service is required");
       }

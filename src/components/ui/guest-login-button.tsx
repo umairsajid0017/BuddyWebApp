@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from '@/apis/apiCalls'
 import { setAuthCookie } from "@/app/(auth)/login/authOptions";
 import { useToast } from "@/hooks/use-toast";
-import { LoginType } from "@/utils/constants";
 import axios from "axios";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
+import { LoginType } from "@/constants/constantValues";
 
 export function GuestLoginButton() {
   const [isLoading, setIsLoading] = useState(false);
