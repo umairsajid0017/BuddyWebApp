@@ -15,8 +15,9 @@ import { CURRENCY } from "@/constants/constantValues";
 import { getImageUrl } from "@/helpers/utils";
 import { CategoryService, Service } from "@/types/service-types";
 
-const ServiceCard: React.FC<{ service: CategoryService }> = ({ service }) => (
-  <Link href={`/services/${service.service_id}`} className="block">
+const ServiceCard: React.FC<{ service: Service }> = ({ service }) => (
+  console.log("Service:", service),
+  <Link href={`/services/${service.id}`} className="block">
     <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
       <div className="relative h-44 overflow-hidden bg-gray-200">
         <Image
@@ -25,14 +26,14 @@ const ServiceCard: React.FC<{ service: CategoryService }> = ({ service }) => (
               ? getImageUrl(service.images[0].name)
               : '/assets/placeholder.jpg'
           }
-          alt={service.service_name}
+          alt={service.name}
           layout="fill"
           objectFit="cover"
           unoptimized
         />
       </div>
       <CardContent>
-        <h4 className="mt-2 text-xl font-medium">{service.service_name}</h4>
+        <h4 className="mt-2 text-xl font-medium">{service.name}</h4>
         <p className="text-xs text-gray-600">{service.description.slice(0, 50)}...</p>
         <div className="mt-2 flex items-center justify-between">
           <p className="text-lg font-bold text-primary">
@@ -44,7 +45,7 @@ const ServiceCard: React.FC<{ service: CategoryService }> = ({ service }) => (
           </p>
           <div className="flex items-center text-xs text-gray-600">
             <BookmarkIcon className="h-4 w-4" />
-            <span className="ml-1">{service.total_reviews} reviews</span>
+            {/* <span className="ml-1">{service.ratings.length} reviews</span> */}
           </div>
         </div>
       </CardContent>
@@ -87,6 +88,7 @@ const NoResultsFound: React.FC<{ categoryId: string }> = ({ categoryId }) => (
 );
 
 const CategoryHeader: React.FC<{ categoryId: string }> = ({ categoryId }) => {
+  console.log("Category ID from query:", categoryId);
   const { data: category, isLoading } = useCategory(categoryId);
 
   if (isLoading) {
@@ -125,6 +127,8 @@ const CategoryPage: React.FC = () => {
     isError,
     isFetching
   } = useServicesByCategory(categoryId);
+
+  console.log("Services:", services);
 
   const filteredAndSortedServices = React.useMemo(() => {
     if (!services?.length) return [];
@@ -177,8 +181,8 @@ const CategoryPage: React.FC = () => {
       <FilterBar />
       {filteredAndSortedServices.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {filteredAndSortedServices.map((service: CategoryService) => (
-            <ServiceCard key={service.service_id} service={service} />
+          {filteredAndSortedServices.map((service: Service) => (
+            <ServiceCard key={service.id} service={service} />
           ))}
         </div>
       ) : (

@@ -3,7 +3,7 @@
 import { Category } from "@/types/category-types";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { getImageUrl } from "@/helpers/utils";
+import kebabCase, { getImageUrl } from "@/helpers/utils";
 
 interface CategoryComponentProps {
   category: Category;
@@ -12,10 +12,13 @@ interface CategoryComponentProps {
 const CategoryComponent: React.FC<CategoryComponentProps> = ({ category }) => {
   const router = useRouter();
 
+    const handleCategoryClick = () => {
+      router.push(`/categories/${kebabCase(category.title)}?id=${category.id}`);
+    };
   return (
     <Card
       className="cursor-pointer transition-all hover:scale-105"
-      onClick={() => router.push(`/services?category=${category.id}`)}
+      onClick={handleCategoryClick}
     >
       <CardContent className="flex flex-col items-center p-4">
         <img

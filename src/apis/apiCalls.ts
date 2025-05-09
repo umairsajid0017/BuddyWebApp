@@ -906,7 +906,7 @@ export const useCategory = (id: string) => {
     queryFn: async () => {
       const { data } = await http.get<CategoryResponse>(
         Endpoints.GET_CATEGORY_DETAILS,
-        { params: { id } },
+        { category_id: id },
       );
       return data;
     },
