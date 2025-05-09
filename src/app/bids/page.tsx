@@ -1,11 +1,23 @@
 "use client";
 
-import { useCancelBid, useBidResponses, useCustomerBidsByStatus, useAcceptOffer } from "@/apis/apiCalls";
+import {
+  useCancelBid,
+  useBidResponses,
+  useCustomerBidsByStatus,
+  useAcceptOffer,
+} from "@/apis/apiCalls";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Clock, MoreVertical, PlayCircle, AlertCircle } from "lucide-react";
+import {
+  MapPin,
+  Clock,
+  MoreVertical,
+  PlayCircle,
+  AlertCircle,
+  Eye,
+} from "lucide-react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -33,9 +45,13 @@ import Main from "@/components/ui/main";
 import { ImageViewer } from "@/components/ImageViewer";
 import { getImageUrl, getStatusBadgeProps } from "@/helpers/utils";
 
-
 const BidsPage = () => {
-  const { data: bidsData, isLoading, error, refetch } = useCustomerBidsByStatus(BidStatus.OPEN);
+  const {
+    data: bidsData,
+    isLoading,
+    error,
+    refetch,
+  } = useCustomerBidsByStatus(BidStatus.OPEN);
   const acceptOffer = useAcceptOffer();
   const cancelBid = useCancelBid();
   const { toast } = useToast();
@@ -46,10 +62,10 @@ const BidsPage = () => {
   const [playingAudioId, setPlayingAudioId] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const { 
-    data: bidResponsesData, 
-    isLoading: isLoadingResponses, 
-    error: responsesError 
+  const {
+    data: bidResponsesData,
+    isLoading: isLoadingResponses,
+    error: responsesError,
   } = useBidResponses(selectedBid);
 
   console.log("bidResponsesData", bidResponsesData);
@@ -84,7 +100,7 @@ const BidsPage = () => {
   const handleAcceptOffer = async (offerId: number) => {
     try {
       if (!selectedBid) return;
-     const response = await acceptOffer.mutateAsync({
+      const response = await acceptOffer.mutateAsync({
         response_id: offerId,
         bid_id: selectedBid as number,
         status: 1,
@@ -96,14 +112,18 @@ const BidsPage = () => {
       });
       refetch();
     } catch (error: any) {
-      toast({ 
+      toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
     }
   };
-  
+
+  const handleShowBidOffers = (bidId: number) => {
+    setSelectedBid(bidId);
+    setShowOffers(true);
+  };
 
   if (isLoading) {
     return (
@@ -142,40 +162,40 @@ const BidsPage = () => {
     );
   }
 
- if (bidsData && !bidsData?.records) {
-   return (
-     <div className="container mx-auto max-w-4xl p-6">
-       <h1 className="mb-6 text-3xl font-bold tracking-tight">My Bids</h1>
+  if (bidsData && !bidsData?.records) {
+    return (
+      <div className="container mx-auto max-w-4xl p-6">
+        <h1 className="mb-6 text-3xl font-bold tracking-tight">My Bids</h1>
 
-       <Card className="border-destructive/20 shadow-md">
-         <CardContent className="flex flex-col items-center justify-center px-6 pb-4 pt-6">
-           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-             <AlertCircle className="h-8 w-8 text-destructive" />
-           </div>
+        <Card className="border-destructive/20 shadow-md">
+          <CardContent className="flex flex-col items-center justify-center px-6 pb-4 pt-6">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </div>
 
-           <h3 className="mb-2 text-xl font-semibold text-destructive">
-             Unable to Load Bids
-           </h3>
+            <h3 className="mb-2 text-xl font-semibold text-destructive">
+              Unable to Load Bids
+            </h3>
 
-           <p className="max-w-md text-center text-muted-foreground">
-             {bidsData?.message ||
-               "There was an error loading your bids. Please try again later."}
-           </p>
-         </CardContent>
+            <p className="max-w-md text-center text-muted-foreground">
+              {bidsData?.message ||
+                "There was an error loading your bids. Please try again later."}
+            </p>
+          </CardContent>
 
-         <CardFooter className="flex justify-center pb-6">
-           <Button
-             variant="outline"
-             className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-             onClick={() => refetch()}
-           >
-             Try Again
-           </Button>
-         </CardFooter>
-       </Card>
-     </div>
-   );
- }
+          <CardFooter className="flex justify-center pb-6">
+            <Button
+              variant="outline"
+              className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => refetch()}
+            >
+              Try Again
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <Main>
@@ -185,138 +205,149 @@ const BidsPage = () => {
         </div>
         <ScrollArea className="h-[calc(100vh-200px)]">
           <div className="space-y-6">
-            {bidsData && bidsData?.records && bidsData?.records?.map((bid: Bid) => {
-              const statusProps = getStatusBadgeProps(bid.status);
-              return (
-                <Card key={bid.id} className="overflow-hidden">
-                  <div className="border-b p-6">
-                    <div className="flex items-start justify-between">
-                      <div 
-                        className="space-y-4 cursor-pointer" 
-                        onClick={() => {
-                          setSelectedBid(bid.id);
-                          setShowOffers(true);
-                        }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <h3 className="text-xl font-semibold">
-                            {bid.service.name}
-                          </h3>
-
-                          <Badge
-                            className="font-regular text-xs"
-                            variant={statusProps.variant as any}
-                          >
-                            {statusProps.label}
-                          </Badge>
-                        </div>
-                        <Badge className="bg-secondary px-3 py-1 hover:bg-secondary-800">
-                          {CURRENCY} {bid.expected_price}
-                        </Badge>
-                        <p className="max-w-2xl text-muted-foreground">
-                          {bid.description}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {formatDistanceToNow(new Date(bid.created_at), {
-                              addSuffix: true,
-                            })}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {bid.address}
-                          </div>
-                        </div>
-                        {bid.bid_canceled_reason && (
-                          <p className="text-sm text-destructive">
-                            Cancellation reason: {bid.bid_canceled_reason}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4">
-                        {bid.images && bid.images.length > 0 && (
-                          <div className="flex gap-2">
-                            {bid.images.map((image) => (
-                              <div
-                                key={image.id}
-                                className="relative h-24 w-24 overflow-hidden rounded-lg cursor-pointer"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedImage(getImageUrl(image.name)); 
-                                }}
-                              >
-                                <Image
-                                  src={getImageUrl(image.name)} 
-                                  alt="Bid image"
-                                  fill
-                                  className="object-cover transition-transform hover:scale-110"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              disabled={bid.status !== BidStatus.OPEN}
-                            >
-                              <MoreVertical className="h-5 w-5" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => {
-                                  setSelectedBid(bid.id);
-                                  setCancelDialogOpen(true);
-                                }}
-                              >
-                                Cancel Bid
-                              </DropdownMenuItem>
-                            }
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </div>
-                  {bid.audio && (
-                    <div className="bg-muted/50 p-4">
-                      {playingAudioId === bid.id ? (
-                        <audio
-                          controls
-                          className="h-10 w-full"
-                          style={{
-                            colorScheme: "normal",
+            {bidsData &&
+              bidsData?.records &&
+              bidsData?.records?.map((bid: Bid) => {
+                const statusProps = getStatusBadgeProps(bid.status);
+                return (
+                  <Card key={bid.id} className="overflow-hidden">
+                    <div className="border-b p-6">
+                      <div className="flex items-start justify-between">
+                        <div
+                          className="cursor-pointer space-y-4"
+                          onClick={() => {
+                            handleShowBidOffers(bid.id);
                           }}
-                          onEnded={() => setPlayingAudioId(null)}
-                          autoPlay
                         >
-                          <source
-                            src={`${process.env.NEXT_PUBLIC_AUDIO_URL}/${bid.audio}`}
-                            type="audio/wav"
-                          />
-                          Your browser does not support the audio element.
-                        </audio>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          className="flex items-center justify-center gap-2"
-                          onClick={() => setPlayingAudioId(bid.id)}
-                        >
-                          <PlayCircle className="h-5 w-5" />
-                          Play Audio
-                        </Button>
-                      )}
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-xl font-semibold">
+                              {bid.service.name}
+                            </h3>
+
+                            <Badge
+                              className="font-regular text-xs"
+                              variant={statusProps.variant as any}
+                            >
+                              {statusProps.label}
+                            </Badge>
+                          </div>
+                          <Badge className="bg-secondary px-3 py-1 hover:bg-secondary-800">
+                            {CURRENCY} {bid.expected_price}
+                          </Badge>
+                          <p className="max-w-2xl text-muted-foreground">
+                            {bid.description}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {formatDistanceToNow(new Date(bid.created_at), {
+                                addSuffix: true,
+                              })}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {bid.address}
+                            </div>
+                          </div>
+                          {bid.bid_canceled_reason && (
+                            <p className="text-sm text-destructive">
+                              Cancellation reason: {bid.bid_canceled_reason}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex h-full flex-col gap-8 justify-between">
+                          <div className="flex items-center gap-4">
+                            {bid.images && bid.images.length > 0 && (
+                              <div className="flex gap-2">
+                                {bid.images.map((image) => (
+                                  <div
+                                    key={image.id}
+                                    className="relative h-24 w-24 cursor-pointer overflow-hidden rounded-lg"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedImage(getImageUrl(image.name));
+                                    }}
+                                  >
+                                    <Image
+                                      src={getImageUrl(image.name)}
+                                      alt="Bid image"
+                                      fill
+                                      className="object-cover transition-transform hover:scale-110"
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  disabled={bid.status !== BidStatus.OPEN}
+                                >
+                                  <MoreVertical className="h-5 w-5" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => {
+                                      setSelectedBid(bid.id);
+                                      setCancelDialogOpen(true);
+                                    }}
+                                  >
+                                    Cancel Bid
+                                  </DropdownMenuItem>
+                                }
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                          <Button
+                            variant="default"
+                            size="default"
+                            onClick={() => handleShowBidOffers(bid.id)}
+                            disabled={bid.status !== BidStatus.OPEN}
+                          >
+                            View Offers
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </Card>
-              );
-            })}
+                    {bid.audio && (
+                      <div className="bg-muted/50 p-4">
+                        {playingAudioId === bid.id ? (
+                          <audio
+                            controls
+                            className="h-10 w-full"
+                            style={{
+                              colorScheme: "normal",
+                            }}
+                            onEnded={() => setPlayingAudioId(null)}
+                            autoPlay
+                          >
+                            <source
+                              src={`${process.env.NEXT_PUBLIC_AUDIO_URL}/${bid.audio}`}
+                              type="audio/wav"
+                            />
+                            Your browser does not support the audio element.
+                          </audio>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            className="flex items-center justify-center gap-2"
+                            onClick={() => setPlayingAudioId(bid.id)}
+                          >
+                            <PlayCircle className="h-5 w-5" />
+                            Play Audio
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </Card>
+                );
+              })}
           </div>
         </ScrollArea>
       </div>

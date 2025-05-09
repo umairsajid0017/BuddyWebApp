@@ -10,6 +10,7 @@ import Image from "next/image";
 import { getStatusLabel } from "@/helpers/utils";
 import { BookingStatus } from "@/constants/constantValues";
 import { Booking } from "@/types/booking-types";
+import { ScrollArea } from "../ui/scroll-area";
 
 const DISPLAY_STATUSES = [
   {
@@ -84,7 +85,7 @@ const BookingsComponent: React.FC = () => {
   }
 
   return (
-    <div className="p-4">
+    <ScrollArea className="p-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Bookings</h1>
         {/* <CreateBookingDialog /> */}
@@ -118,7 +119,7 @@ const BookingsComponent: React.FC = () => {
           </TabsContent>
         ))}
       </Tabs>
-    </div>
+    </ScrollArea>
   );
 };
 
