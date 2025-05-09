@@ -16,6 +16,7 @@ import {
   BidResponse,
   BidsResponse,
   BookingsResponse,
+  BookmarkResponse,
   CancelBidResponse,
   CategoriesResponse,
   CategoryResponse,
@@ -1081,3 +1082,45 @@ export const useAcceptOffer = () => {
     },
   });
 };
+
+export const useAddBookmark = () => {
+  return useMutation<BookmarkResponse, AxiosError, { service_id: number, status: number }>({
+    mutationFn: async ({ service_id, status }) => {
+      const formData = new FormData();
+      formData.append("service_id", service_id.toString());
+      formData.append("status", status.toString());
+      
+      const { data } = await http.post<BookmarkResponse>(
+        Endpoints.ADD_BOOKMARK,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+  });
+};
+
+
+export const useShowBookmarks = () => {
+  return useQuery<BookmarkResponse, AxiosError>({
+    queryKey: ["show-bookmarks"],
+    queryFn: async () => {
+      const { data } = await http.get<BookmarkResponse>(Endpoints.SHOW_BOOKMARK);
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+  });
+};
+
+
+
+

@@ -23,6 +23,7 @@ import {
   Bell,
   LogIn,
   Wallet,
+  Bookmark,
 } from "lucide-react";
 
 import NotificationsBell from "../notification/notifcation-bell";
@@ -74,7 +75,7 @@ export default function NavBar() {
     }
   };
 
-  const navigateTo = (path: string) => {``
+  const navigateTo = (path: string) => {
     router.push(path);
     setIsProfileOpen(false);
   };
@@ -155,6 +156,7 @@ export default function NavBar() {
                 >
                   Privacy Policy
                 </Button>
+
                 <CreateBookingDialog isGuest={isGuestUser} />
                 <TooltipWrapper content="Notifications">
                   <NotificationsBell />
@@ -219,7 +221,14 @@ export default function NavBar() {
                             <Wallet className="h-4 w-4" />
                             Wallet
                           </Button>
-
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start gap-2 px-4 py-2 text-gray-800 hover:bg-gray-100"
+                            onClick={() => navigateTo("/bookmarks")}
+                          >
+                            <Bookmark className="h-4 w-4" />
+                            Bookmarks
+                          </Button>
                           <Button
                             variant="ghost"
                             className="w-full justify-start gap-2 px-4 py-2 text-gray-800 hover:bg-gray-100"

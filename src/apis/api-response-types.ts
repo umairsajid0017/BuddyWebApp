@@ -12,6 +12,7 @@ import {
   CnicVerificationRecord,
   VerificationStatus,
 } from "@/types/verification-types";
+import { Bookmark } from '@/types/bookmark-types';
 
 export interface GeneralResponse {
   error: boolean;
@@ -227,3 +228,11 @@ export interface AvailabilityResponse {
     availability_details: AvailabilityDetail[];
   };
 }
+
+export interface BookmarkResponse {
+  error: boolean;
+  message: string;
+  records: Bookmark[];
+}
+
+
