@@ -39,12 +39,14 @@ import { Service } from "@/types/service-types";
 import { MediaFiles } from "@/types/general-types";
 import { useLocationUpdate } from "@/helpers/location";
 import { CreateBidData, CreateBookingData } from "@/apis/api-request-types";
+import { ROUTES } from "@/constants/routes";
 
 
 
 interface CreateBookingDialogProps {
   initialService?: Service;
   mode?: "book" | "bid";
+  isGuest?: boolean;
 }
 
 type BookFormState = {
@@ -78,6 +80,7 @@ const isBidForm = (form: FormState): form is BidFormState => {
 export function CreateBookingDialog({
   initialService,
   mode = "bid",
+  isGuest = false,
 }: CreateBookingDialogProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -133,6 +136,11 @@ export function CreateBookingDialog({
   console.log("Categories:", categories)
 
   const handleOpenChange = (open: boolean) => {
+    console.log("Is guest:", isGuest);
+    if(isGuest) {
+     router.push(ROUTES.LOGIN);
+      return;
+    }
     setIsOpen(open);
     if (!open) {
       resetForm();

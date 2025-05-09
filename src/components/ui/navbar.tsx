@@ -155,7 +155,7 @@ export default function NavBar() {
                 >
                   Privacy Policy
                 </Button>
-                <CreateBookingDialog />
+                <CreateBookingDialog isGuest={isGuestUser} />
                 <TooltipWrapper content="Notifications">
                   <NotificationsBell />
                 </TooltipWrapper>
