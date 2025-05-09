@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 import { useAddBookmark, useShowBookmarks } from "@/apis/apiCalls";
 import { colors } from "@/constants/colors";
 
-const ServiceCard: React.FC<{ service: Service, bookmarked: boolean }> = ({ service, bookmarked: initialBookmarked }) => {
+const ServiceCard: React.FC<{ service: Service, bookmarked?: boolean }> = ({ service, bookmarked: initialBookmarked }) => {
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
 
   useEffect(() => {
