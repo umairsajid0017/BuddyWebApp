@@ -13,6 +13,7 @@ import {
   VerificationStatus,
 } from "@/types/verification-types";
 import { Bookmark } from '@/types/bookmark-types';
+import { Notification } from '@/types/notification-types';
 
 export interface GeneralResponse {
   error: boolean;
@@ -233,6 +234,14 @@ export interface BookmarkResponse {
   error: boolean;
   message: string;
   records: Bookmark[];
+}
+
+
+
+export interface ShowNotificationsResponse {
+  error: boolean;
+  message: string;
+  records: Notification[];
 }
 
 

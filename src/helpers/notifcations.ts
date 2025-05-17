@@ -13,11 +13,11 @@ import {
   Timestamp,
   serverTimestamp
 } from 'firebase/firestore';
-import { Notification } from '../types/notification-types';
+import { Notification, FirebaseNotification } from '../types/notification-types';
 
 const NOTIFICATIONS_COLLECTION = 'notifications';
 
-export const getUserNotifications = async (userId: string): Promise<Notification[]> => {
+export const getUserNotifications = async (userId: string): Promise<FirebaseNotification[]> => {
   const q = query(
     collection(db, NOTIFICATIONS_COLLECTION),
     where('userId', '==', userId),
@@ -28,12 +28,12 @@ export const getUserNotifications = async (userId: string): Promise<Notification
   return snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data()
-  })) as Notification[];
+  })) as FirebaseNotification[];
 };
 
 export const subscribeToUserNotifications = (
   userId: string, 
-  callback: (notifications: Notification[]) => void
+  callback: (notifications: FirebaseNotification[]) => void
 ) => {
   if (!userId) return null;
   
@@ -47,7 +47,7 @@ export const subscribeToUserNotifications = (
     const notifications = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    })) as Notification[];
+    })) as FirebaseNotification[];
     
     callback(notifications);
   });
@@ -87,7 +87,7 @@ export const clearAllNotifications = async (userId: string) => {
   await Promise.all(deletePromises);
 };
 
-export const saveNotificationToFirestore = async (userId: string, notification: Partial<Notification>) => {
+export const saveNotificationToFirestore = async (userId: string, notification: Partial<FirebaseNotification>) => {
   await addDoc(collection(db, NOTIFICATIONS_COLLECTION), {
     userId,
     title: notification.title || 'New Notification',

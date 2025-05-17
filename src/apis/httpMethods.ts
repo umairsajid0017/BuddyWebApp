@@ -20,5 +20,12 @@ export const http = {
 
   delete: async <T>(url: string, params?: Record<string, any>): Promise<AxiosResponse<T>> => {
     return api.delete<T>(url, { params });
+  },
+  
+  deleteWithBody: async <T>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> => {
+    return api.delete<T>(url, { 
+      ...config,
+      data
+    });
   }
 }; 

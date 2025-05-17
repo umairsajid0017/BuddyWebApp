@@ -7,7 +7,7 @@ import {
 } from "@/helpers/firebase-messaging";
 import { useToast } from "@/hooks/use-toast";
 import { saveNotificationToFirestore } from "@/helpers/notifcations";
-import { useAuth } from '@/apis/apiCalls'
+import { useAuth, useUpdateToken } from '@/apis/apiCalls'
 
 export default function FcmProvider({
   children,
@@ -16,6 +16,7 @@ export default function FcmProvider({
 }) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const updateTokenMutation = useUpdateToken();
 
   useEffect(() => {
     const initFcm = async () => {
@@ -23,6 +24,9 @@ export default function FcmProvider({
         const token = await initializeFirebaseMessaging();
         if (token) {
           console.log("FCM initialized with token");
+          updateTokenMutation.mutate({ token })
+          
+          console.log("Token updated:", token);
         }
       } catch (error) {
         console.error("Failed to initialize FCM:", error);

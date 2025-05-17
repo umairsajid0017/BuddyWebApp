@@ -36,6 +36,7 @@ import {
   SendOtpResponse,
   ServiceResponse,
   ServicesResponse,
+  ShowNotificationsResponse,
   SpecialOffersResponse,
   TransactionResponse,
   UserDetailResponse,
@@ -1121,6 +1122,121 @@ export const useShowBookmarks = () => {
   });
 };
 
+export const useUpdateToken = () => {
+  return useMutation<GeneralResponse, AxiosError, { token: string }>({
+    mutationFn: async (tokenData: { token: string }) => {
+      const formData = new FormData();
+      formData.append("token", tokenData.token);
+      
+      const { data } = await http.post<GeneralResponse>(
+        Endpoints.UPDATE_TOKEN,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+  });
+};
+
+export const useShowNotifications = () => {
+  return useQuery<ShowNotificationsResponse, AxiosError>({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const { data } = await http.get<ShowNotificationsResponse>(Endpoints.SHOW_NOTIFICATIONS);
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+  });
+};
+
+export const useMarkNotificationAsRead = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation<GeneralResponse, AxiosError, { notification_id: number }>({
+    mutationFn: async ({ notification_id }) => {
+      const formData = new FormData();
+      formData.append("notification_id", notification_id.toString());
+      
+      const { data } = await http.post<GeneralResponse>(
+        Endpoints.MARK_READ_NOTIFICATION,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+};
+
+export const useClearAllNotifications = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation<GeneralResponse, AxiosError>({
+    mutationFn: async () => {
+      const { data } = await http.delete<GeneralResponse>(
+        Endpoints.CLEAR_ALL_NOTIFICATIONS,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+};
+
+export const useDeleteNotification = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation<GeneralResponse, AxiosError, { notification_id: number }>({
+    mutationFn: async ({ notification_id }) => {
+      const urlencoded = new URLSearchParams();
+      urlencoded.append("notification_id", notification_id.toString());
+      
+      const { data } = await http.deleteWithBody<GeneralResponse>(
+        Endpoints.DELETE_NOTIFICATION,
+        urlencoded,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+};
 
 
 

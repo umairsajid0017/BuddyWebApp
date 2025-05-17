@@ -3,14 +3,16 @@ import { formatDistanceToNow } from "date-fns";
 import { Check, Trash2, X, BellRing, MoreVertical } from "lucide-react";
 import { Notification } from "@/types/notification-types";
 import {
-  markNotificationAsRead,
   markAllNotificationsAsRead,
-  deleteNotification,
-  clearAllNotifications,
 } from "@/helpers/notifcations";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from '@/apis/apiCalls'
+import { 
+  useAuth, 
+  useMarkNotificationAsRead, 
+  useClearAllNotifications,
+  useDeleteNotification
+} from '@/apis/apiCalls'
 
 interface NotificationsMenuProps {
   notifications: Notification[];
@@ -24,6 +26,9 @@ export default function NotificationsMenu({
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
+  const markAsReadMutation = useMarkNotificationAsRead();
+  const clearAllMutation = useClearAllNotifications();
+  const deleteNotificationMutation = useDeleteNotification();
 
   // Helper function to safely format timestamp
   const formatTimestamp = (timestamp: any) => {
@@ -44,6 +49,11 @@ export default function NotificationsMenu({
         return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
       }
 
+      // Handle string timestamp
+      if (timestamp && typeof timestamp === "string") {
+        return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+      }
+
       // Default case, return a placeholder
       return "recently";
     } catch (error) {
@@ -54,7 +64,11 @@ export default function NotificationsMenu({
 
   const handleMarkAsRead = async (notification: Notification) => {
     try {
-      await markNotificationAsRead(notification.id);
+      await markAsReadMutation.mutateAsync({ notification_id: notification.id });
+      toast({
+        title: "Success",
+        description: "Notification marked as read",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -84,7 +98,7 @@ export default function NotificationsMenu({
 
   const handleDeleteNotification = async (notification: Notification) => {
     try {
-      await deleteNotification(notification.id);
+      await deleteNotificationMutation.mutateAsync({ notification_id: notification.id });
       toast({
         title: "Success",
         description: "Notification deleted",
@@ -99,10 +113,8 @@ export default function NotificationsMenu({
   };
 
   const handleClearAll = async () => {
-    if (!user?.id) return;
-
     try {
-      await clearAllNotifications(user.id.toString());
+      await clearAllMutation.mutateAsync();
       toast({
         title: "Success",
         description: "All notifications cleared",
@@ -117,14 +129,14 @@ export default function NotificationsMenu({
   };
 
   const handleNotificationClick = (notification: Notification) => {
-    if (!notification.read) {
+    if (!notification.is_read) {
       handleMarkAsRead(notification);
     }
 
-    if (notification.link) {
-      router.push(notification.link);
-      onClose();
-    }
+    // if (notification.link) {
+    //   router.push(notification.link);
+    //   onClose();
+    // }
   };
 
   return (
@@ -172,14 +184,14 @@ export default function NotificationsMenu({
             {notifications.map((notification) => (
               <li
                 key={notification.id}
-                className={`flex cursor-pointer items-start gap-4 p-4 transition-colors hover:bg-accent/50 ${notification.read ? "opacity-75" : "bg-accent/20"} `}
+                className={`flex cursor-pointer items-start gap-4 p-4 transition-colors hover:bg-accent/50 ${notification.is_read ? "opacity-75" : "bg-accent/20"} `}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="relative h-10 w-10 flex-shrink-0">
                   <div className="flex h-full w-full items-center justify-center rounded-full bg-primary-100">
                     <BellRing className="h-5 w-5 text-primary" />
                   </div>
-                  {!notification.read && (
+                  {!notification.is_read && (
                     <span className="absolute right-0 top-0 h-2 w-2 rounded-full bg-primary" />
                   )}
                 </div>
@@ -203,11 +215,11 @@ export default function NotificationsMenu({
                   </div>
 
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                    {notification.body}
+                    {notification.message}
                   </p>
 
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {formatTimestamp(notification.timestamp)}
+                    {formatTimestamp(notification.created_at)}
                   </p>
                 </div>
               </li>

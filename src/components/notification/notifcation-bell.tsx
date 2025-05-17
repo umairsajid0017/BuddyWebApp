@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useAuth } from '@/apis/apiCalls'
+import { useAuth, useShowNotifications } from '@/apis/apiCalls'
 import { Notification } from "@/types/notification-types";
 import { subscribeToUserNotifications } from "@/helpers/notifcations";
 import NotificationsMenu from "./notifications-menu";
@@ -19,6 +19,13 @@ export default function NotificationsBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
+  const { data: notificationsData, isLoading, refetch } = useShowNotifications();
+
+  useEffect(() => {
+    if (notificationsData?.records && Array.isArray(notificationsData.records)) {
+      setNotifications(notificationsData.records);
+    }
+  }, [notificationsData]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -27,15 +34,17 @@ export default function NotificationsBell() {
       user.id.toString(),
       (newNotifications) => {
         console.log("📬 got notifications:", newNotifications);
-        setNotifications(newNotifications);
-      },
+        refetch();
+        
+      }
     );
 
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
     };
   }, [user]); 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
