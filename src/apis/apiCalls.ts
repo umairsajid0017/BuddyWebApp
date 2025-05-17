@@ -24,6 +24,7 @@ import {
   CheckCredentialsResponse,
   CnicVerificationResponse,
   CreateBookingResponse,
+  DeductAmountResponse,
   FAQResponse,
   GeneralResponse,
   LivePhotoVerificationResponse,
@@ -125,7 +126,6 @@ export const useLogin = () => {
   });
 };
 
-
 export const useLogout = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -162,9 +162,8 @@ export const useLogout = () => {
       // Ensure state is cleared regardless of success/failure
         useAuthStore.getState().setUser(null);
         useAuthStore.getState().setToken(null);
-      },
-    },
-  );
+    }
+  });
 };
 
 export const useUser = () => {
@@ -1108,7 +1107,6 @@ export const useAddBookmark = () => {
   });
 };
 
-
 export const useShowBookmarks = () => {
   return useQuery<BookmarkResponse, AxiosError>({
     queryKey: ["show-bookmarks"],
@@ -1234,6 +1232,31 @@ export const useDeleteNotification = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+};
+
+export const useCheckDeduction = () => {
+  return useMutation<DeductAmountResponse, AxiosError, { amount_omr: string }>({
+    mutationFn: async ({ amount_omr }) => {
+      const formData = new FormData();
+      formData.append("amount_omr", amount_omr);
+      
+      const { data } = await http.post<DeductAmountResponse>(
+        Endpoints.DEDUCT_BOOKING_AMOUNT,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      
+      return data;
     },
   });
 };

@@ -236,7 +236,13 @@ export interface BookmarkResponse {
   records: Bookmark[];
 }
 
-
+export interface DeductAmountResponse {
+  error: boolean;
+  message: string;
+  deduct_amount: string;
+  wallet_amount: string;
+  user_id: number;
+}
 
 export interface ShowNotificationsResponse {
   error: boolean;
