@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,13 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, XIcon } from "lucide-react";
 import { format, setDate } from "date-fns";
 import { PlaceOrderSheet } from "./create-booking/place-order-sheet";
 import { StartBookingDialog } from "./create-booking/offer-bid";
 import { BookingConfirmation } from "./create-booking/booking-create-confirmation";
 import { ServiceCard } from "./create-booking/booking-service-card";
-import { useDirectBooking, useCreateBid, useServices, useCategories, useCalendarAvailability } from "@/apis/apiCalls";
+import { useDirectBooking, useCreateBid, useServices, useCategories, useCalendarAvailability, useCheckDeduction, useInitPaymentGateway } from "@/apis/apiCalls";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/store/authStore";
@@ -38,10 +38,9 @@ import { BackgroundGradient } from "../ui/background-gradient";
 import { Service } from "@/types/service-types";
 import { MediaFiles } from "@/types/general-types";
 import { useLocationUpdate } from "@/helpers/location";
-import { CreateBidData, CreateBookingData } from "@/apis/api-request-types";
+import { CreateBidData, CreateBookingData, AddToWalletData } from "@/apis/api-request-types";
 import { ROUTES } from "@/constants/routes";
-
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -86,6 +85,8 @@ export function CreateBookingDialog({
   const { user } = useAuth();
   const createBid = useCreateBid();
   const directBooking = useDirectBooking();
+  const checkDeduction = useCheckDeduction();
+  const paymentGatewayMutation = useInitPaymentGateway();
   const { updateUserLocation } = useLocationUpdate();
   if(mode === "book" && !initialService) {
     throw new Error("Initial service is required");
@@ -135,6 +136,17 @@ export function CreateBookingDialog({
   console.log("Services:", services);
   console.log("Categories:", categories)
 
+  // Add state to store deduction info
+  const [deductionInfo, setDeductionInfo] = useState<{
+    deduct_amount: string;
+    wallet_amount: string;
+  } | null>(null);
+  
+  // Payment gateway state
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState("");
+  const [pendingMediaFiles, setPendingMediaFiles] = useState<MediaFiles | undefined>(undefined);
+
   const handleOpenChange = (open: boolean) => {
     console.log("Is guest:", isGuest);
     if(isGuest) {
@@ -167,6 +179,11 @@ export function CreateBookingDialog({
             address: "",
           } as BidFormState),
     );
+    setDeductionInfo(null);
+    setIsPaymentOpen(false);
+    setPaymentUrl("");
+    setPendingMediaFiles(undefined);
+    setIsBookingLoading(false);
   };
 
   const handleSaveBooking = () => {
@@ -190,27 +207,15 @@ export function CreateBookingDialog({
     setIsPlaceOrderOpen(true);
   };
 
-  const handlePlaceOrderContinue = async (
-    description: string,
-    mediaFiles?: MediaFiles,
-  ) => {
-    setFormState((prev) => ({ ...prev, description, mediaFiles }));
-    setIsPlaceOrderOpen(false);
-    if (mode === "bid") {
-      console.log("Bid mode");
-      setIsStartBookingOpen(true);
-    } else {
-      setIsBookingConfirmationOpen(true);
-      await handleDirectBooking(mediaFiles);
-    }
-  };
-
   const handleDirectBooking = async (mediaFiles?: MediaFiles) => {
     const bookingState = formState as BookFormState;
     if (!user || !bookingState.service) return;
 
     try {
-      setIsBookingLoading(true);
+      // If it's not already loading (might be set from payment flow)
+      if (!isBookingLoading) {
+        setIsBookingLoading(true);
+      }
 
       // Update location
       await updateUserLocation();
@@ -224,7 +229,6 @@ export function CreateBookingDialog({
         throw new Error("Initial service is required");
       }
       const payload: CreateBookingData = {
-
         description: bookingState.description,
         images: mediaFiles?.images || bookingState.mediaFiles?.images,
         audio: mediaFiles?.audio || bookingState.mediaFiles?.audio,
@@ -248,6 +252,127 @@ export function CreateBookingDialog({
       console.error("Booking error:", error);
     } finally {
       setIsBookingLoading(false);
+    }
+  };
+  
+  // Handler for payment dialog close
+  const handlePaymentClose = useCallback(async () => {
+    setIsPaymentOpen(false);
+    setPaymentUrl("");
+    
+    // Check deduction again to see if payment was successful
+    try {
+      const bookingState = formState as BookFormState;
+      if (!bookingState.service) return;
+      
+      const expectedPrice = bookingState.service.fixed_price;
+      const deductionResult = await checkDeduction.mutateAsync({ amount_omr: expectedPrice });
+      
+      // Always store the latest deduction info
+      setDeductionInfo({
+        deduct_amount: deductionResult.deduct_amount,
+        wallet_amount: deductionResult.wallet_amount
+      });
+      
+      // Always show booking confirmation dialog
+      setIsBookingConfirmationOpen(true);
+      
+      // Attempt to create booking
+      await handleDirectBooking(pendingMediaFiles);
+      
+      // Show appropriate notification based on payment status
+      if (parseFloat(deductionResult.deduct_amount) === 0 || !deductionResult.deduct_amount) {
+        // No amount to deduct, payment was successful
+        toast.success("Payment completed successfully");
+      } else {
+        // Still has amount to deduct
+        toast.warning("Payment not completed. Your booking might not be processed.");
+      }
+    } catch (error) {
+      toast.error("Error verifying payment status");
+      console.error("Payment verification error:", error);
+      // Still show booking confirmation with the error state
+      setIsBookingConfirmationOpen(true);
+    }
+  }, [formState, checkDeduction, pendingMediaFiles]);
+  
+  // Register event listener to handle postMessage from iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Check if the message is from our payment iframe
+      if (event.data === "close" || event.data?.action === "close") {
+        handlePaymentClose();
+      }
+    };
+    
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [handlePaymentClose]);
+
+  const handlePlaceOrderContinue = async (
+    description: string,
+    mediaFiles?: MediaFiles,
+  ) => {
+    setFormState((prev) => ({ ...prev, description, mediaFiles }));
+    setIsPlaceOrderOpen(false);
+    
+    if (mode === "bid") {
+      console.log("Bid mode");
+      setIsStartBookingOpen(true);
+    } else {
+      // Check deduction amount before creating booking
+      try {
+        const bookingState = formState as BookFormState;
+        if (!bookingState.service) return;
+        
+        const expectedPrice = bookingState.service.fixed_price;
+        
+        setIsBookingLoading(true);
+        const deductionResult = await checkDeduction.mutateAsync({ amount_omr: expectedPrice });
+        setDeductionInfo({
+          deduct_amount: deductionResult.deduct_amount,
+          wallet_amount: deductionResult.wallet_amount
+        });
+        
+        // Save media files for later use
+        setPendingMediaFiles(mediaFiles);
+        
+        // If there's an amount to deduct, show payment gateway
+        if (parseFloat(deductionResult.deduct_amount) > 0) {
+          // Initialize payment gateway
+          const paymentData: AddToWalletData = {
+            amount: deductionResult.deduct_amount,
+            payment_method_id: "1", 
+            comment: "Booking payment",
+            order_total_amount: expectedPrice,
+            action: "order_deduction",
+          };
+          
+          const result = await paymentGatewayMutation.mutateAsync(paymentData);
+          
+          if (!result.error && result.pay_url) {
+            // Open the payment URL in the dialog
+            setPaymentUrl(result.pay_url);
+            setIsPaymentOpen(true);
+          } else {
+            // Show error and still open confirmation dialog
+            toast.error(result.message || "Failed to initialize payment");
+            setIsBookingConfirmationOpen(true);
+            await handleDirectBooking(mediaFiles);
+            setIsBookingLoading(false);
+          }
+        } else {
+          // No amount to deduct, proceed with booking directly
+          setIsBookingConfirmationOpen(true);
+          await handleDirectBooking(mediaFiles);
+        }
+      } catch (error) {
+        toast.error("Error checking wallet deduction amount");
+        console.error("Deduction check error:", error);
+        // Still show confirmation dialog even on error
+        setIsBookingConfirmationOpen(true);
+        setIsBookingLoading(false);
+      }
     }
   };
 
@@ -559,6 +684,7 @@ export function CreateBookingDialog({
         }}
         bookingDetails={bookingDetails ?? undefined}
         isLoading={isBookingLoading}
+        deductionInfo={deductionInfo}
       />
 
       <BookingConfirmation
@@ -569,6 +695,98 @@ export function CreateBookingDialog({
         }}
         bidDetails={bidDetails ?? undefined}
       />
+
+      {/* Payment Gateway Dialog */}
+      <Dialog
+        open={isPaymentOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            handlePaymentClose();
+          } else {
+            setIsPaymentOpen(true);
+          }
+        }}
+      >
+        <DialogContent className="h-[80vh] max-w-[90vw] overflow-hidden rounded-lg p-0 md:max-w-[900px]">
+          <div className="flex items-center justify-between bg-gradient-to-r from-[#1D0D25] to-[#673086] p-5 text-white">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-semibold">Complete Payment</h2>
+            </div>
+            <Button
+              variant="ghost"
+              className="h-8 w-8 rounded-full p-0 text-white"
+              onClick={handlePaymentClose}
+            >
+              <XIcon className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <ScrollArea className="h-[calc(80vh-134px)]">
+            <div className="min-h-full bg-gradient-to-b from-[#f8f8f8] to-white p-4">
+              {paymentUrl ? (
+                <div className="h-full w-full overflow-hidden rounded-lg border border-gray-100 bg-white shadow-inner">
+                  <div className="relative h-[calc(80vh-182px)] w-full">
+                    <div
+                      className="absolute inset-0 z-10 flex items-center justify-center bg-white/80"
+                      id="loading-indicator"
+                    >
+                      <div className="flex flex-col items-center">
+                        <div className="mb-2 h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                        <p className="text-sm text-muted-foreground">
+                          Loading payment gateway...
+                        </p>
+                      </div>
+                    </div>
+                    <iframe
+                      src={paymentUrl}
+                      className="h-full w-full border-none"
+                      title="Payment Gateway"
+                      sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation allow-modals"
+                      onLoad={() => {
+                        const loadingIndicator =
+                          document.getElementById("loading-indicator");
+                        if (loadingIndicator)
+                          loadingIndicator.style.display = "none";
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex h-[calc(80vh-150px)] w-full items-center justify-center">
+                  <div className="flex flex-col items-center">
+                    <div className="mb-4 h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                    <p className="text-lg font-medium">
+                      Initializing payment...
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+          
+          <div className="flex items-center justify-between border-t bg-gray-50 p-3">
+            <div className="flex items-center">
+              <div className="flex space-x-1">
+                <div className="h-4 w-6 rounded bg-gray-300"></div>
+                <div className="h-4 w-6 rounded bg-gray-400"></div>
+                <div className="h-4 w-6 rounded bg-gray-500"></div>
+                <div className="h-4 w-6 rounded bg-gray-600"></div>
+              </div>
+              <span className="ml-2 text-xs text-gray-500">
+                Secure payment
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePaymentClose}
+              className="text-sm"
+            >
+              Cancel Payment
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
