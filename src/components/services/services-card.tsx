@@ -11,13 +11,14 @@ import { Button } from "../ui/button";
 import { useAddBookmark, useShowBookmarks } from "@/apis/apiCalls";
 import { colors } from "@/constants/colors";
 import TooltipWrapper from "../ui/tooltip-wrapper";
+import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const showBookmarks = useShowBookmarks();
   const bookmarkMutation = useAddBookmark();
 
-  // Check if this service is bookmarked when bookmarks data loads
   useEffect(() => {
     if (showBookmarks.data?.records) {
       const isServiceBookmarked = showBookmarks.data.records.some(
@@ -35,20 +36,19 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Update UI optimistically
     setIsBookmarked(!isBookmarked);
     
-    // Update in the backend
     bookmarkMutation.mutateAsync({ 
       service_id: serviceId, 
       status: isBookmarked ? 0 : 1 
     }).then(() => {
       showBookmarks.refetch();
     }).catch(() => {
-      // Revert UI if mutation fails
       setIsBookmarked(isBookmarked);
     });
   };
+
+
 
   return (
     <Link href={`/services/${service.id}`} className="block">
@@ -61,24 +61,59 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
             objectFit="cover"
             unoptimized
           />
+          
+          {service.category && (
+            <div className="absolute top-3 left-3">
+              <Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-gray-800 shadow-sm">
+                {service.category.title}
+              </Badge>
+            </div>
+          )}
         </div>
-        <CardContent>
-          <h4 className="mt-2 text-lg font-medium">{service.name}</h4>
-          <p className="text-xs text-gray-600">
-            {service.description.slice(0, 50) + "..."}
-          </p>
-          <div className="mt-2 flex items-center justify-between">
-            <p className="text-lg font-bold text-primary">
-              {CURRENCY}. {service.fixed_price}
+        
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            <h4 className="text-lg font-semibold text-gray-900 leading-tight">
+              {service.name}
+            </h4>
+            
+            {service.user && (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage 
+                    src={service.user.image ? getImageUrl(service.user.image) : undefined} 
+                    alt={service.user.name || "Provider"} 
+                  />
+                  <AvatarFallback className="text-xs">
+                    {service.user.name?.charAt(0).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-gray-600 font-medium">
+                  {service.user.name || "Service Provider"}
+                </span>
+              </div>
+            )}
+            
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {service.description.length > 80 
+                ? service.description.slice(0, 80) + "..." 
+                : service.description
+              }
             </p>
-            <div className="flex items-center text-xs text-gray-600">
-              <TooltipWrapper
-              content={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
-              >
-                <Button variant="ghost" size="icon" onClick={(e) => handleBookmark(e, service.id)}>
-                  <BookmarkIcon className="h-4 w-4" fill={isBookmarked ? colors.primary.DEFAULT : "none"} stroke={isBookmarked ? colors.primary.DEFAULT : colors.text.DEFAULT} />
-                </Button>
-              </TooltipWrapper>
+            
+             <div className="mt-4 flex items-center justify-between">
+              <p className="text-xl font-bold text-primary">
+                {CURRENCY}. {service.fixed_price}
+              </p>
+              <div className="flex items-center text-xs text-gray-600">
+                <TooltipWrapper
+                  content={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+                >
+                  <Button variant="ghost" size="icon" onClick={(e) => handleBookmark(e, service.id)}>
+                    <BookmarkIcon className="h-4 w-4" fill={isBookmarked ? colors.primary.DEFAULT : "none"} stroke={isBookmarked ? colors.primary.DEFAULT : colors.text.DEFAULT} />
+                  </Button>
+                </TooltipWrapper>
+              </div>
             </div>
           </div>
         </CardContent>

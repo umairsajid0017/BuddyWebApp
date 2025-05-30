@@ -16,7 +16,7 @@ export default function BookmarksPage() {
     <h1 className="text-2xl text-text font-bold my-4">Bookmarks</h1>
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {bookmarks?.records.map((bookmark) => (
-        <ServiceCard key={bookmark.id} service={bookmark.service} bookmarked={bookmark.status === 1} />
+        <ServiceCard key={bookmark.id} service={bookmark.service} />
       ))}
     </div>
   </Main>
