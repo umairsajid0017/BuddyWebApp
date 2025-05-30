@@ -20,6 +20,7 @@ import { ImageViewer } from "@/components/ImageViewer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getImageUrl } from "@/helpers/utils";
 import { format } from "date-fns";
+import { BookingStatus } from "@/constants/constantValues";
 
 type BookingDetailsSheetProps = {
   booking: Booking;
@@ -185,12 +186,13 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                   </div>
                 )}
 
-                {/* Actions */}
                 <div className="flex space-x-4">
-                  <Button onClick={handleChat} className="flex-1">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Chat
-                  </Button>
+                  {booking.status !== BookingStatus.CANCELED && (
+                    <Button onClick={handleChat} className="flex-1">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Chat
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -208,12 +210,12 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
 
       {/* Chat Dialog */}
       {/* TODO: Implement the chat dialog */}
-      {/* <BookingChat
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        taskId={booking.id.toString()}
-        provider={booking.worker}
-      /> */}
+      <BookingChat
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            taskId={booking.id.toString()}
+            provider={booking.worker}
+          />
     </>
   );
 };

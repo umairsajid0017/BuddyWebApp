@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from '@/apis/apiCalls'
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,7 @@ import {
 import {  chatService } from "@/services/chatService";
 import { ChatMessageFirebase } from "@/types/chat-types";
 import { Worker } from "@/types/general-types";
-
+import { useAuth } from "@/store/authStore";
 
 interface BookingChatProps {
   isOpen: boolean;
@@ -176,6 +175,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
   taskId,
 }) => {
   const { user } = useAuth();
+  console.log(user, provider);
   const [messages, setMessages] = useState<ChatMessageFirebase[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -195,6 +195,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
 
   useEffect(() => {
     const initializeChat = async () => {
+
       if (user && provider) {
         const roomId = await chatService.getChatRoomId(
           user.id.toString(),
@@ -317,9 +318,14 @@ export const BookingChat: React.FC<BookingChatProps> = ({
           </Avatar>
           <div>
             <h3 className="font-semibold">{provider.name}</h3>
-            <div className="flex items-center gap-2">
-              <Circle className="h-2 w-2 text-green-500" fill="currentColor" />
-              <p className="text-sm text-muted-foreground">Online</p>
+           <div className="flex items-center gap-2">
+              <Circle 
+                className={`h-2 w-2 ${provider.is_online ? 'text-green-500' : 'text-red-500'}`} 
+                fill="currentColor" 
+              />
+              <p className="text-sm text-muted-foreground">
+                {provider.is_online ? 'Online' : 'Offline'}
+              </p>
             </div>
           </div>
         </div>

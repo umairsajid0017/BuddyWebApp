@@ -49,6 +49,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
       <CardContent className="p-4">
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
           {booking.service.name}
+          <Badge variant={"secondary"} className="">
+            {booking.bid_id ? "Bid" : "Direct"}
+          </Badge>
         </CardTitle>
         <div className="mt-2 space-y-1">
           <p className="text-sm text-gray-500">{booking.worker.name}</p>
