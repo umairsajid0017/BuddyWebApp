@@ -18,7 +18,7 @@ export interface Bid {
   canceled_time: string | null;
   deleted_at: string | null;
   category: Category;
-  service: Service;
+  service: Service | null;
 }
 
 export interface Offer {

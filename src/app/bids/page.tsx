@@ -221,7 +221,7 @@ const BidsPage = () => {
                         >
                           <div className="flex items-center gap-3">
                             <h3 className="text-xl font-semibold">
-                              {bid.service.name}
+                              {bid.service?.name || 'Service Unavailable'}
                             </h3>
 
                             <Badge
