@@ -10,20 +10,26 @@ import { getImageUrl } from "@/helpers/utils";
 import { Button } from "../ui/button";
 import { useAddBookmark, useShowBookmarks } from "@/apis/apiCalls";
 import { colors } from "@/constants/colors";
+import TooltipWrapper from "../ui/tooltip-wrapper";
 
-const ServiceCard: React.FC<{ service: Service, bookmarked?: boolean }> = ({ service, bookmarked: initialBookmarked }) => {
-  const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const showBookmarks = useShowBookmarks();
+  const bookmarkMutation = useAddBookmark();
 
+  // Check if this service is bookmarked when bookmarks data loads
   useEffect(() => {
-    setIsBookmarked(initialBookmarked);
-  }, [initialBookmarked]);
+    if (showBookmarks.data?.records) {
+      const isServiceBookmarked = showBookmarks.data.records.some(
+        bookmark => bookmark.status === 1 && parseInt(bookmark.service_id) === service.id
+      );
+      setIsBookmarked(isServiceBookmarked);
+    }
+  }, [showBookmarks.data, service.id]);
 
   const imageUrl = service.images?.[0]?.name
     ? getImageUrl(service.images[0].name)
     : getImageUrl(service.image);
-
-  const bookmarkMutation = useAddBookmark();
-  const showBookmarks = useShowBookmarks();
 
   const handleBookmark = (e: React.MouseEvent<HTMLButtonElement>, serviceId: number) => {
     e.preventDefault();
@@ -66,20 +72,13 @@ const ServiceCard: React.FC<{ service: Service, bookmarked?: boolean }> = ({ ser
               {CURRENCY}. {service.fixed_price}
             </p>
             <div className="flex items-center text-xs text-gray-600">
-              <Button variant="ghost" size="icon" onClick={(e) => handleBookmark(e, service.id)}>
-              <BookmarkIcon className="h-4 w-4" fill={isBookmarked ? colors.primary.DEFAULT : "none"} stroke={isBookmarked ? colors.primary.DEFAULT : colors.text.DEFAULT} />
-              </Button>
-              {/* <span className="ml-1">
-              {service.ratings?.length > 0
-                ? (
-                    service.ratings.reduce(
-                      (acc, curr) => acc + curr.rating,
-                      0,
-                    ) / service.ratings?.length
-                  ).toFixed(1)
-                : "0.0"}
-              | {service.ratings?.length} reviews
-            </span> */}
+              <TooltipWrapper
+              content={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+              >
+                <Button variant="ghost" size="icon" onClick={(e) => handleBookmark(e, service.id)}>
+                  <BookmarkIcon className="h-4 w-4" fill={isBookmarked ? colors.primary.DEFAULT : "none"} stroke={isBookmarked ? colors.primary.DEFAULT : colors.text.DEFAULT} />
+                </Button>
+              </TooltipWrapper>
             </div>
           </div>
         </CardContent>

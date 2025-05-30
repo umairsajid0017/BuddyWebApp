@@ -26,18 +26,6 @@ const ServiceSkeleton = () => (
 
 const PopularServices: React.FC<PopularServicesProps> = ({ services }) => {
   const { isLoading, error } = useServices();
-  const showBookmarks = useShowBookmarks();
-  const [bookmarkedServices, setBookmarkedServices] = useState<number[]>([]);
-
-  useEffect(() => {
-    if (showBookmarks.data?.records) {
-      const bookmarkedIds = showBookmarks.data.records
-        .filter(bookmark => bookmark.status === 1)
-        .map(bookmark => parseInt(bookmark.service_id));
-      
-      setBookmarkedServices(bookmarkedIds);
-    }
-  }, [showBookmarks.data]);
 
   
   if (isLoading) {
@@ -56,7 +44,6 @@ const PopularServices: React.FC<PopularServicesProps> = ({ services }) => {
         <ServiceCard 
           key={service.id} 
           service={service} 
-          bookmarked={bookmarkedServices.includes(service.id)} 
         />
       ))}
     </div>
