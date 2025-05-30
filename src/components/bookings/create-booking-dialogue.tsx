@@ -435,7 +435,7 @@ export function CreateBookingDialog({
 
   return (
     <>
-       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <BackgroundGradient className="w-fit" containerClassName="w-fit">
           <DialogTrigger asChild>
             <Button
@@ -448,7 +448,7 @@ export function CreateBookingDialog({
             </Button>
           </DialogTrigger>
         </BackgroundGradient>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="flex flex-col max-h-[800px] h-[90vh] sm:max-w-[425px] mx-2">
           <DialogHeader>
             <DialogTitle>
               {mode === "book" ? "Book Service" : "New Bid"}
@@ -459,178 +459,148 @@ export function CreateBookingDialog({
                 : "Create a new bid for a service."}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {mode === "book" ? (
-              <ServiceCard service={initialService!} compact />
-            ) : (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="service" className="text-right">
-                  Service
-                </Label>
-                <Select
-                  onValueChange={(value) => {
-                    if (isBidForm(formState)) {
-                      const category = categories?.find(
-                        (s) => s.id.toString() === value,
-                      );
-                      setFormState((prev) => ({
-                        ...prev,
-                        category: category ?? null,
-                      }));
+          <ScrollArea>
+            <div className="grid gap-4 py-4">
+              {mode === "book" ? (
+                <ServiceCard service={initialService!} compact />
+              ) : (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="service" className="text-right">
+                    Service
+                  </Label>
+                  <Select
+                    onValueChange={(value) => {
+                      if (isBidForm(formState)) {
+                        const category = categories?.find(
+                          (s) => s.id.toString() === value,
+                        );
+                        setFormState((prev) => ({
+                          ...prev,
+                          category: category ?? null,
+                        }));
+                      }
+                    }}
+                    value={
+                      isBidForm(formState)
+                        ? formState.category?.id?.toString()
+                        : undefined
                     }
-                  }}
-                  value={
-                    isBidForm(formState)
-                      ? formState.category?.id?.toString()
-                      : undefined
-                  }
-                >
-                  <SelectTrigger
-                    className="col-span-3 w-full"
-                    disabled={isLoading}
                   >
-                    <SelectValue placeholder="Select a category">
-                      {isBidForm(formState)
-                        ? (formState.category?.title ?? "Select a category")
-                        : "Select a category"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoriesLoading ? (
-                      <SelectItem value="loading" disabled>
-                        Loading categories...
-                      </SelectItem>
-                    ) : categories?.length ? (
-                      categories.map((category) => (
-                        <SelectItem
-                          key={category.id}
-                          value={category.id.toString()}
-                        >
-                          {category.title || `Category #${category.id}`}
+                    <SelectTrigger
+                      className="col-span-3 w-full"
+                      disabled={isLoading}
+                    >
+                      <SelectValue placeholder="Select a category">
+                        {isBidForm(formState)
+                          ? (formState.category?.title ?? "Select a category")
+                          : "Select a category"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categoriesLoading ? (
+                        <SelectItem value="loading" disabled>
+                          Loading categories...
                         </SelectItem>
-                      ))
+                      ) : categories?.length ? (
+                        categories.map((category) => (
+                          <SelectItem
+                            key={category.id}
+                            value={category.id.toString()}
+                          >
+                            {category.title || `Category #${category.id}`}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-categories" disabled>
+                          No categories available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="date" className="text-right">
+                  Date
+                </Label>
+                <div className="col-span-3">
+                  <Button
+                    variant="outline"
+                    className={`w-full justify-start text-left font-normal ${!formState.date && "text-muted-foreground"}`}
+                    onClick={() => handleDateSelect(new Date())}
+                    disabled={mode === "book"}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {isLoadingAvailability ? (
+                      <Skeleton className="h-4 w-[100px]" />
+                    ) : formState.date ? (
+                      format(formState.date, "PPP")
                     ) : (
-                      <SelectItem value="no-categories" disabled>
-                        No categories available
-                      </SelectItem>
+                      <span>Pick a date</span>
                     )}
-                  </SelectContent>
-                </Select>
+                  </Button>
+                </div>
               </div>
-            )}
+              {isLoadingAvailability ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : (
+                mode !== "bid" && (
+                  <Calendar
+                    mode="single"
+                    selected={formState.date}
+                    onSelect={handleDateSelect}
+                    className="flex w-full items-center justify-center rounded-md border"
+                    disabled={
+                      mode === "book"
+                        ? (date) => {
+                            const isAvailable = isDateAvailable(date);
+                            console.log("Is available:", isAvailable);
+                            return !isAvailable;
+                          }
+                        : (date) =>
+                            format(date, "yyyy-MM-dd") !==
+                            format(new Date(), "yyyy-MM-dd")
+                    }
+                    modifiers={
+                      mode === "book"
+                        ? {
+                            available: (date) => {
+                              return isDateAvailable(date);
+                            },
+                          }
+                        : {
+                            available: (date) =>
+                              format(date, "yyyy-MM-dd") ===
+                              format(new Date(), "yyyy-MM-dd"),
+                          }
+                    }
+                    modifiersClassNames={{
+                      available: "bg-green-100 hover:bg-green-200",
+                    }}
+                  />
+                )
+              )}
 
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="date" className="text-right">
-                Date
-              </Label>
-              <div className="col-span-3">
-                <Button
-                  variant="outline"
-                  className={`w-full justify-start text-left font-normal ${!formState.date && "text-muted-foreground"}`}
-                  onClick={() => handleDateSelect(new Date())}
-                  disabled={mode === "book"}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {isLoadingAvailability ? (
-                    <Skeleton className="h-4 w-[100px]" />
-                  ) : formState.date ? (
-                    format(formState.date, "PPP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </div>
-            </div>
-            {isLoadingAvailability ? (
-              <Skeleton className="h-[300px] w-full" />
-            ) : (
-              mode !== "bid" && (
-                <Calendar
-                  mode="single"
-                  selected={formState.date}
-                  onSelect={handleDateSelect}
-                  className="flex w-full items-center justify-center rounded-md border"
-                  disabled={
-                    mode === "book"
-                      ? (date) => {
-                          const isAvailable = isDateAvailable(date);
-                          console.log("Is available:", isAvailable);
-                          return !isAvailable;
-                        }
-                      : (date) =>
-                          format(date, "yyyy-MM-dd") !==
-                          format(new Date(), "yyyy-MM-dd")
-                  }
-                  modifiers={
-                    mode === "book"
-                      ? { available: (date) => {
-                          return isDateAvailable(date);
-                        } }
-                      : {
-                          available: (date) =>
-                            format(date, "yyyy-MM-dd") ===
-                            format(new Date(), "yyyy-MM-dd"),
-                        }
-                  }
-                  modifiersClassNames={{
-                    available: "bg-green-100 hover:bg-green-200",
-                  }}
-                />
-              )
-            )}
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="address" className="text-right">
-                Address
-              </Label>
-              <Input
-                id="address"
-                type="text"
-                className="col-span-3"
-                value={formState.address}
-                onChange={(e) =>
-                  setFormState((prev) => ({ ...prev, address: e.target.value }))
-                }
-                placeholder="Enter your address"
-              />
-            </div>
-
-            {/* <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="time" className="text-right">
-                Time
-              </Label>
-              <Input
-                id="time"
-                type="time"
-                className="col-span-3"
-                value={formState.time}
-                onChange={handleTimeChange}
-              />
-            </div> */}
-
-            {/* <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="budget" className="text-right">
-                Budget
-              </Label>
-              <div className="relative col-span-3">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {CURRENCY}
-                </span>
+              <div className="flex flex-col gap-2 px-4">
+                <Label htmlFor="address">
+                  Address
+                </Label>
                 <Input
-                  id="budget"
-                  type="number"
-                  value={formState.budget}
+                  id="address"
+                  type="text"
+                  value={formState.address}
                   onChange={(e) =>
                     setFormState((prev) => ({
                       ...prev,
-                      budget: Number(e.target.value),
+                      address: e.target.value,
                     }))
                   }
-                  className="pl-14"
+                  placeholder="Enter your address"
                 />
               </div>
-            </div> */}
-          </div>
+            </div>
+          </ScrollArea>
 
           <DialogFooter>
             <Button
@@ -720,7 +690,7 @@ export function CreateBookingDialog({
               <XIcon className="h-4 w-4" />
             </Button>
           </div>
-          
+
           <ScrollArea className="h-[calc(80vh-134px)]">
             <div className="min-h-full bg-gradient-to-b from-[#f8f8f8] to-white p-4">
               {paymentUrl ? (
@@ -763,7 +733,7 @@ export function CreateBookingDialog({
               )}
             </div>
           </ScrollArea>
-          
+
           <div className="flex items-center justify-between border-t bg-gray-50 p-3">
             <div className="flex items-center">
               <div className="flex space-x-1">
@@ -772,9 +742,7 @@ export function CreateBookingDialog({
                 <div className="h-4 w-6 rounded bg-gray-500"></div>
                 <div className="h-4 w-6 rounded bg-gray-600"></div>
               </div>
-              <span className="ml-2 text-xs text-gray-500">
-                Secure payment
-              </span>
+              <span className="ml-2 text-xs text-gray-500">Secure payment</span>
             </div>
             <Button
               variant="outline"
