@@ -15,10 +15,10 @@ import { Service, ServiceRating } from "@/types/service-types";
 import ReviewsSection from "@/components/services/reviews-section";
 import UserProfileCard from "@/components/services/user-profile-card";
 import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
-import { CURRENCY } from "@/constants/constantValues";
+import { CURRENCY, LoginType } from "@/constants/constantValues";
 import { ServiceImageGallery } from "@/components/services/service-image-gallery";
 import { CollapsibleText } from "@/components/ui/collapsible-text";
-
+import { useAuth } from "@/store/authStore";
 
 interface ServiceDetailsProps {
   params: {
@@ -49,9 +49,12 @@ const ServiceDetailsSkeleton: React.FC = () => (
 );
 
 const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
+  const { user } = useAuth();
   const { data: serviceResponse, isLoading, error } = useServiceDetails(+params.id);
   const { services } = useServices();
   const [service, setService] = useState<Service>();
+
+  const isGuestUser = user?.login_type === LoginType.GUEST;
 
   useEffect(() => {
     if (serviceResponse) {
@@ -147,7 +150,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                     <p className="mb-4 text-muted-foreground">
                       {service.description ? <CollapsibleText text={service.description} /> : "No description available."}
                     </p>
-                    <CreateBookingDialog initialService={service} mode="book" />
+                    <CreateBookingDialog initialService={service} mode="book" isGuest={isGuestUser} />
                   </div>
                 </div>
               </CardContent>
