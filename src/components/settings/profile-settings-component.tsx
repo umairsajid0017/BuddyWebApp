@@ -17,7 +17,8 @@ import { useUpdateProfile } from "@/apis/apiCalls";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getImageUrl, splitFullName } from "@/helpers/utils";
-import  useAuthStore, { useAuth } from "@/store/authStore";
+import useAuthStore, { useAuth } from "@/store/authStore";
+import { validateName, validatePhone } from "@/utils/validations";
 
 interface ProfileFormData {
   name: string;
@@ -30,13 +31,23 @@ interface ProfileFormData {
   civil_id_number: string | null;
 }
 
+interface ValidationErrors {
+  name?: string;
+  phone?: string;
+  dob?: string;
+  gender?: string;
+  address?: string;
+  civil_id_number?: string;
+}
+
 export default function ProfileComponent() {
   const { user } = useAuth();
   const updateProfileMutation = useUpdateProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [formData, setFormData] = useState<ProfileFormData>({
     name: user?.name || "",
     email: user?.email || "",
@@ -55,7 +66,7 @@ export default function ProfileComponent() {
         email: user.email || "",
         phone: user.phone || "",
         dob: user.dob || null,
-        country: user.country || "OM", // Default to Oman
+        country: user.country || "OM",
         gender: user.gender || null,
         address: user.address || null,
         civil_id_number: user.civil_id_number || null,
@@ -63,18 +74,89 @@ export default function ProfileComponent() {
     }
   }, [user]);
 
+  // Validation functions
+  const validateField = (field: string, value: string): string | null => {
+    switch (field) {
+      case 'name':
+        const nameResult = validateName(value);
+        return nameResult.isValid ? null : nameResult.message || null;
+      
+      case 'phone':
+        const phoneResult = validatePhone(value);
+        return phoneResult.isValid ? null : phoneResult.message || null;
+      
+      case 'dob':
+        if (!value?.trim()) return "Date of birth is required";
+        const dobDate = new Date(value);
+        const today = new Date();
+        const age = today.getFullYear() - dobDate.getFullYear();
+        if (age < 18) return "You must be at least 18 years old";
+        if (age > 100) return "Please enter a valid date of birth";
+        return null;
+      
+      case 'gender':
+        if (!value?.trim()) return "Gender is required";
+        return null;
+      
+      case 'address':
+        if (!value?.trim()) return "Address is required";
+        if (value.trim().length < 10) return "Address must be at least 10 characters long";
+        return null;
+      
+      case 'civil_id_number':
+        if (!value?.trim()) return "Oman ID is required";
+        // Oman ID format: 8-9 digits (no hyphens required)
+        const cleanValue = value.trim().replace(/[-\s]/g, ''); // Remove hyphens and spaces
+        if (!/^\d{8,9}$/.test(cleanValue)) {
+          return "Oman ID must be 8-9 digits";
+        }
+        return null;
+      
+      default:
+        return null;
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [id]: value,
     }));
+
+    // Real-time validation for touched fields
+    if (touchedFields[id]) {
+      const error = validateField(id, value);
+      setErrors((prev) => ({
+        ...prev,
+        [id]: error || undefined,
+      }));
+    }
   };
 
   const handleSelectChange = (value: string, field: keyof ProfileFormData) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+    }));
+
+    // Real-time validation for touched fields
+    if (touchedFields[field]) {
+      const error = validateField(field, value);
+      setErrors((prev) => ({
+        ...prev,
+        [field]: error || undefined,
+      }));
+    }
+  };
+
+  const handleFieldBlur = (field: string) => {
+    setTouchedFields((prev) => ({ ...prev, [field]: true }));
+    const value = formData[field as keyof ProfileFormData] || "";
+    const error = validateField(field, value);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: error || undefined,
     }));
   };
 
@@ -85,36 +167,90 @@ export default function ProfileComponent() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Image size must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Please select a valid image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setSelectedImage(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
-  const validateForm = () => {
-    const requiredFields = [
-      "name",
-      "phone",
-      "dob",
-      "country",
-      "gender",
-      "civil_id_number",
-      "address",
-    ];
-    const emptyFields = requiredFields.filter(
-      (field) => !formData[field as keyof ProfileFormData],
-    );
+  const validateForm = (): boolean => {
+    const requiredFields = ["name", "phone", "dob", "gender", "civil_id_number", "address"];
+    const newErrors: ValidationErrors = {};
+    let hasErrors = false;
 
-    if (emptyFields.length > 0) {
-      const fieldNames = emptyFields.map((field) =>
-        field.replace(/_/g, " ").toUpperCase(),
-      );
+    // Mark all required fields as touched
+    const newTouchedFields: Record<string, boolean> = {};
+    requiredFields.forEach(field => {
+      newTouchedFields[field] = true;
+    });
+    setTouchedFields(newTouchedFields);
+
+    // Validate all required fields
+    requiredFields.forEach(field => {
+      const value = formData[field as keyof ProfileFormData] || "";
+      const error = validateField(field, value);
+      if (error) {
+        newErrors[field as keyof ValidationErrors] = error;
+        hasErrors = true;
+      }
+    });
+
+    setErrors(newErrors);
+
+    if (hasErrors) {
+      const firstError = Object.values(newErrors)[0];
       toast({
-        title: "Error",
-        description: `Please fill in the following required fields: ${fieldNames.join(", ")}`,
+        title: "Validation Error",
+        description: firstError,
+        variant: "destructive",
       });
-      return false;
     }
-    return true;
+
+    return !hasErrors;
+  };
+
+  // Check if form is valid without showing errors (for submit button state)
+  const isFormValid = (): boolean => {
+    const requiredFields = ["name", "phone", "dob", "gender", "civil_id_number", "address"];
+    
+    // Check if there are any current errors
+    const hasErrors = Object.values(errors).some(error => error !== undefined);
+    if (hasErrors) return false;
+
+    // Check if all required fields are filled
+    const allFieldsFilled = requiredFields.every(field => {
+      const value = formData[field as keyof ProfileFormData];
+      return value && value.toString().trim() !== "";
+    });
+    if (!allFieldsFilled) return false;
+
+    // Validate all fields silently
+    const allFieldsValid = requiredFields.every(field => {
+      const value = formData[field as keyof ProfileFormData] || "";
+      const error = validateField(field, value);
+      return !error;
+    });
+
+    return allFieldsValid;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,7 +271,7 @@ export default function ProfileComponent() {
         description: response.message || "Profile updated successfully",
       });
       
-      if(!response.error) {
+      if (!response.error) {
         useAuthStore.getState().setUser(response.records);
       }
 
@@ -145,10 +281,13 @@ export default function ProfileComponent() {
         setPreviewUrl(null);
       }
       setSelectedImage(null);
+      // Clear errors after successful submission
+      setErrors({});
     } catch (error) {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update profile",
+        variant: "destructive",
       });
     }
   };
@@ -170,10 +309,7 @@ export default function ProfileComponent() {
               </div>
             ) : (
               <AvatarImage
-                src={
-                  previewUrl ||
-                  getImageUrl(user?.image)
-                }
+                src={previewUrl || getImageUrl(user?.image)}
                 alt={user?.name ?? ""}
               />
             )}
@@ -206,7 +342,12 @@ export default function ProfileComponent() {
               placeholder="John Doe"
               value={formData.name}
               onChange={handleInputChange}
+              onBlur={() => handleFieldBlur("name")}
+              className={errors.name ? "border-red-500" : ""}
             />
+            {errors.name && (
+              <p className="text-xs text-red-600">{errors.name}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -217,7 +358,9 @@ export default function ProfileComponent() {
               value={formData.email}
               onChange={handleInputChange}
               disabled
+              className="bg-gray-50"
             />
+            <p className="text-xs text-gray-500">Email cannot be changed</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number *</Label>
@@ -228,7 +371,12 @@ export default function ProfileComponent() {
               placeholder="+968 XXXX XXXX"
               value={formData.phone}
               onChange={handleInputChange}
+              onBlur={() => handleFieldBlur("phone")}
+              className={errors.phone ? "border-red-500" : ""}
             />
+            {errors.phone && (
+              <p className="text-xs text-red-600">{errors.phone}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth *</Label>
@@ -238,7 +386,12 @@ export default function ProfileComponent() {
               type="date"
               value={formData.dob || ""}
               onChange={handleInputChange}
+              onBlur={() => handleFieldBlur("dob")}
+              className={errors.dob ? "border-red-500" : ""}
             />
+            {errors.dob && (
+              <p className="text-xs text-red-600">{errors.dob}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="country">Country *</Label>
@@ -260,7 +413,7 @@ export default function ProfileComponent() {
               value={formData.gender || ""}
               onValueChange={(value) => handleSelectChange(value, "gender")}
             >
-              <SelectTrigger>
+              <SelectTrigger className={errors.gender ? "border-red-500" : ""}>
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -269,17 +422,25 @@ export default function ProfileComponent() {
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
+            {errors.gender && (
+              <p className="text-xs text-red-600">{errors.gender}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="civil_id_number">Oman ID *</Label>
             <Input
               required
               id="civil_id_number"
-              placeholder="3-123456-1234567-1"
+              placeholder="12345678"
               value={formData.civil_id_number || ""}
               onChange={handleInputChange}
-              maxLength={17}
+              onBlur={() => handleFieldBlur("civil_id_number")}
+              maxLength={9}
+              className={errors.civil_id_number ? "border-red-500" : ""}
             />
+            {errors.civil_id_number && (
+              <p className="text-xs text-red-600">{errors.civil_id_number}</p>
+            )}
           </div>
         </div>
         <div className="space-y-2">
@@ -290,12 +451,17 @@ export default function ProfileComponent() {
             placeholder="123 Main St, City, Country"
             value={formData.address || ""}
             onChange={handleInputChange}
+            onBlur={() => handleFieldBlur("address")}
+            className={errors.address ? "border-red-500" : ""}
           />
+          {errors.address && (
+            <p className="text-xs text-red-600">{errors.address}</p>
+          )}
         </div>
         <Button
           type="submit"
           className="w-full"
-          disabled={updateProfileMutation.isPending}
+          disabled={!isFormValid() || updateProfileMutation.isPending}
         >
           {updateProfileMutation.isPending ? (
             <>
@@ -306,6 +472,11 @@ export default function ProfileComponent() {
             "Save Changes"
           )}
         </Button>
+        {!isFormValid() && !updateProfileMutation.isPending && (
+          <p className="text-xs text-gray-500 text-center mt-2">
+            Please fill in all required fields correctly to save changes
+          </p>
+        )}
       </form>
     </>
   );
