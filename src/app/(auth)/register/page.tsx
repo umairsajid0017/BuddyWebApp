@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   useRegister,
   useVerifyOtp,
@@ -39,6 +39,7 @@ const Register: React.FC = () => {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterData, string>>>({});
   const [backendErrors, setBackendErrors] = useState<Record<string, string[]>>({});
+  const [autoOtp, setAutoOtp] = useState<number | null>(null);
   const router = useRouter();
   const registerMutation = useRegister();
   const checkCredentialsMutation = useCheckCredentials();
@@ -178,33 +179,16 @@ const Register: React.FC = () => {
         return;
       }
 
-      try {
-        const otpResponse = await sendOtpMutation.mutateAsync({
-          email: formData.email,
-          role: RoleType.CUSTOMER,
-        });
+      // Registration successful - move to step 3 and send OTP immediately
+      toast({
+        title: "Registration Successful",
+        description: "Please verify your email to complete registration.",
+      });
+      setStep(3);
+      
+      // Send OTP immediately after moving to step 3
+      handleSendOtp();
 
-        if (!otpResponse.error) {
-          setStep(3);
-          toast({
-            title: "Verification Required",
-            description: "Please check your email for the OTP code.",
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "OTP Error",
-            description: otpResponse.message,
-          });
-        }
-      } catch (otpError) {
-        console.error("Error sending OTP:", otpError);
-        toast({
-          variant: "destructive",
-          title: "OTP Error",
-          description: "Failed to send verification code. Please try again.",
-        });
-      }
     } catch (error) {
       console.error("Registration error:", error);
       toast({
@@ -217,11 +201,41 @@ const Register: React.FC = () => {
 
   const verifyOtpMutation = useVerifyOtp();
 
-  const handleVerifyEmail = async (verificationCode: string) => {
+  const handleSendOtp = useCallback(async () => {
+    try {
+      const otpResponse = await sendOtpMutation.mutateAsync({
+        email: formData.email,
+        role: RoleType.CUSTOMER,
+      });
+
+      // Check for your_otp regardless of error flag
+      if (otpResponse.your_otp) {
+        setAutoOtp(Number(otpResponse.your_otp));
+        toast({
+          title: "OTP Sent",
+          description: "Verification code has been sent to your email.",
+        });
+      } else {
+        toast({
+          title: "OTP Sent", 
+          description: "Please check your email for the verification code.",
+        });
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      toast({
+        variant: "destructive",
+        title: "OTP Error",
+        description: "Failed to send verification code. Please try again.",
+      });
+    }
+  }, [formData.email, sendOtpMutation, toast]);
+
+  const handleVerifyEmail = async (verificationCode: number) => {
     try {
       const response = await verifyOtpMutation.mutateAsync({
         email: formData.email,
-        otp: verificationCode,
+        otp: verificationCode.toString(),
       });
 
       if (!response.error) {
@@ -326,7 +340,13 @@ const Register: React.FC = () => {
               isLoading={registerMutation.isPending}
             />
           )}
-          {step === 3 && <StepThree handleVerifyEmail={handleVerifyEmail} />}
+          {step === 3 && (
+            <StepThree 
+              handleVerifyEmail={handleVerifyEmail}
+              autoOtp={autoOtp}
+              handleSendOtp={handleSendOtp}
+            />
+          )}
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-gray-600">

@@ -53,9 +53,9 @@ export interface CheckCredentialsResponse {
 export interface SendOtpResponse {
   error: boolean;
   message: string;
-  your_otp?: string;
+  your_otp?: number;
   records?: {
-    otp: string;
+    otp: number;
     otp_expires_at: string;
     next_retry_at?: string;
     remaining_attempts: number;

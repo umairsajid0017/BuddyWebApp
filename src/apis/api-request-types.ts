@@ -127,7 +127,3 @@ export interface BidFormData {
   address: string;
 }
 
-export interface VerifyOtpData {
-  email: string;
-  otp: string;
-}
