@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookingStatus } from "@/constants/constantValues";
 import { getStatusLabel } from "@/helpers/utils";
 import { CreateBookingResponse } from "@/apis/api-response-types";
+import { BookingMobileConfirmation } from "./booking-mobile-confirmation";
 
 interface BookingDirectConfirmationProps {
   isOpen: boolean;
@@ -43,6 +44,22 @@ export function BookingDirectConfirmation({
   deductionInfo,
 }: BookingDirectConfirmationProps) {
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // 768px is the md breakpoint
+    };
+
+    // Check on mount
+    checkScreenSize();
+
+    // Add event listener for resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const getStatusBadgeColor = (status: number) => {
     switch (status) {
@@ -59,6 +76,20 @@ export function BookingDirectConfirmation({
     }
   };
 
+  // Render mobile drawer
+  if (isMobile) {
+    return (
+      <BookingMobileConfirmation
+        isOpen={isOpen}
+        onClose={onClose}
+        bookingDetails={bookingDetails}
+        isLoading={isLoading}
+        deductionInfo={deductionInfo}
+      />
+    );
+  }
+
+  // Render desktop dialog
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[475px]">
@@ -133,10 +164,6 @@ export function BookingDirectConfirmation({
                   {bookingDetails ? bookingDetails.price : "-"}
                 </div>
               </div>
-              
-            
-              
-           
             </div>
 
             {/* Details Card */}
