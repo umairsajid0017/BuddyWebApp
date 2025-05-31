@@ -162,7 +162,7 @@ const BidsPage = () => {
     );
   }
 
-  if (bidsData && !bidsData?.records) {
+  if (bidsData && bidsData?.records.length === 0) {
     return (
       <div className="container mx-auto max-w-4xl p-6">
         <h1 className="mb-6 text-3xl font-bold tracking-tight">My Bids</h1>
@@ -174,7 +174,7 @@ const BidsPage = () => {
             </div>
 
             <h3 className="mb-2 text-xl font-semibold text-destructive">
-              Unable to Load Bids
+              No Bids Found
             </h3>
 
             <p className="max-w-md text-center text-muted-foreground">

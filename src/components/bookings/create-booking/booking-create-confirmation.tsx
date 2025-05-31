@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { CheckCircle2, Clock, IndianRupee, AlertCircle } from "lucide-react"; // Add icons
 import { CURRENCY } from "@/constants/constantValues";
 import { BidResponse } from "@/apis/api-response-types";
+import { BookingCreateMobileConfirmation } from "./booking-create-mobile-confirmation";
 
 interface BookingConfirmationProps {
   isOpen: boolean;
@@ -26,6 +27,30 @@ export function BookingConfirmation({
   bidDetails,
 }: BookingConfirmationProps) {
   const router = useRouter();
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkScreenSize();
+
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <BookingCreateMobileConfirmation
+        isOpen={isOpen}
+        onClose={onClose}
+        bidDetails={bidDetails}
+      />
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
