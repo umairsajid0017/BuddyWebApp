@@ -186,19 +186,7 @@ export function BookingDirectConfirmation({
                       ).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between border-b border-dashed border-gray-200 pb-2">
-                    <div className="flex items-center space-x-2">
-                      <AlertCircle className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">Status</span>
-                    </div>
-                    <Badge
-                      className={`text-xs font-medium ${getStatusBadgeColor(
-                        bookingDetails.status,
-                      )}`}
-                    >
-                      {getStatusLabel(bookingDetails.status)}
-                    </Badge>
-                  </div>
+                 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <MapPin className="h-4 w-4 text-gray-400" />
@@ -258,19 +246,7 @@ export function BookingDirectConfirmation({
               </div>
             )}
 
-            {/* Next Steps */}
-            {bookingDetails && (
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h4 className="mb-2 text-sm font-medium text-gray-700">
-                  What&apos;s Next?
-                </h4>
-                <p className="text-sm text-gray-600">
-                  You can track your booking status and communicate with the
-                  service provider in the bookings section. We&apos;ll notify
-                  you of any updates.
-                </p>
-              </div>
-            )}
+           
           </div>
         )}
 

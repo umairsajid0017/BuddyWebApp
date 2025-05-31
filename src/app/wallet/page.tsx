@@ -149,7 +149,7 @@ const WalletPage = () => {
         amount: amount,
         payment_method_id: "1", // Default payment method
         comment: comment,
-        order_total_amount: amount, // Using same amount as total
+        order_total_amount: parseFloat(amount), // Using same amount as total
         action: "add_to_wallet",
       };
 
