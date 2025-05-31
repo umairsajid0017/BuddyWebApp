@@ -45,6 +45,62 @@ export default function VerifyAccountComponent() {
   const livePhotoVerificationMutation = useLivePhotoVerification();
   const passportVerificationMutation = usePassportVerification();
 
+  // Helper function to check if a step is completed
+  const isStepCompleted = (step: 'cnic' | 'live-photo' | 'passport') => {
+    switch (step) {
+      case 'cnic':
+        return verificationCheck?.cnicInfo?.status !== null;
+      case 'live-photo':
+        return verificationCheck?.livePhotoRecord?.status !== null;
+      case 'passport':
+        return verificationCheck?.passportPhotoRecord?.status !== null;
+      default:
+        return false;
+    }
+  };
+
+  // Helper function to check if a step should be enabled (stepper logic)
+  const isStepEnabled = (step: 'cnic' | 'live-photo' | 'passport') => {
+    switch (step) {
+      case 'cnic':
+        // CNIC is always enabled if not completed
+        return !isStepCompleted('cnic');
+      case 'live-photo':
+        // Live Photo enabled only if CNIC is completed and Live Photo is not completed
+        return isStepCompleted('cnic') && !isStepCompleted('live-photo');
+      case 'passport':
+        // Passport enabled only if CNIC and Live Photo are completed and Passport is not completed
+        return isStepCompleted('cnic') && isStepCompleted('live-photo') && !isStepCompleted('passport');
+      default:
+        return false;
+    }
+  };
+
+  // Helper function to get next required step message
+  const getNextRequiredStepMessage = (currentStep: 'live-photo' | 'passport') => {
+    if (currentStep === 'live-photo' && !isStepCompleted('cnic')) {
+      return "Please complete CNIC verification first.";
+    }
+    if (currentStep === 'passport') {
+      if (!isStepCompleted('cnic')) {
+        return "Please complete CNIC verification first.";
+      }
+      if (!isStepCompleted('live-photo')) {
+        return "Please complete Live Photo verification first.";
+      }
+    }
+    return "This step is not yet available. Please complete previous steps first.";
+  };
+
+  // Helper function to get the first available tab (stepper logic)
+  const getDefaultTab = () => {
+    if (isStepEnabled('cnic')) return "cnic";
+    if (isStepEnabled('live-photo')) return "live-photo";
+    if (isStepEnabled('passport')) return "passport";
+    // If all steps are completed, default to the first step to show status
+    return "cnic";
+  };
+
   const handleFileUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
     setter: (file: File | null) => void,
@@ -351,309 +407,457 @@ export default function VerifyAccountComponent() {
 
       {renderOverallStatus()}
 
-      <Tabs defaultValue="cnic" className="w-full">
+      {/* Step Indicator */}
+      <div className="rounded-lg border p-4">
+        <h3 className="text-lg font-semibold mb-4">Verification Process</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+              isStepCompleted('cnic') 
+                ? 'bg-green-500 text-white' 
+                : isStepEnabled('cnic') 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-300 text-gray-600'
+            }`}>
+              {isStepCompleted('cnic') ? '✓' : '1'}
+            </div>
+            <span className={isStepCompleted('cnic') ? 'text-green-600 font-medium' : 'text-gray-600'}>
+              CNIC
+            </span>
+          </div>
+          
+          <div className={`flex-1 h-1 mx-4 ${isStepCompleted('cnic') ? 'bg-green-500' : 'bg-gray-300'}`} />
+          
+          <div className="flex items-center space-x-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+              isStepCompleted('live-photo') 
+                ? 'bg-green-500 text-white' 
+                : isStepEnabled('live-photo') 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-300 text-gray-600'
+            }`}>
+              {isStepCompleted('live-photo') ? '✓' : '2'}
+            </div>
+            <span className={isStepCompleted('live-photo') ? 'text-green-600 font-medium' : 'text-gray-600'}>
+              Live Photo
+            </span>
+          </div>
+          
+          <div className={`flex-1 h-1 mx-4 ${isStepCompleted('live-photo') ? 'bg-green-500' : 'bg-gray-300'}`} />
+          
+          <div className="flex items-center space-x-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+              isStepCompleted('passport') 
+                ? 'bg-green-500 text-white' 
+                : isStepEnabled('passport') 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-300 text-gray-600'
+            }`}>
+              {isStepCompleted('passport') ? '✓' : '3'}
+            </div>
+            <span className={isStepCompleted('passport') ? 'text-green-600 font-medium' : 'text-gray-600'}>
+              Passport
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <Tabs defaultValue={getDefaultTab()} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="cnic">CNIC</TabsTrigger>
-          <TabsTrigger value="live-photo">Live Photo</TabsTrigger>
-          <TabsTrigger value="passport">Passport</TabsTrigger>
+          <TabsTrigger 
+            value="cnic" 
+            disabled={!isStepEnabled('cnic') && !isStepCompleted('cnic')}
+            className={(!isStepEnabled('cnic') && !isStepCompleted('cnic')) ? "opacity-50 cursor-not-allowed" : ""}
+          >
+            CNIC {isStepCompleted('cnic') && <CheckCircle2 className="h-5 w-5 ml-2" />}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="live-photo" 
+            disabled={!isStepEnabled('live-photo') && !isStepCompleted('live-photo')}
+            className={(!isStepEnabled('live-photo') && !isStepCompleted('live-photo')) ? "opacity-50 cursor-not-allowed" : ""}
+          >
+            Live Photo {isStepCompleted('live-photo') && <CheckCircle2 className="h-5 w-5 ml-2" />}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="passport" 
+            disabled={!isStepEnabled('passport') && !isStepCompleted('passport')}
+            className={(!isStepEnabled('passport') && !isStepCompleted('passport')) ? "opacity-50 cursor-not-allowed" : ""}
+          >
+            Passport {isStepCompleted('passport') && <CheckCircle2 className="h-5 w-5 ml-2" />}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="cnic" className="space-y-6">
-          <div className="space-y-6 font-medium">
-            <Card className="relative border-dashed border-primary-400 p-4">
-              <Badge className="absolute -top-2 z-10">ID Card Front</Badge>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleFileUpload(e, setIdFront)}
-                id="id-front"
-              />
-              <label
-                htmlFor="id-front"
-                className="flex cursor-pointer flex-col items-center justify-center gap-4"
-              >
-                {idFront ? (
-                  <div className="h-[180px] w-[280px] overflow-hidden rounded-lg">
-                    <Image
-                      src={URL.createObjectURL(idFront)}
-                      alt="id-front"
-                      width={640}
-                      height={480}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <Image
-                      src="/assets/icons/image-placeholder.svg"
-                      className="mb-2 h-12 w-12 text-text-500"
-                      alt="id-front-placeholder"
-                      width={48}
-                      height={48}
-                    />
-                    <span className="text-text-600">
-                      Upload National ID Front
-                    </span>
-                  </div>
-                )}
-              </label>
-            </Card>
+          {isStepCompleted('cnic') ? (
+            <div className="rounded-lg border p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                {getVerificationIcon(verificationCheck?.cnicInfo)}
+                <span className="text-lg font-semibold capitalize">
+                  {verificationCheck?.cnicInfo?.status}
+                </span>
+              </div>
+              <p className="text-gray-600">
+                Your CNIC verification has been submitted and is {verificationCheck?.cnicInfo?.status}.
+                {verificationCheck?.cnicInfo?.status === "pending" && " Please wait for review."}
+                {verificationCheck?.cnicInfo?.status === "rejected" && " Please contact support for assistance."}
+                {verificationCheck?.cnicInfo?.status === "approved" && " You can now proceed to the next step."}
+              </p>
+            </div>
+          ) : isStepEnabled('cnic') ? (
+            <>
+              <div className="space-y-6 font-medium">
+                <Card className="relative border-dashed border-primary-400 p-4">
+                  <Badge className="absolute -top-2 z-10">ID Card Front</Badge>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e, setIdFront)}
+                    id="id-front"
+                  />
+                  <label
+                    htmlFor="id-front"
+                    className="flex cursor-pointer flex-col items-center justify-center gap-4"
+                  >
+                    {idFront ? (
+                      <div className="h-[180px] w-[280px] overflow-hidden rounded-lg">
+                        <Image
+                          src={URL.createObjectURL(idFront)}
+                          alt="id-front"
+                          width={640}
+                          height={480}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src="/assets/icons/image-placeholder.svg"
+                          className="mb-2 h-12 w-12 text-text-500"
+                          alt="id-front-placeholder"
+                          width={48}
+                          height={48}
+                        />
+                        <span className="text-text-600">
+                          Upload National ID Front
+                        </span>
+                      </div>
+                    )}
+                  </label>
+                </Card>
 
-            <Card className="relative border-dashed border-primary-400 p-4">
-              <Badge className="absolute -top-2 z-10">ID Card Back</Badge>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleFileUpload(e, setIdBack)}
-                id="id-back"
-              />
-              <label
-                htmlFor="id-back"
-                className="flex cursor-pointer flex-col items-center justify-center gap-4"
-              >
-                {idBack ? (
-                  <div className="h-[180px] w-[280px] overflow-hidden rounded-lg">
-                    <Image
-                      src={URL.createObjectURL(idBack)}
-                      alt="id-back"
-                      width={640}
-                      height={480}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <Image
-                      src="/assets/icons/image-placeholder.svg"
-                      className="mb-2 h-12 w-12 text-text-500"
-                      alt="id-back-placeholder"
-                      width={48}
-                      height={48}
-                    />
-                    <span className="text-text-600">
-                      Upload National ID Back
-                    </span>
-                  </div>
-                )}
-              </label>
-            </Card>
-          </div>
+                <Card className="relative border-dashed border-primary-400 p-4">
+                  <Badge className="absolute -top-2 z-10">ID Card Back</Badge>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e, setIdBack)}
+                    id="id-back"
+                  />
+                  <label
+                    htmlFor="id-back"
+                    className="flex cursor-pointer flex-col items-center justify-center gap-4"
+                  >
+                    {idBack ? (
+                      <div className="h-[180px] w-[280px] overflow-hidden rounded-lg">
+                        <Image
+                          src={URL.createObjectURL(idBack)}
+                          alt="id-back"
+                          width={640}
+                          height={480}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src="/assets/icons/image-placeholder.svg"
+                          className="mb-2 h-12 w-12 text-text-500"
+                          alt="id-back-placeholder"
+                          width={48}
+                          height={48}
+                        />
+                        <span className="text-text-600">
+                          Upload National ID Back
+                        </span>
+                      </div>
+                    )}
+                  </label>
+                </Card>
+              </div>
 
-          <Button
-            className="w-full"
-            onClick={handleVerifyCnic}
-            disabled={cnicVerificationMutation.isPending}
-          >
-            {cnicVerificationMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verifying...
-              </>
-            ) : (
-              "Verify CNIC"
-            )}
-          </Button>
+              <Button
+                className="w-full"
+                onClick={handleVerifyCnic}
+                disabled={cnicVerificationMutation.isPending}
+              >
+                {cnicVerificationMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify CNIC"
+                )}
+              </Button>
+            </>
+          ) : (
+            <div className="rounded-lg border p-6 text-center">
+              <p className="text-gray-600">
+                CNIC verification is the first step in the process.
+              </p>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="live-photo" className="space-y-6">
-          <div className="space-y-6 font-medium">
-            <Card className="relative border-dashed border-primary-400 p-4">
-              <Badge className="absolute -top-2 z-10">Live Photo</Badge>
-              <div className="flex flex-col items-center space-y-4">
-                {isCapturing ? (
-                  <div className="relative w-full">
-                    <div className="relative mx-auto h-[400px] w-[400px] overflow-hidden rounded-lg bg-black">
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className={`h-full w-full object-cover ${
-                          isFrontCamera ? "scale-x-[-1]" : ""
-                        }`}
-                      />
-                      {countdown !== null && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                          <span className="text-8xl font-bold text-white drop-shadow-lg">
-                            {countdown}
-                          </span>
+          {isStepCompleted('live-photo') ? (
+            <div className="rounded-lg border p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                {getVerificationIcon(verificationCheck?.livePhotoRecord)}
+                <span className="text-lg font-semibold capitalize">
+                  {verificationCheck?.livePhotoRecord?.status}
+                </span>
+              </div>
+              <p className="text-gray-600">
+                Your live photo verification has been submitted and is {verificationCheck?.livePhotoRecord?.status}.
+                {verificationCheck?.livePhotoRecord?.status === "pending" && " Please wait for review."}
+                {verificationCheck?.livePhotoRecord?.status === "rejected" && " Please contact support for assistance."}
+                {verificationCheck?.livePhotoRecord?.status === "approved" && " You can now proceed to the next step."}
+              </p>
+            </div>
+          ) : isStepEnabled('live-photo') ? (
+            <>
+              <div className="space-y-6 font-medium">
+                <Card className="relative border-dashed border-primary-400 p-4">
+                  <Badge className="absolute -top-2 z-10">Live Photo</Badge>
+                  <div className="flex flex-col items-center space-y-4">
+                    {isCapturing ? (
+                      <div className="relative w-full">
+                        <div className="relative mx-auto h-[400px] w-[400px] overflow-hidden rounded-lg bg-black">
+                          <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            className={`h-full w-full object-cover ${
+                              isFrontCamera ? "scale-x-[-1]" : ""
+                            }`}
+                          />
+                          {countdown !== null && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                              <span className="text-8xl font-bold text-white drop-shadow-lg">
+                                {countdown}
+                              </span>
+                            </div>
+                          )}
+                          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-2">
+                            {countdown === null ? (
+                              <>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={switchCamera}
+                                  className="bg-white/70 hover:bg-white"
+                                >
+                                  <FlipHorizontal className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={startCountdown}
+                                  className="bg-white/70 hover:bg-white"
+                                >
+                                  <Timer className="mr-1 h-4 w-4" />
+                                  Timer
+                                </Button>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={capturePhoto}
+                                  className="bg-white/70 hover:bg-white"
+                                >
+                                  Capture
+                                </Button>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={stopCamera}
+                                  className="bg-white/70 hover:bg-white"
+                                >
+                                  Cancel
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={cancelCountdown}
+                                className="bg-white/70 hover:bg-white"
+                              >
+                                Cancel Timer
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                      )}
-                      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-2">
-                        {countdown === null ? (
-                          <>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={switchCamera}
-                              className="bg-white/70 hover:bg-white"
-                            >
-                              <FlipHorizontal className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={startCountdown}
-                              className="bg-white/70 hover:bg-white"
-                            >
-                              <Timer className="mr-1 h-4 w-4" />
-                              Timer
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={capturePhoto}
-                              className="bg-white/70 hover:bg-white"
-                            >
-                              Capture
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={stopCamera}
-                              className="bg-white/70 hover:bg-white"
-                            >
-                              Cancel
-                            </Button>
-                          </>
-                        ) : (
+                        <div className="mt-4 text-center text-sm text-gray-500">
+                          {isFrontCamera ? "Front Camera" : "Back Camera"}
+                        </div>
+                      </div>
+                    ) : livePhoto ? (
+                      <div className="relative mx-auto">
+                        <div className="h-[400px] w-[400px] overflow-hidden rounded-lg">
+                          <Image
+                            src={URL.createObjectURL(livePhoto)}
+                            alt="live-photo"
+                            width={400}
+                            height={400}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-2">
                           <Button
                             variant="secondary"
                             size="sm"
-                            onClick={cancelCountdown}
+                            onClick={() => {
+                              setLivePhoto(null);
+                              startCamera();
+                            }}
                             className="bg-white/70 hover:bg-white"
                           >
-                            Cancel Timer
+                            <RefreshCw className="mr-1 h-4 w-4" />
+                            Retake
                           </Button>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="mt-4 text-center text-sm text-gray-500">
-                      {isFrontCamera ? "Front Camera" : "Back Camera"}
-                    </div>
+                    ) : (
+                      <div className="flex flex-col items-center space-y-4 py-8">
+                        <div className="rounded-full bg-gray-100 p-8">
+                          <Camera className="h-12 w-12 text-gray-400" />
+                        </div>
+                        <div className="text-center">
+                          <h3 className="text-lg font-semibold">Take Live Photo</h3>
+                          <p className="mt-2 max-w-[300px] text-sm text-gray-500">
+                            Please ensure you&apos;re in a well-lit area and look
+                            directly at the camera. Keep your face centered and
+                            clearly visible.
+                          </p>
+                        </div>
+                        <Button onClick={startCamera} className="mt-4">
+                          <Camera className="mr-2 h-4 w-4" />
+                          Start Camera
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                ) : livePhoto ? (
-                  <div className="relative mx-auto">
-                    <div className="h-[400px] w-[400px] overflow-hidden rounded-lg">
-                      <Image
-                        src={URL.createObjectURL(livePhoto)}
-                        alt="live-photo"
-                        width={400}
-                        height={400}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => {
-                          setLivePhoto(null);
-                          startCamera();
-                        }}
-                        className="bg-white/70 hover:bg-white"
-                      >
-                        <RefreshCw className="mr-1 h-4 w-4" />
-                        Retake
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center space-y-4 py-8">
-                    <div className="rounded-full bg-gray-100 p-8">
-                      <Camera className="h-12 w-12 text-gray-400" />
-                    </div>
-                    <div className="text-center">
-                      <h3 className="text-lg font-semibold">Take Live Photo</h3>
-                      <p className="mt-2 max-w-[300px] text-sm text-gray-500">
-                        Please ensure you&apos;re in a well-lit area and look
-                        directly at the camera. Keep your face centered and
-                        clearly visible.
-                      </p>
-                    </div>
-                    <Button onClick={startCamera} className="mt-4">
-                      <Camera className="mr-2 h-4 w-4" />
-                      Start Camera
-                    </Button>
-                  </div>
-                )}
+                </Card>
               </div>
-            </Card>
-          </div>
 
-          <Button
-            className="w-full"
-            onClick={handleVerifyLivePhoto}
-            disabled={livePhotoVerificationMutation.isPending || !livePhoto}
-          >
-            {livePhotoVerificationMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verifying...
-              </>
-            ) : (
-              "Verify Live Photo"
-            )}
-          </Button>
+              <Button
+                className="w-full"
+                onClick={handleVerifyLivePhoto}
+                disabled={livePhotoVerificationMutation.isPending || !livePhoto}
+              >
+                {livePhotoVerificationMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify Live Photo"
+                )}
+              </Button>
+            </>
+          ) : (
+            <div className="rounded-lg border p-6 text-center">
+              <p className="text-gray-600">
+                {getNextRequiredStepMessage("live-photo")}
+              </p>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="passport" className="space-y-6">
-          <div className="space-y-6 font-medium">
-            <Card className="relative border-dashed border-primary-400 p-4">
-              <Badge className="absolute -top-2 z-10">Passport</Badge>
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleFileUpload(e, setPassportFront)}
-                id="passport-front"
-              />
-              <label
-                htmlFor="passport-front"
-                className="flex cursor-pointer flex-col items-center justify-center gap-4"
-              >
-                {passportFront ? (
-                  <div className="h-[180px] w-[280px] overflow-hidden rounded-lg">
-                    <Image
-                      src={URL.createObjectURL(passportFront)}
-                      alt="passport-front"
-                      width={640}
-                      height={480}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <Image
-                      src="/assets/icons/image-placeholder.svg"
-                      className="mb-2 h-12 w-12 text-text-500"
-                      alt="passport-front-placeholder"
-                      width={48}
-                      height={48}
-                    />
-                    <span className="text-text-600">Upload Passport</span>
-                  </div>
-                )}
-              </label>
-            </Card>
-          </div>
+          {isStepCompleted('passport') ? (
+            <div className="rounded-lg border p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                {getVerificationIcon(verificationCheck?.passportPhotoRecord)}
+                <span className="text-lg font-semibold capitalize">
+                  {verificationCheck?.passportPhotoRecord?.status}
+                </span>
+              </div>
+              <p className="text-gray-600">
+                Your passport verification has been submitted and is {verificationCheck?.passportPhotoRecord?.status}.
+                {verificationCheck?.passportPhotoRecord?.status === "pending" && " Please wait for review."}
+                {verificationCheck?.passportPhotoRecord?.status === "rejected" && " Please contact support for assistance."}
+                {verificationCheck?.passportPhotoRecord?.status === "approved" && " All verification steps completed!"}
+              </p>
+            </div>
+          ) : isStepEnabled('passport') ? (
+            <>
+              <div className="space-y-6 font-medium">
+                <Card className="relative border-dashed border-primary-400 p-4">
+                  <Badge className="absolute -top-2 z-10">Passport</Badge>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e, setPassportFront)}
+                    id="passport-front"
+                  />
+                  <label
+                    htmlFor="passport-front"
+                    className="flex cursor-pointer flex-col items-center justify-center gap-4"
+                  >
+                    {passportFront ? (
+                      <div className="h-[180px] w-[280px] overflow-hidden rounded-lg">
+                        <Image
+                          src={URL.createObjectURL(passportFront)}
+                          alt="passport-front"
+                          width={640}
+                          height={480}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src="/assets/icons/image-placeholder.svg"
+                          className="mb-2 h-12 w-12 text-text-500"
+                          alt="passport-front-placeholder"
+                          width={48}
+                          height={48}
+                        />
+                        <span className="text-text-600">Upload Passport</span>
+                      </div>
+                    )}
+                  </label>
+                </Card>
+              </div>
 
-          <Button
-            className="w-full"
-            onClick={handleVerifyPassport}
-            disabled={passportVerificationMutation.isPending}
-          >
-            {passportVerificationMutation.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verifying...
-              </>
-            ) : (
-              "Verify Passport"
-            )}
-          </Button>
+              <Button
+                className="w-full"
+                onClick={handleVerifyPassport}
+                disabled={passportVerificationMutation.isPending}
+              >
+                {passportVerificationMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify Passport"
+                )}
+              </Button>
+            </>
+          ) : (
+            <div className="rounded-lg border p-6 text-center">
+              <p className="text-gray-600">
+                {getNextRequiredStepMessage("passport")}
+              </p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
