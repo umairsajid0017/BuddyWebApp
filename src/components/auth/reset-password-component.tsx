@@ -22,15 +22,9 @@ const emailSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
-const resetSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
 export function ResetPasswordComponent() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const sendOtpMutation = useSendOtp();
@@ -47,11 +41,11 @@ export function ResetPasswordComponent() {
         role: RoleType.CUSTOMER
       });
 
-      if (response.error) {
+      if (response.your_otp) {
         toast.success("OTP sent to your email");
         router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=reset`);
       } else {
-        toast.error(response.message);
+        toast.error(response.message || "Failed to send OTP. Please try again.");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSendOtp, useVerifyOtp } from "@/apis/apiCalls";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,29 +33,15 @@ const OTPVerification = () => {
   const sendOtpMutation = useSendOtp();
   const verifyOtpMutation = useVerifyOtp();
 
-  useEffect(() => {
-    if (!email) {
-      router.push("/");
-      return;
-    }
-    handleSendOTP();
-  }, [email]);
-
-  useEffect(() => {
-    if (resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [resendTimer]);
-
-  const handleSendOTP = async () => {
+  const handleSendOTP = useCallback(async () => {
+    if (!email) return;
     try {
       const response = await sendOtpMutation.mutateAsync({
         email: email!,
         role: RoleType.CUSTOMER,
       });
 
-      if (!response.error) {
+      if (response.your_otp) {
         setResendTimer(60);
         if (response.records?.remaining_attempts !== undefined) {
           setRemainingAttempts(response.records.remaining_attempts);
@@ -70,14 +56,14 @@ const OTPVerification = () => {
             (new Date(response.records.next_retry_at).getTime() - Date.now()) /
               1000,
           );
-          setResendTimer(waitTime);
+          setResendTimer(waitTime > 0 ? waitTime : 0);
         }
 
-        setTempOtp(response.your_otp ?? "");
+        setTempOtp(response.your_otp?.toString() ?? "");
         toast({
           variant: "destructive",
           title: "Error",
-          description: response.message,
+          description: response.message || "Failed to send OTP.",
         });
       }
     } catch (error) {
@@ -87,7 +73,24 @@ const OTPVerification = () => {
         description: "Failed to send OTP. Please try again.",
       });
     }
-  };
+  }, [email, sendOtpMutation, toast]);
+
+  useEffect(() => {
+    if (!email) {
+      router.push("/");
+      return;
+    }
+    if (type !== 'reset') {
+      handleSendOTP();
+    }
+  }, [email, router, type, handleSendOTP]);
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
 
   const handleVerifyOTP = async () => {
     if (!otp) {
@@ -110,7 +113,11 @@ const OTPVerification = () => {
           title: "Success",
           description: "Email verified successfully.",
         });
-        router.push(type === "reset" ? "/reset-password" : "/login");
+        if (type === "reset") {
+          router.push(`/new-password?email=${encodeURIComponent(email!)}&otp=${encodeURIComponent(otp)}`);
+        } else {
+          router.push("/login");
+        }
       } else {
         toast({
           variant: "destructive",

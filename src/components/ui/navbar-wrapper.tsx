@@ -11,7 +11,9 @@ export default function NavbarWrapper() {
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/verify-otp") ||
-    pathname.startsWith("/reset-password");
+    pathname.startsWith("/reset-password") ||
+    pathname.startsWith("/new-password");
+    
 
   const { user } = useAuth();
 
