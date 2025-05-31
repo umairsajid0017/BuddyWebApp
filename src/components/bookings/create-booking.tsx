@@ -111,7 +111,7 @@ export function NewBookingDialog() {
         onContinue={handlePlaceOrderContinue}
       />
 
-      <StartBookingDialog
+      <StartBookingResponsive
         isOpen={isStartBookingOpen}
         onClose={() => setIsStartBookingOpen(false)}
         onFindWorker={handleFindWorker}

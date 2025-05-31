@@ -24,7 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Plus, XIcon } from "lucide-react";
 import { format, setDate } from "date-fns";
 import { PlaceOrderResponsive } from "./create-booking/place-order-responsive";
-import { StartBookingDialog } from "./create-booking/offer-bid";
+import { StartBookingResponsive } from "./create-booking/offer-bid-responsive";
 import { BookingConfirmation } from "./create-booking/booking-create-confirmation";
 import { ServiceCard } from "./create-booking/booking-service-card";
 import { useDirectBooking, useCreateBid, useServices, useCategories, useCalendarAvailability, useCheckDeduction, useInitPaymentGateway } from "@/apis/apiCalls";
@@ -677,7 +677,7 @@ export function CreateBookingDialog({
         }
       />
 
-      <StartBookingDialog
+      <StartBookingResponsive
         isOpen={isStartBookingOpen}
         onClose={() => setIsStartBookingOpen(false)}
         onSubmitBid={handleBidPlacement}

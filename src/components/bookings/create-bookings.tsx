@@ -24,7 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { PlaceOrderResponsive } from "./create-booking/place-order-responsive";
-import { StartBookingDialog } from "./create-booking/offer-bid";
+import { StartBookingResponsive } from "./create-booking/offer-bid-responsive";
 import { BookingConfirmation } from "./create-booking/booking-create-confirmation";
 
 export function NewBookingDialog() {
@@ -124,7 +124,7 @@ export function NewBookingDialog() {
         onContinue={handlePlaceOrderContinue}
       />
 
-      <StartBookingDialog
+      <StartBookingResponsive
         isOpen={isStartBookingOpen}
         onClose={() => setIsStartBookingOpen(false)}
         onFindWorker={handleFindWorker}
