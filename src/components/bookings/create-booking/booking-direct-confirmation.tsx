@@ -134,32 +134,9 @@ export function BookingDirectConfirmation({
                 </div>
               </div>
               
-              {deductionInfo && (
-                <div className="mt-3 border-t border-green-100 pt-3">
-                  <div className="flex items-center justify-between">
-                  </div>
-                  {/* <div className="mt-1 flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">
-                      Wallet Balance
-                    </span>
-                    <div className="flex items-center text-sm font-medium text-blue-700">
-                      <span className="mr-1">{CURRENCY}</span>
-                      {deductionInfo.wallet_amount}
-                    </div>
-                  </div> */}
-                </div>
-              )}
+            
               
-              {deductionInfo && parseFloat(deductionInfo.deduct_amount) > 0 && (
-                <div className="mt-3 border-t border-yellow-200 pt-3">
-                  <div className="flex items-start gap-2 text-yellow-700">
-                    <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">
-                      Your payment was not completed. Please try adding funds to your wallet or try again with a different payment method.
-                    </span>
-                  </div>
-                </div>
-              )}
+           
             </div>
 
             {/* Details Card */}

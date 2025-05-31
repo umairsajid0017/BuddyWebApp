@@ -282,7 +282,6 @@ export function CreateBookingDialog({
       
       // Show appropriate notification based on payment status
       if (parseFloat(deductionResult.deduct_amount) === 0 || !deductionResult.deduct_amount) {
-        // No amount to deduct, payment was successful
         toast.success("Payment completed successfully");
       } else {
         // Still has amount to deduct
@@ -344,7 +343,7 @@ export function CreateBookingDialog({
             amount: deductionResult.deduct_amount,
             payment_method_id: "1", 
             comment: "Booking payment",
-            order_total_amount: expectedPrice,
+            order_total_amount: parseFloat(expectedPrice),
             action: "order_deduction",
           };
           

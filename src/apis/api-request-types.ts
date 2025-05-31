@@ -99,7 +99,7 @@ export interface AddToWalletData {
   amount: string;
   payment_method_id: string;
   comment: string;
-  order_total_amount: string;
+  order_total_amount: number;
   action: string;
 }
 
