@@ -84,7 +84,7 @@ const NoBidsView: React.FC<{ tabLabel: string }> = ({ tabLabel }) => (
         No {tabLabel} Bids Found
       </h3>
       <p className="max-w-md text-center text-muted-foreground">
-        You don't have any {tabLabel.toLowerCase()} bids at the moment.
+        You don&apos;t have any {tabLabel.toLowerCase()} bids at the moment.
       </p>
     </CardContent>
   </Card>
