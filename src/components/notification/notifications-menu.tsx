@@ -2,16 +2,14 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { Check, Trash2, X, BellRing, MoreVertical } from "lucide-react";
 import { Notification } from "@/types/notification-types";
-import {
-  markAllNotificationsAsRead,
-} from "@/helpers/notifcations";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { 
   useAuth, 
   useMarkNotificationAsRead, 
   useClearAllNotifications,
-  useDeleteNotification
+  useDeleteNotification,
+  useMarkAllNotificationsAsRead
 } from '@/apis/apiCalls'
 
 interface NotificationsMenuProps {
@@ -29,21 +27,11 @@ export default function NotificationsMenu({
   const markAsReadMutation = useMarkNotificationAsRead();
   const clearAllMutation = useClearAllNotifications();
   const deleteNotificationMutation = useDeleteNotification();
+  const markAllAsReadMutation = useMarkAllNotificationsAsRead();
 
   // Helper function to safely format timestamp
   const formatTimestamp = (timestamp: any) => {
     try {
-      // Handle Firestore timestamp object
-      if (
-        timestamp &&
-        typeof timestamp === "object" &&
-        "seconds" in timestamp
-      ) {
-        // Convert Firestore timestamp to JavaScript Date
-        const date = new Date(timestamp.seconds * 1000);
-        return formatDistanceToNow(date, { addSuffix: true });
-      }
-
       // Handle regular timestamp number
       if (timestamp && typeof timestamp === "number") {
         return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
@@ -79,10 +67,8 @@ export default function NotificationsMenu({
   };
 
   const handleMarkAllAsRead = async () => {
-    if (!user?.id) return;
-
     try {
-      await markAllNotificationsAsRead(user.id.toString());
+      await markAllAsReadMutation.mutateAsync();
       toast({
         title: "Success",
         description: "All notifications marked as read",

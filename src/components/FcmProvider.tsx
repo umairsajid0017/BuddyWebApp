@@ -6,27 +6,25 @@ import {
   setupMessageListener,
 } from "@/helpers/firebase-messaging";
 import { useToast } from "@/hooks/use-toast";
-import { saveNotificationToFirestore } from "@/helpers/notifcations";
-import { useAuth, useUpdateToken } from '@/apis/apiCalls'
+import { useUpdateToken } from '@/apis/apiCalls'
+import { useQueryClient } from '@tanstack/react-query';
+import { playNotificationSound, showBrowserNotification } from "@/helpers/notifcations";
 
 export default function FcmProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user } = useAuth();
   const { toast } = useToast();
   const updateTokenMutation = useUpdateToken();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const initFcm = async () => {
       try {
         const token = await initializeFirebaseMessaging();
         if (token) {
-          console.log("FCM initialized with token");
-          updateTokenMutation.mutate({ token })
-          
-          console.log("Token updated:", token);
+          updateTokenMutation.mutate({ token });
         }
       } catch (error) {
         console.error("Failed to initialize FCM:", error);
@@ -36,24 +34,29 @@ export default function FcmProvider({
     initFcm();
 
     const unsubscribe = setupMessageListener((payload) => {
-      console.log("New notification received:", payload);
+      console.log("🔔 New notification received:", payload);
 
       if (payload.notification) {
+        const title = payload.notification.title || "New notification";
+        const body = payload.notification.body || "";
+
+        // Show toast immediately when notification arrives
         toast({
-          title: payload.notification.title || "New notification",
-          description: payload.notification.body,
+          title,
+          description: body,
           duration: 5000,
         });
-      }
 
-      if (user?.id && payload.notification) {
-       const saved = saveNotificationToFirestore(user.id.toString(), {
-         title: payload.notification.title,
-         body: payload.notification.body,
-         timestamp: Date.now(),
-         ...(payload.data || {}),
-       });
-        console.log("Notification saved:", saved.then((res) => res));
+        // Play notification sound
+        playNotificationSound();
+
+        // Show browser notification as backup (when app is not in focus)
+        showBrowserNotification(title, body);
+
+        // Invalidate and refetch notifications to update the bell icon in real-time
+        console.log("🔄 Invalidating notifications cache...");
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        console.log("✅ Cache invalidated");
       }
     });
 

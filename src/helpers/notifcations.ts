@@ -1,100 +1,72 @@
-import { db, auth } from './firebase';
-import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc,
-  onSnapshot,
-  Timestamp,
-  serverTimestamp
-} from 'firebase/firestore';
-import { Notification, FirebaseNotification } from '../types/notification-types';
 
-const NOTIFICATIONS_COLLECTION = 'notifications';
+import type { Notification } from '../types/notification-types';
 
-export const getUserNotifications = async (userId: string): Promise<FirebaseNotification[]> => {
-  const q = query(
-    collection(db, NOTIFICATIONS_COLLECTION),
-    where('userId', '==', userId),
-    orderBy('timestamp', 'desc')
-  );
-  
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  })) as FirebaseNotification[];
+/**
+ * Helper function to format notification timestamps
+ */
+export const formatNotificationTimestamp = (timestamp: any): string => {
+  try {
+    // Handle regular timestamp number
+    if (timestamp && typeof timestamp === "number") {
+      return new Date(timestamp).toISOString();
+    }
+
+    // Handle string timestamp
+    if (timestamp && typeof timestamp === "string") {
+      return new Date(timestamp).toISOString();
+    }
+
+    // Default case
+    return new Date().toISOString();
+  } catch (error) {
+    console.error("Error formatting timestamp:", error);
+    return new Date().toISOString();
+  }
 };
 
-export const subscribeToUserNotifications = (
-  userId: string, 
-  callback: (notifications: FirebaseNotification[]) => void
-) => {
-  if (!userId) return null;
-  
-  const q = query(
-    collection(db, NOTIFICATIONS_COLLECTION),
-    where('userId', '==', userId),
-    orderBy('timestamp', 'desc')
-  );
-  
-  return onSnapshot(q, (snapshot) => {
-    const notifications = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as FirebaseNotification[];
-    
-    callback(notifications);
-  });
+/**
+ * Helper function to play notification sound (optional)
+ */
+export const playNotificationSound = () => {
+  try {
+    // Try to play custom notification sound first
+    const audio = new Audio('/notification-sound.mp3');
+    audio.play().catch(() => {
+      // Fallback to system beep sound using Web Audio API
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      } catch (e) {
+        console.log('Could not play notification sound:', e);
+      }
+    });
+  } catch (error) {
+    console.log('Notification sound not available');
+  }
 };
 
-export const markNotificationAsRead = async (notificationId: string) => {
-  const notificationRef = doc(db, NOTIFICATIONS_COLLECTION, notificationId);
-  await updateDoc(notificationRef, {
-    read: true
-  });
-};
-
-export const markAllNotificationsAsRead = async (userId: string) => {
-  const notifications = await getUserNotifications(userId);
-  
-  const updatePromises = notifications
-    .filter(notification => !notification.read)
-    .map(notification => 
-      updateDoc(doc(db, NOTIFICATIONS_COLLECTION, notification.id), { read: true })
-    );
-    
-  await Promise.all(updatePromises);
-};
-
-export const deleteNotification = async (notificationId: string) => {
-  const notificationRef = doc(db, NOTIFICATIONS_COLLECTION, notificationId);
-  await deleteDoc(notificationRef);
-};
-
-export const clearAllNotifications = async (userId: string) => {
-  const notifications = await getUserNotifications(userId);
-  
-  const deletePromises = notifications.map(notification => 
-    deleteDoc(doc(db, NOTIFICATIONS_COLLECTION, notification.id))
-  );
-    
-  await Promise.all(deletePromises);
-};
-
-export const saveNotificationToFirestore = async (userId: string, notification: Partial<FirebaseNotification>) => {
-  await addDoc(collection(db, NOTIFICATIONS_COLLECTION), {
-    userId,
-    title: notification.title || 'New Notification',
-    body: notification.body || '',
-    read: false,
-    timestamp: serverTimestamp(),
-    link: notification.link || null,
-    imageUrl: notification.imageUrl || null
-  });
+/**
+ * Helper to show browser notification (for backup when app is not in focus)
+ */
+export const showBrowserNotification = (title: string, body: string, options?: NotificationOptions) => {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, {
+      body,
+      icon: '/assets/logo.png',
+      ...options
+    });
+  }
 };

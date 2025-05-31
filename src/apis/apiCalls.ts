@@ -1164,6 +1164,9 @@ export const useShowNotifications = () => {
       }
       return data;
     },
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    staleTime: 0, // Always consider data stale so it refetches when invalidated
   });
 };
 
@@ -1240,6 +1243,47 @@ export const useDeleteNotification = () => {
         throw new Error(data.message);
       }
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+};
+
+export const useMarkAllNotificationsAsRead = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation<GeneralResponse, AxiosError>({
+    mutationFn: async () => {
+      // First, get all notifications
+      const { data: notificationsData } = await http.get<ShowNotificationsResponse>(Endpoints.SHOW_NOTIFICATIONS);
+      
+      if (notificationsData.error) {
+        throw new Error(notificationsData.message);
+      }
+
+      // Filter unread notifications
+      const unreadNotifications = notificationsData.records?.filter(n => !n.is_read) || [];
+      
+      // Mark each unread notification as read
+      const markReadPromises = unreadNotifications.map(async (notification) => {
+        const formData = new FormData();
+        formData.append("notification_id", notification.id.toString());
+        
+        return http.post<GeneralResponse>(
+          Endpoints.MARK_READ_NOTIFICATION,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      });
+
+      await Promise.all(markReadPromises);
+      
+      return { error: false, message: "All notifications marked as read" } as GeneralResponse;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
