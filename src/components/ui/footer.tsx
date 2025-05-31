@@ -66,10 +66,10 @@ export default function Footer() {
             <h3 className="mb-4 text-lg font-bold">Contact Us</h3>
             <p className="text-sm text-gray-300">Email:</p>
             <a
-              href="mailto:ThemaarConsultancy@buddy.com"
+              href="mailto:generalmanager@themaar.co"
               className="text-sm text-gray-300 hover:text-white"
             >
-              ThemaarConsultancy@buddy.com
+              generalmanager@themaar.co
             </a>
             <p className="mt-2 text-sm text-gray-300">Phone:</p>
             <a
