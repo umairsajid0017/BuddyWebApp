@@ -62,7 +62,7 @@ export function ServiceCategories() {
                     alt={category.title}
                     width={32}
                     height={32}
-                    className="h-8 w-8 sm:h-10 sm:w-10"
+                    className="w-10"
                   />
                 </div>
                 <span className="text-sm font-medium sm:text-base">

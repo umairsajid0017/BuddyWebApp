@@ -160,11 +160,15 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {booking.before_images.map((image, index) => (
-                        <div key={image.id}>
+                        <div
+                          key={image.id}
+                          className="relative aspect-square overflow-hidden rounded-lg"
+                        >
                           <Image
                             src={getImageUrl(image.name)}
                             alt={`Before image ${index + 1}`}
                             fill
+                            className="object-cover"
                           />
                         </div>
                       ))}
@@ -178,11 +182,15 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {booking.after_images.map((image, index) => (
-                        <div key={image.id}>
+                        <div
+                          key={image.id}
+                          className="relative aspect-square overflow-hidden rounded-lg"
+                        >
                           <Image
                             src={getImageUrl(image.name)}
                             alt={`After image ${index + 1}`}
                             fill
+                            className="object-cover"
                           />
                         </div>
                       ))}
