@@ -23,7 +23,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { PlaceOrderSheet } from "./create-booking/place-order-sheet";
+import { PlaceOrderResponsive } from "./create-booking/place-order-responsive";
 import { StartBookingDialog } from "./create-booking/offer-bid";
 import { BookingConfirmation } from "./create-booking/booking-create-confirmation";
 
@@ -118,7 +118,7 @@ export function NewBookingDialog() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* <PlaceOrderSheet
+      {/* <PlaceOrderResponsive
         isOpen={isPlaceOrderOpen}
         onClose={() => setIsPlaceOrderOpen(false)}
         onContinue={handlePlaceOrderContinue}

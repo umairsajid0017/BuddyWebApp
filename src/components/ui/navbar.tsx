@@ -184,7 +184,6 @@ export default function NavBar() {
                           {user.name?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-secondary-900 bg-green-500" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent

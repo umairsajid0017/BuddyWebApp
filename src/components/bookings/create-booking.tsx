@@ -105,7 +105,7 @@ export function NewBookingDialog() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* <PlaceOrderSheet
+      {/* <PlaceOrderResponsive
         isOpen={isPlaceOrderOpen}
         onClose={() => setIsPlaceOrderOpen(false)}
         onContinue={handlePlaceOrderContinue}
