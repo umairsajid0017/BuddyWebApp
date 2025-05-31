@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth, useLogin } from '@/apis/apiCalls';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { setAuthCookie } from "./authOptions";
-import { Mail, Lock, AlertTriangle, Eye } from "lucide-react";
+import { Mail, Lock, AlertTriangle, Eye, EyeOff } from "lucide-react";
 import Loading from "@/components/ui/loading";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
@@ -29,6 +29,16 @@ import { LoginCredentials } from "@/apis/api-request-types";
 import backgroundSvg from '@/components/ui/assets/background-pattern.svg';
 import useAuthStore from "@/store/authStore";
 import { setAuthToken } from "@/apis/axios";
+import { validateEmail } from "@/utils/validations";
+
+// Simple password validation for login (just required)
+const validateLoginPassword = (password: string): { isValid: boolean; message?: string } => {
+  if (!password.trim()) {
+    return { isValid: false, message: "Password is required" };
+  }
+  return { isValid: true };
+};
+
 type LoginErrors = Partial<Record<keyof LoginCredentials, string>>;
 
 export default function Login() {
@@ -40,6 +50,17 @@ export default function Login() {
     role: RoleType.CUSTOMER,
   });
   const [errors, setErrors] = useState<LoginErrors>({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
+  const [touchedFields, setTouchedFields] = useState<{
+    email: boolean;
+    password: boolean;
+  }>({
+    email: false,
+    password: false,
+  });
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLogin();
@@ -48,39 +69,142 @@ export default function Login() {
 
   const { setUser, setToken } = useAuthStore();
 
+  // Validate individual fields using utils
+  const validateField = (name: string, value: string | null | undefined) => {
+    const safeValue = value || ""; // Handle null/undefined values
+    
+    switch (name) {
+      case 'email':
+        const emailValidation = validateEmail(safeValue);
+        return emailValidation.isValid ? "" : emailValidation.message || "";
+      case 'password':
+        const passwordValidation = validateLoginPassword(safeValue);
+        return passwordValidation.isValid ? "" : passwordValidation.message || "";
+      default:
+        return "";
+    }
+  };
+
+  // Check if form is valid for button enabling
+  const isFormValid = () => {
+    const email = formData.email || "";
+    const password = formData.password || "";
+    return email.trim() !== "" && password.trim() !== "";
+  };
+
+  const handleFieldBlur = (fieldName: 'email' | 'password') => {
+    setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
+    
+    const error = validateField(fieldName, formData[fieldName]);
+    setFieldErrors(prev => ({
+      ...prev,
+      [fieldName]: error || undefined
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setServerError(null);
 
+    // Mark all fields as touched for validation
+    setTouchedFields({ email: true, password: true });
+
+    // Validate all fields
+    const emailError = validateField('email', formData.email);
+    const passwordError = validateField('password', formData.password);
+
+    const validationErrors = {
+      email: emailError || undefined,
+      password: passwordError || undefined,
+    };
+
+    setFieldErrors(validationErrors);
+
+    // If there are validation errors, don't submit
+    if (emailError || passwordError) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fix the errors below.",
+      });
+      return;
+    }
+
     try {
       const response = await loginMutation.mutateAsync(formData);
-      const { records, token } = response;
+      const { records, token, error: apiError, message: apiMessage } = response;
 
-      if (records.otp_verify === "0") {
-        void router.push(`/verify-otp?email=${records.email}`);
+      if (apiError) {
+        const errorMessage = apiMessage || "Login failed. Please try again.";
+        setServerError(errorMessage);
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: errorMessage,
+        });
+        return;
+      }
+
+      if (records && token) {
+        if (records.otp_verify === "0") {
+          void router.push(`/verify-otp?email=${records.email}`);
+        } else {
+          await setAuthCookie(records, token);
+          setAuthToken(token);
+          setUser(records);
+          setToken(token);
+          localStorage.setItem("token", token);
+          void router.push("/");
+        }
       } else {
-        await setAuthCookie(records, token);
-        setAuthToken(token);
-        setUser(records);
-        setToken(token);
-        localStorage.setItem("token", token);
-        void router.push("/");
+     
+        const errorMessage = "Login failed: Invalid response from server.";
+        setServerError(errorMessage);
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: errorMessage,
+        });
       }
     } catch (error) {
       if (error instanceof Error) {
         setServerError(error.message);
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: error.message,
+        });
       } else {
         setServerError("An unexpected error occurred");
+        toast({
+          variant: "destructive",
+          title: "Login Failed",
+          description: "An unexpected error occurred",
+        });
       }
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === "email") setErrors((prev) => ({ ...prev, email: "" }));
-    if (name === "password") setErrors((prev) => ({ ...prev, password: "" }));
+    
+    // Update form data
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear server errors when user starts typing
+    if (serverError) {
+      setServerError(null);
+    }
+    
+    // Real-time validation for touched fields
+    if (touchedFields[name as keyof typeof touchedFields]) {
+      const error = validateField(name, value);
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: error || undefined
+      }));
+    }
   };
 
   return (
@@ -125,17 +249,19 @@ export default function Login() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="pl-10"
+                    onBlur={() => handleFieldBlur('email')}
+                    className={`pl-10 ${fieldErrors.email ? "border-red-500" : ""}`}
                   />
                 </div>
-                {errors.email && (
-                  <Alert variant="destructive">
-                    <AlertDescription className="flex items-center gap-2">
-                      <AlertTriangle /> {errors.email}
+                {fieldErrors.email && (
+                  <Alert variant="destructive" className="text-xs text-red-600">
+                    <AlertDescription>
+                      {fieldErrors.email}
                     </AlertDescription>
                   </Alert>
-                )}{" "}
+                )}
               </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
@@ -147,24 +273,25 @@ export default function Login() {
                     placeholder="Enter your password"
                     value={formData.password || ""}
                     onChange={handleChange}
-                    className="pl-10"
+                    onBlur={() => handleFieldBlur('password')}
+                    className={`pl-10 pr-10 ${fieldErrors.password ? "border-red-500" : ""}`}
                   />
                   <button 
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
                     {showPassword ? (
-                      <Eye className="h-4 w-4" />
+                      <EyeOff className="h-4 w-4" />
                     ) : (
                       <Eye className="h-4 w-4" />
                     )}
                   </button>
                 </div>
-                {errors.password && (
-                  <Alert variant="destructive">
-                    <AlertDescription className="flex items-center gap-2">
-                      <AlertTriangle /> {errors.password}
+                {fieldErrors.password && (
+                  <Alert variant="destructive" className="text-xs text-red-600">
+                    <AlertDescription>
+                      {fieldErrors.password}
                     </AlertDescription>
                   </Alert>
                 )}
@@ -179,20 +306,17 @@ export default function Login() {
                   </Button>
                 </div>
               </div>
-              {/* {serverError && (
-                <Alert variant="destructive">
-                  <AlertDescription>{serverError}</AlertDescription>
-                </Alert>
-              )} */}
+              
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loginMutation.isPending}
+                disabled={loginMutation.isPending || !isFormValid()}
               >
                 {loginMutation.isPending ? (
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                ) : null}
-                Sign In
+                  <Loading />
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </div>
           </form>
