@@ -123,13 +123,17 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      {booking.updated_at ? format(booking.updated_at, "MMM d, yyyy") : "Date not specified"}
+                      {booking.updated_at
+                        ? format(booking.updated_at, "MMM d, yyyy")
+                        : "Date not specified"}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4" />
                     <span>
-                      {booking.updated_at ? format(booking.updated_at, "h:mm a") : "Time not specified"}
+                      {booking.updated_at
+                        ? format(booking.updated_at, "h:mm a")
+                        : "Time not specified"}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -187,12 +191,13 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                 )}
 
                 <div className="flex space-x-4">
-                  {booking.status !== BookingStatus.CANCELED && (
-                    <Button onClick={handleChat} className="flex-1">
-                      <MessageCircle className="mr-2 h-4 w-4" />
-                      Chat
-                    </Button>
-                  )}
+                  {booking.status !== BookingStatus.CANCELED &&
+                    booking.status !== BookingStatus.PENDING && (
+                      <Button onClick={handleChat} className="flex-1">
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Chat
+                      </Button>
+                    )}
                 </div>
               </div>
             </div>
@@ -200,7 +205,6 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
         </SheetContent>
       </Sheet>
 
-      {/* Image Viewer */}
       <ImageViewer
         src={selectedImage || ""}
         alt="Booking image"
@@ -208,14 +212,15 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
         onClose={() => setSelectedImage(null)}
       />
 
-      {/* Chat Dialog */}
-      {/* TODO: Implement the chat dialog */}
-      <BookingChat
+      {booking.status !== BookingStatus.CANCELED &&
+        booking.status !== BookingStatus.PENDING && (
+          <BookingChat
             isOpen={isChatOpen}
             onClose={() => setIsChatOpen(false)}
             taskId={booking.id.toString()}
             provider={booking.worker}
           />
+        )}
     </>
   );
 };

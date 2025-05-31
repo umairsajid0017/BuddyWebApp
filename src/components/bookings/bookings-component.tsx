@@ -85,7 +85,7 @@ const BookingsComponent: React.FC = () => {
   }
 
   return (
-    <ScrollArea className="p-4">
+    <>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Bookings</h1>
         {/* <CreateBookingDialog /> */}
@@ -119,7 +119,7 @@ const BookingsComponent: React.FC = () => {
           </TabsContent>
         ))}
       </Tabs>
-    </ScrollArea>
+    </>
   );
 };
 
