@@ -6,8 +6,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Loading from "@/components/ui/loading";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 import { cn } from "@/helpers/utils";
-import { z } from "zod";
 import { RegisterData } from "@/apis/api-request-types";
+import { 
+  getPasswordRequirements, 
+  calculatePasswordStrength, 
+  getPasswordStrengthColor, 
+  getPasswordStrengthText,
+  validatePassword,
+  PasswordRequirement
+} from "@/utils/validations";
 
 interface StepTwoProps {
   formData: RegisterData;
@@ -19,78 +26,57 @@ interface StepTwoProps {
   isLoading: boolean;
 }
 
-interface PasswordRequirement {
-  text: string;
-  validator: (password: string) => boolean;
-  isMet: boolean;
-}
-
-const StepTwo: React.FC<StepTwoProps> = ({ formData, errors, backendErrors, handleChange, handleSubmit, handleBackStep, isLoading }) => {
+const StepTwo: React.FC<StepTwoProps> = ({ 
+  formData, 
+  errors, 
+  backendErrors, 
+  handleChange, 
+  handleSubmit, 
+  handleBackStep, 
+  isLoading 
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
-  const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirement[]>([
-    { 
-      text: "At least 8 characters", 
-      validator: (pass) => pass.length >= 8,
-      isMet: false 
-    },
-    { 
-      text: "At least one uppercase letter", 
-      validator: (pass) => /[A-Z]/.test(pass),
-      isMet: false 
-    },
-    { 
-      text: "At least one lowercase letter", 
-      validator: (pass) => /[a-z]/.test(pass),
-      isMet: false 
-    },
-    { 
-      text: "At least one number", 
-      validator: (pass) => /[0-9]/.test(pass),
-      isMet: false 
-    },
-    { 
-      text: "At least one special character", 
-      validator: (pass) => /[^A-Za-z0-9]/.test(pass),
-      isMet: false 
-    },
-  ]);
+  const [passwordRequirements, setPasswordRequirements] = useState<PasswordRequirement[]>(
+    getPasswordRequirements()
+  );
+  const [passwordError, setPasswordError] = useState<string>("");
+  const [passwordTouched, setPasswordTouched] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const handlePasswordBlur = () => {
+    setPasswordTouched(true);
+    const validation = validatePassword(formData.password || "");
+    setPasswordError(validation.isValid ? "" : validation.message || "");
+  };
+
   useEffect(() => {
     const password = formData.password || '';
     
-    // Update requirements
-    const updatedRequirements = passwordRequirements.map(req => ({
+    // Update requirements using the utility function
+    const requirements = getPasswordRequirements();
+    const updatedRequirements = requirements.map(req => ({
       ...req,
       isMet: req.validator(password)
     }));
     
     setPasswordRequirements(updatedRequirements);
     
-    // Calculate strength percentage
-    const metRequirements = updatedRequirements.filter(req => req.isMet).length;
-    setPasswordStrength((metRequirements / updatedRequirements.length) * 100);
+    // Calculate strength using utility function
+    setPasswordStrength(calculatePasswordStrength(password));
 
-  }, [formData.password]);
+    // Clear password error if password becomes valid
+    if (passwordTouched) {
+      const validation = validatePassword(password);
+      setPasswordError(validation.isValid ? "" : validation.message || "");
+    }
+  }, [formData.password, passwordTouched]);
 
-  const getStrengthColor = () => {
-    if (passwordStrength <= 20) return "bg-red-500";
-    if (passwordStrength <= 40) return "bg-orange-500";
-    if (passwordStrength <= 60) return "bg-yellow-500";
-    if (passwordStrength <= 80) return "bg-blue-500";
-    return "bg-green-500";
-  };
-
-  const getStrengthText = () => {
-    if (passwordStrength <= 20) return "Very Weak";
-    if (passwordStrength <= 40) return "Weak";
-    if (passwordStrength <= 60) return "Medium";
-    if (passwordStrength <= 80) return "Strong";
-    return "Very Strong";
+  const isPasswordValid = () => {
+    return validatePassword(formData.password || "").isValid && passwordTouched;
   };
 
   return (
@@ -107,7 +93,8 @@ const StepTwo: React.FC<StepTwoProps> = ({ formData, errors, backendErrors, hand
             placeholder="Password"
             value={formData.password || ''}
             onChange={handleChange}
-            className="pr-10"
+            onBlur={handlePasswordBlur}
+            className={`pr-10 ${passwordError ? "border-red-500" : ""}`}
           />
           <button
             type="button"
@@ -129,18 +116,16 @@ const StepTwo: React.FC<StepTwoProps> = ({ formData, errors, backendErrors, hand
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Password Strength:</span>
                 <span className={cn(
-                  passwordStrength <= 20 ? "text-red-500" :
-                  passwordStrength <= 40 ? "text-orange-500" :
-                  passwordStrength <= 60 ? "text-yellow-500" :
-                  passwordStrength <= 80 ? "text-blue-500" :
+                  passwordStrength <= 33 ? "text-red-500" :
+                  passwordStrength <= 66 ? "text-yellow-500" :
                   "text-green-500"
                 )}>
-                  {getStrengthText()}
+                  {getPasswordStrengthText(passwordStrength)}
                 </span>
               </div>
               <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                 <div 
-                  className={cn("h-full transition-all duration-300", getStrengthColor())}
+                  className={cn("h-full transition-all duration-300", getPasswordStrengthColor(passwordStrength))}
                   style={{ width: `${passwordStrength}%` }}
                 />
               </div>
@@ -162,8 +147,10 @@ const StepTwo: React.FC<StepTwoProps> = ({ formData, errors, backendErrors, hand
           </>
         )}
 
-        {errors.password && (
-          <Alert variant="destructive" className="text-xs text-red-600">{errors.password}</Alert>
+        {(passwordError || errors.password) && (
+          <Alert variant="destructive" className="text-xs text-red-600">
+            {passwordError || errors.password}
+          </Alert>
         )}
       </div>
 
@@ -191,7 +178,7 @@ const StepTwo: React.FC<StepTwoProps> = ({ formData, errors, backendErrors, hand
         <Button
           type="submit"
           className="w-1/2 transition-all duration-300"
-          disabled={isLoading || passwordStrength < 100}
+          disabled={isLoading || !isPasswordValid()}
           variant={isLoading ? "ghost": "default"}
         >
           {isLoading ? <Loading/> : "Sign up"}

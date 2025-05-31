@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { RegisterData } from "@/apis/api-request-types";
 import { LoginType, RoleType } from "@/constants/constantValues";
 import { VerifyOtpError } from "@/types/general-types";
+import { validateName, validateEmail, validatePhone, validatePassword } from "@/utils/validations";
 
 const Register: React.FC = () => {
   const { toast } = useToast();
@@ -32,7 +33,7 @@ const Register: React.FC = () => {
     name: "",
     email: "",
     password: "",
-    phone: "",  
+    phone: "+968",  
     role: RoleType.CUSTOMER,
     login_type: LoginType.MANUAL,
   });
@@ -48,9 +49,44 @@ const Register: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear backend errors for the field being edited
+    if (errors[name as keyof RegisterData]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleNextStep = async () => {
+    // Clear previous errors
+    setErrors({});
+
+    // Client-side validation first
+    const nameValidation = validateName(formData.name);
+    const emailValidation = validateEmail(formData.email);
+    const phoneValidation = validatePhone(formData.phone);
+
+    const validationErrors: Partial<Record<keyof RegisterData, string>> = {};
+
+    if (!nameValidation.isValid) {
+      validationErrors.name = nameValidation.message;
+    }
+    if (!emailValidation.isValid) {
+      validationErrors.email = emailValidation.message;
+    }
+    if (!phoneValidation.isValid) {
+      validationErrors.phone = phoneValidation.message;
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fix the errors below.",
+      });
+      return;
+    }
+
     try {
       const response = await checkCredentialsMutation.mutateAsync({
         email: formData.email,
@@ -93,12 +129,25 @@ const Register: React.FC = () => {
   const handleBackStep = () => {
     setStep((prevStep) => prevStep - 1);
     setBackendErrors({});
+    setErrors({});
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setBackendErrors({});
+
+    // Client-side password validation
+    const passwordValidation = validatePassword(formData.password || "");
+    if (!passwordValidation.isValid) {
+      setErrors({ password: passwordValidation.message });
+      toast({
+        variant: "destructive",
+        title: "Password Validation Error",
+        description: passwordValidation.message,
+      });
+      return;
+    }
 
     try {
       const response = await registerMutation.mutateAsync(formData);
@@ -182,24 +231,27 @@ const Register: React.FC = () => {
         });
         router.push("/login");
       } else {
-        setErrors({ otp: response.message });
+        const errorMessage = response.message || "Verification failed";
+        setErrors({ otp: errorMessage });
         toast({
           variant: "destructive",
           title: "Verification Failed",
-          description: response.message,
+          description: errorMessage,
         });
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data as VerifyOtpError;
-        setErrors({ otp: errorData.message });
+        const errorMessage = errorData.message || "Verification failed";
+        setErrors({ otp: errorMessage });
         toast({
           variant: "destructive",
           title: "Verification Failed",
-          description: errorData.message,
+          description: errorMessage,
         });
       } else {
         console.error("Verification error:", error);
+        setErrors({ otp: "An unexpected error occurred" });
         toast({
           variant: "destructive",
           title: "Verification Failed",
@@ -239,8 +291,8 @@ const Register: React.FC = () => {
             {step === 1
               ? "Get started for free"
               : step === 2
-                ? "Your password must have at least one symbol & 8 or more characters."
-                : `We texted you a code to verify your email ${formData.email}`}
+                ? "Your password must meet the requirements below."
+                : `We sent you a code to verify your email ${formData.email}`}
           </p>
           {step === 3 && (
             <div className="pointer-events-none flex items-center justify-center">

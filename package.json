@@ -15,7 +15,7 @@
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-context-menu": "^2.2.2",
-    "@radix-ui/react-dialog": "^1.1.2",
+    "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-navigation-menu": "^1.2.4",
@@ -52,6 +52,7 @@
     "sonner": "^1.7.0",
     "tailwind-merge": "^2.5.3",
     "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2",
     "wavesurfer.js": "^7.8.8",
     "zod": "^3.24.3",
     "zustand": "^5.0.0-rc.2"
