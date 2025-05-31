@@ -22,6 +22,7 @@ const OTPVerification = () => {
   const email = searchParams.get("email");
   const type =
     (searchParams.get("type") as "register" | "reset" | "verify") || "register";
+  const urlOtp = searchParams.get("otp");
 
   const [otp, setOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
@@ -91,6 +92,21 @@ const OTPVerification = () => {
       return () => clearTimeout(timer);
     }
   }, [resendTimer]);
+
+  // Automatically fill OTP input when tempOtp is available
+  useEffect(() => {
+    if (tempOtp && tempOtp.length === 6) {
+      setOtp(tempOtp);
+    }
+  }, [tempOtp]);
+
+  // Automatically fill OTP from URL parameter when component loads
+  useEffect(() => {
+    if (urlOtp && urlOtp.length === 6) {
+      setOtp(urlOtp);
+      setTempOtp(urlOtp); // Also set tempOtp for display
+    }
+  }, [urlOtp]);
 
   const handleVerifyOTP = async () => {
     if (!otp) {

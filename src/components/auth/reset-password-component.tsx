@@ -43,7 +43,7 @@ export function ResetPasswordComponent() {
 
       if (response.your_otp) {
         toast.success("OTP sent to your email");
-        router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=reset`);
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}&type=reset&otp=${response.your_otp}`);
       } else {
         toast.error(response.message || "Failed to send OTP. Please try again.");
       }
