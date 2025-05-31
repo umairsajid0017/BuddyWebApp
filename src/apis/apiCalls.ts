@@ -1316,5 +1316,38 @@ export const useCheckDeduction = () => {
   });
 };
 
+export const useSendChatNotification = () => {
+  return useMutation<GeneralResponse, AxiosError, { 
+    receiver_id: string; 
+    message: string; 
+    title: string; 
+    booking_id: string; 
+  }>({
+    mutationFn: async ({ receiver_id, message, title, booking_id }) => {
+      const formData = new FormData();
+      formData.append("receiver_id", receiver_id);
+      formData.append("message", message);
+      formData.append("title", title);
+      formData.append("booking_id", booking_id);
+      
+      const { data } = await http.post<GeneralResponse>(
+        Endpoints.SEND_CHAT_NOTIFICATION,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      
+      return data;
+    },
+  });
+};
+
 
 

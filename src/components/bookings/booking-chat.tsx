@@ -35,6 +35,7 @@ import {
 } from "firebase/firestore";
 import { Worker } from "@/types/general-types";
 import { useAuth } from "@/store/authStore";
+import { useSendChatNotification } from "@/apis/apiCalls";
 
 // Message interface matching React Native structure
 interface Message {
@@ -202,6 +203,7 @@ export const BookingChat: React.FC<BookingChatProps> = ({
   taskId,
 }) => {
   const { user } = useAuth();
+  const sendChatNotificationMutation = useSendChatNotification();
   console.log(user, provider);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -326,21 +328,24 @@ export const BookingChat: React.FC<BookingChatProps> = ({
       
       await addDoc(messagesRef, messageData);
 
-      // TODO: Send chat notification similar to React Native implementation
-      // await sendChatNotification({
-      //   bookingId: taskId,
-      //   senderId: user.id.toString(),
-      //   receiverId: provider.id.toString(),
-      //   message: newMessage,
-      //   title: user?.name + " has sent you a message",
-      // });
+      // Send chat notification
+      try {
+        await sendChatNotificationMutation.mutateAsync({
+          receiver_id: provider.id.toString(),
+          message: newMessage,
+          title: `${user?.name || 'Someone'} has sent you a message`,
+          booking_id: taskId,
+        });
+      } catch (notificationError) {
+        console.error("Error sending notification:", notificationError);
+      }
 
       setNewMessage("");
       setReplyingTo(null);
     } catch (error) {
       console.error("Error sending message:", error);
     }
-  }, [newMessage, user, taskId, replyingTo, provider.id, provider.name]);
+  }, [newMessage, user, taskId, replyingTo, provider.id, provider.name, sendChatNotificationMutation]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
