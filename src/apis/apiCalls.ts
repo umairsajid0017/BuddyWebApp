@@ -628,6 +628,17 @@ export const useInitPaymentGateway = () => {
   });
 };
 
+
+export const useAllCustomerBids = () => {
+  return useQuery<BidsResponse, AxiosError>({
+    queryKey: ["customerBids", "all"],
+    queryFn: async (): Promise<BidsResponse> => {
+      const { data } = await http.get<BidsResponse>(Endpoints.BIDS);
+      return data;
+    },
+  });
+};
+
 export const useCustomerBidsByStatus = (
   status: BidStatus,
   options?: UseQueryOptions<BidsResponse, AxiosError>,
