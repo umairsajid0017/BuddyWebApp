@@ -4,13 +4,13 @@ import { Check, Trash2, X, BellRing, MoreVertical } from "lucide-react";
 import { Notification } from "@/types/notification-types";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  useAuth, 
-  useMarkNotificationAsRead, 
+import {
+  useAuth,
+  useMarkNotificationAsRead,
   useClearAllNotifications,
   useDeleteNotification,
-  useMarkAllNotificationsAsRead
-} from '@/apis/apiCalls'
+  useMarkAllNotificationsAsRead,
+} from "@/apis/apiCalls";
 
 interface NotificationsMenuProps {
   notifications: Notification[];
@@ -52,7 +52,9 @@ export default function NotificationsMenu({
 
   const handleMarkAsRead = async (notification: Notification) => {
     try {
-      await markAsReadMutation.mutateAsync({ notification_id: notification.id });
+      await markAsReadMutation.mutateAsync({
+        notification_id: notification.id,
+      });
       toast({
         title: "Success",
         description: "Notification marked as read",
@@ -84,7 +86,9 @@ export default function NotificationsMenu({
 
   const handleDeleteNotification = async (notification: Notification) => {
     try {
-      await deleteNotificationMutation.mutateAsync({ notification_id: notification.id });
+      await deleteNotificationMutation.mutateAsync({
+        notification_id: notification.id,
+      });
       toast({
         title: "Success",
         description: "Notification deleted",
@@ -119,10 +123,51 @@ export default function NotificationsMenu({
       handleMarkAsRead(notification);
     }
 
-    // if (notification.link) {
-    //   router.push(notification.link);
-    //   onClose();
-    // }
+    try {
+      if (notification.type === "NEW_BID_REQUEST") {
+        router.push("/bids");
+      } else if (notification.type === "NEW_DIRECT_BOOKING") {
+        router.push("/bookings");
+      } else if (notification.type === "BOOKING_ACCEPTED") {
+        router.push("/bookings");
+      } else if (notification.type === "BOOKING_DECLINED") {
+        // Direct booking request declined by the worker - navigate to cancelled bookings
+        router.push("/bookings");
+      } else if (notification.type === "BOOKING_STARTED") {
+        // Booking started by the worker - navigate to confirmed bookings
+        router.push("/bookings");
+      } else if (notification.type === "BOOKING_COMPLETED") {
+        // Booking completed by the worker - navigate to completed bookings
+        router.push("/bookings");
+      } else if (notification.type === "BOOKING_CANCELED") {
+        // Booking cancelled by the worker - navigate to cancelled bookings
+        router.push("/bookings");
+      } else if (notification.type === "WORKER_ARRIVAL") {
+        // Worker has arrived at the location - navigate to confirmed bookings
+        router.push("/bookings");
+      } else if (
+        notification.type === "AMOUNT_PAID" ||
+        notification.type === "AMOUNT_DEBITED" ||
+        notification.type === "AMOUNT_CREDITED"
+      ) {
+        // Wallet related notifications - navigate to wallet
+        router.push("/wallet");
+      } else if (notification.type === "CHAT") {
+        // Chat notification - for now navigate to bookings (since we don't have a standalone chat page)
+        // In the future, this could be updated to open a specific chat interface
+        router.push("/bookings");
+      } else {
+        // Default case - navigate to bookings for any other booking-related notification
+        router.push("/bookings");
+      }
+
+      // Close the notification menu after navigation
+      onClose();
+    } catch (error) {
+      console.error("Navigation error:", error);
+      // Still close the menu even if navigation fails
+      onClose();
+    }
   };
 
   return (
@@ -130,7 +175,7 @@ export default function NotificationsMenu({
       <div className="flex items-center justify-between border-b px-4 py-3">
         <h3 className="text-lg font-semibold">Notifications</h3>
         <div className="flex items-center gap-2">
-          {notifications.length > 0 && (
+          {/* {notifications.length > 0 && (
             <>
               <Button
                 variant="ghost"
@@ -149,7 +194,7 @@ export default function NotificationsMenu({
                 <Trash2 className="h-4 w-4" />
               </Button>
             </>
-          )}
+          )} */}
           <Button variant="ghost" size="sm" onClick={onClose} title="Close">
             <X className="h-4 w-4" />
           </Button>
