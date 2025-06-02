@@ -162,13 +162,16 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                       {booking.before_images.map((image, index) => (
                         <div
                           key={image.id}
-                          className="relative aspect-square overflow-hidden rounded-lg"
+                          className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
+                          onClick={() =>
+                            setSelectedImage(getImageUrl(image.name))
+                          }
                         >
                           <Image
                             src={getImageUrl(image.name)}
                             alt={`Before image ${index + 1}`}
                             fill
-                            className="object-cover"
+                            className="object-cover transition-transform hover:scale-110"
                           />
                         </div>
                       ))}
@@ -184,13 +187,16 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                       {booking.after_images.map((image, index) => (
                         <div
                           key={image.id}
-                          className="relative aspect-square overflow-hidden rounded-lg"
+                          className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
+                          onClick={() =>
+                            setSelectedImage(getImageUrl(image.name))
+                          }
                         >
                           <Image
                             src={getImageUrl(image.name)}
                             alt={`After image ${index + 1}`}
                             fill
-                            className="object-cover"
+                            className="object-cover transition-transform hover:scale-110"
                           />
                         </div>
                       ))}
@@ -199,13 +205,12 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                 )}
 
                 <div className="flex space-x-4">
-                  {booking.status !== BookingStatus.CANCELED &&
-                    booking.status !== BookingStatus.PENDING && (
-                      <Button onClick={handleChat} className="flex-1">
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        Chat
-                      </Button>
-                    )}
+                  {booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.STARTED && (
+                    <Button onClick={handleChat} className="flex-1">
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Chat
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -220,8 +225,7 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
         onClose={() => setSelectedImage(null)}
       />
 
-      {booking.status !== BookingStatus.CANCELED &&
-        booking.status !== BookingStatus.PENDING && (
+      {booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.STARTED && (
           <BookingChat
             isOpen={isChatOpen}
             onClose={() => setIsChatOpen(false)}
