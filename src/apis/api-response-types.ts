@@ -250,4 +250,10 @@ export interface ShowNotificationsResponse {
   records: Notification[];
 }
 
+export interface MarkAsCancelledResponse {
+  error: boolean;
+  message: string;
+  records?: any;
+}
+
 

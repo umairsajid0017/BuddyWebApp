@@ -29,10 +29,12 @@ import {
   GeneralResponse,
   LivePhotoVerificationResponse,
   LoginResponse,
+  MarkAsCancelledResponse,
   OfferResponse,
   PassportVerificationResponse,
   PaymentGatewayResponse,
   RegisterResponse,
+  
   SearchResponse,
   SendOtpResponse,
   ServiceResponse,
@@ -1344,6 +1346,30 @@ export const useSendChatNotification = () => {
         throw new Error(data.message);
       }
       
+      return data;
+    },
+  });
+};
+
+export const useMarkAsCancelled = () => {
+  return useMutation<MarkAsCancelledResponse, AxiosError, { booking_id: number; canceled_reason: string }>({
+    mutationFn: async ({ booking_id, canceled_reason }) => {
+      const formData = new FormData();
+      formData.append("booking_id", booking_id.toString());
+      formData.append("canceled_reason", canceled_reason);
+      
+      const { data } = await http.post<MarkAsCancelledResponse>(
+        Endpoints.MARK_AS_CANCELLED,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
       return data;
     },
   });
