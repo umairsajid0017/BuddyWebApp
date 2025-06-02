@@ -46,6 +46,7 @@ import {
   UserResponse,
   VerificationCheckResponse,
   WalletCreditResponse,
+  AddReviewResponse,
 } from "@/apis/api-response-types";
 import {
   AddToWalletData,
@@ -63,6 +64,7 @@ import {
   SearchParams,
   SendOtpData,
   VerifyOtpData,
+  AddReviewData,
 } from "./api-request-types";
 import { Service } from "@/types/service-types";
 import { Category } from "@/types/category-types";
@@ -1377,6 +1379,31 @@ export const useMarkAsCancelled = () => {
     onSuccess: () => {
       // Invalidate bookings queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
+    },
+  });
+};
+
+export const useAddReview = () => {
+  return useMutation<AddReviewResponse, AxiosError, AddReviewData>({
+    mutationFn: async (reviewData: AddReviewData) => {
+      const formData = new FormData();
+      formData.append("service_id", reviewData.service_id);
+      formData.append("rating", reviewData.rating);
+      formData.append("comment", reviewData.comment);
+      
+      const { data } = await http.post<AddReviewResponse>(
+        Endpoints.ADD_REVIEW,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
     },
   });
 };

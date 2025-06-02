@@ -256,4 +256,10 @@ export interface MarkAsCancelledResponse {
   records?: any;
 }
 
+export interface AddReviewResponse {
+  error: boolean;
+  message: string;
+  records?: any;
+}
+
 

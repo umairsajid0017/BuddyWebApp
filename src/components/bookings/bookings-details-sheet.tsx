@@ -11,7 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Calendar, Clock, MessageCircle, PlayCircle } from "lucide-react";
+import { MapPin, Calendar, Clock, MessageCircle, PlayCircle, Star } from "lucide-react";
 import Image from "next/image";
 import { CancelBookingDialog } from "./cancel-booking-dialog";
 import { BookingChat } from "./booking-chat";
@@ -21,6 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { getImageUrl } from "@/helpers/utils";
 import { format } from "date-fns";
 import { BookingStatus } from "@/constants/constantValues";
+import { AddReviewDialog } from "./add-review-dialog";
 
 type BookingDetailsSheetProps = {
   booking: Booking;
@@ -204,12 +205,24 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                   </div>
                 )}
 
-                <div className="flex space-x-4">
-                  {booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.STARTED && (
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  {(booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.STARTED) && (
                     <Button onClick={handleChat} className="flex-1">
                       <MessageCircle className="mr-2 h-4 w-4" />
                       Chat
                     </Button>
+                  )}
+                  
+                  {booking.status === BookingStatus.COMPLETED && (
+                    <AddReviewDialog
+                      serviceId={booking.service.id}
+                      trigger={
+                        <Button className="flex-1">
+                          <Star className="mr-2 h-4 w-4" />
+                          Add Review
+                        </Button>
+                      }
+                    />
                   )}
                 </div>
               </div>
@@ -225,7 +238,7 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
         onClose={() => setSelectedImage(null)}
       />
 
-      {booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.STARTED && (
+      {(booking.status === BookingStatus.CONFIRMED || booking.status === BookingStatus.STARTED) && (
           <BookingChat
             isOpen={isChatOpen}
             onClose={() => setIsChatOpen(false)}

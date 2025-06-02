@@ -127,3 +127,9 @@ export interface BidFormData {
   address: string;
 }
 
+export interface AddReviewData {
+  service_id: string;
+  rating: string;
+  comment: string;
+}
+
