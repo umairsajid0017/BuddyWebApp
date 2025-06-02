@@ -1352,6 +1352,8 @@ export const useSendChatNotification = () => {
 };
 
 export const useMarkAsCancelled = () => {
+  const queryClient = useQueryClient();
+  
   return useMutation<MarkAsCancelledResponse, AxiosError, { booking_id: number; canceled_reason: string }>({
     mutationFn: async ({ booking_id, canceled_reason }) => {
       const formData = new FormData();
@@ -1371,6 +1373,10 @@ export const useMarkAsCancelled = () => {
         throw new Error(data.message);
       }
       return data;
+    },
+    onSuccess: () => {
+      // Invalidate bookings queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
     },
   });
 };

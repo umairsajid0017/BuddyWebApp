@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -8,13 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreVertical, X } from "lucide-react";
+import { Trash, X } from "lucide-react";
 import { Booking } from "@/types/booking-types";
 import BookingDetailsSheet from "./bookings-details-sheet";
 import { BookingCancelDialog } from "./booking-cancel-dialog";
@@ -24,7 +18,8 @@ import { formatDistanceToNow } from "date-fns";
 import { MapPin, Clock } from "lucide-react";
 import { getImageUrl, getStatusBadgeVariant, getStatusLabel } from "@/helpers/utils";
 import { TaskCardProps } from "@/types/general-types";
-import { useBookingCancellation } from "@/hooks/use-booking-cancellation";
+import { useMarkAsCancelled } from "@/apis/apiCalls";
+import { useToast } from "@/hooks/use-toast";
 
 const getStatusColor = (status: BookingStatus) => {
   switch (status) {
@@ -43,21 +38,54 @@ const getStatusColor = (status: BookingStatus) => {
 };
 
 const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
-  console.log(booking.status);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const markAsCancelled = useMarkAsCancelled();
+  const { toast } = useToast();
+
   const statusVariant = getStatusBadgeVariant(booking.status);
   const statusLabel = getStatusLabel(booking.status);
-
-  const {
-    isCancelDialogOpen,
-    isLoading,
-    openCancelDialog,
-    closeCancelDialog,
-    handleCancelBooking,
-  } = useBookingCancellation();
 
   // Only show cancel option for bookings that can be cancelled
   const canBeCancelled = booking.status === BookingStatus.PENDING || 
                         booking.status === BookingStatus.CONFIRMED;
+
+  const handleCancelBooking = (reason: string) => {
+    markAsCancelled.mutate(
+      {
+        booking_id: booking.id,
+        canceled_reason: reason,
+      },
+      {
+        onSuccess: (response) => {
+          toast({
+            title: "Booking Cancelled",
+            description: response.message || "Your booking has been cancelled.",
+          });
+          setIsCancelDialogOpen(false);
+          setCancelReason(""); // Reset reason
+          // Force page reload to ensure UI updates
+          setTimeout(() => window.location.reload(), 500);
+        },
+        onError: (error: any) => {
+          toast({
+            title: "Error",
+            description: error.message || "Failed to cancel booking.",
+            variant: "destructive",
+          });
+        },
+      }
+    );
+  };
+
+  const handleCloseDialog = () => {
+    setIsCancelDialogOpen(false);
+    setCancelReason(""); // Reset reason when closing
+  };
+
+  const handleOpenCancelDialog = () => {
+    setIsCancelDialogOpen(true);
+  };
 
   return (
     <>
@@ -104,26 +132,14 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
             <BookingDetailsSheet booking={booking} />
             
             {canBeCancelled && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="text-destructive cursor-pointer"
-                    onClick={() => openCancelDialog(booking.id)}
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Cancel Booking
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+                onClick={handleOpenCancelDialog}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
             )}
           </div>
         </CardFooter>
@@ -131,9 +147,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ booking }) => {
 
       <BookingCancelDialog
         isOpen={isCancelDialogOpen}
-        onClose={closeCancelDialog}
+        onClose={handleCloseDialog}
         onConfirm={handleCancelBooking}
-        isLoading={isLoading}
+        isLoading={markAsCancelled.isPending}
+        reason={cancelReason}
+        onReasonChange={setCancelReason}
       />
     </>
   );
