@@ -128,4 +128,23 @@ export const getPasswordStrengthText = (strength: number): string => {
   if (strength <= 33) return "Weak";
   if (strength <= 66) return "Medium";
   return "Strong";
-}; 
+};
+
+// Address validation
+export const validateAddress = (address: string): ValidationResult => {
+  const trimmedAddress = address.trim();
+  
+  if (!trimmedAddress) {
+    return { isValid: false, message: "Address is required" };
+  }
+  
+  if (trimmedAddress.length < 5) {
+    return { isValid: false, message: "Please provide a more detailed address (minimum 5 characters)" };
+  }
+  
+  if (trimmedAddress.length > 500) {
+    return { isValid: false, message: "Address is too long (maximum 500 characters)" };
+  }
+  
+  return { isValid: true };
+};

@@ -42,6 +42,7 @@ import { CreateBidData, CreateBookingData, AddToWalletData } from "@/apis/api-re
 import { ROUTES } from "@/constants/routes";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateBookingMobileDialogue } from "./create-booking-mobile-dialogue";
+import { validateAddress } from "@/utils/validations";
 
 interface CreateBookingDialogProps {
   initialService?: Service;
@@ -203,6 +204,14 @@ export function CreateBookingDialog({
 
   const handleSaveBooking = () => {
     console.log("Form state:", formState);
+    
+    // Validate address first
+    const addressValidation = validateAddress(formState.address);
+    if (!addressValidation.isValid) {
+      toast.error(addressValidation.message || "Invalid address");
+      return;
+    }
+    
     const isValid =
       mode === "book"
         ? isBookingForm(formState) &&
@@ -495,18 +504,21 @@ export function CreateBookingDialog({
               </Button>
             </DialogTrigger>
           </BackgroundGradient>
-          <DialogContent className="sm:max-w-[475px]">
-            <DialogHeader>
-              <DialogTitle>
-                {mode === "book" ? "Book Service" : "New Bid"}
-              </DialogTitle>
-              <DialogDescription>
-                {mode === "book"
-                  ? "Book this service directly."
-                  : "Create a new bid for a service."}
-              </DialogDescription>
-            </DialogHeader>
-            <ScrollArea>
+          <DialogContent className={`sm:max-w-[475px] ${mode === "bid" ? "max-h-[90vh]" : "h-[90vh]"} flex flex-col p-0`}>
+            <div className="flex-shrink-0 p-6 pb-0">
+              <DialogHeader>
+                <DialogTitle>
+                  {mode === "book" ? "Book Service" : "New Bid"}
+                </DialogTitle>
+                <DialogDescription>
+                  {mode === "book"
+                    ? "Book this service directly."
+                    : "Create a new bid for a service."}
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            
+            <ScrollArea className="flex-1 px-6">
               <div className="grid gap-4 py-4">
                 {mode === "book" ? (
                   <ServiceCard service={initialService!} compact />
@@ -589,48 +601,53 @@ export function CreateBookingDialog({
                     </Button>
                   </div>
                 </div>
+                
                 {isLoadingAvailability ? (
                   <Skeleton className="h-[300px] w-full" />
                 ) : (
                   mode !== "bid" && (
-                    <Calendar
-                      mode="single"
-                      selected={formState.date}
-                      onSelect={handleDateSelect}
-                      className="flex w-full items-center justify-center rounded-md border"
-                      disabled={
-                        mode === "book"
-                          ? (date) => {
-                              const isAvailable = isDateAvailable(date);
-                              console.log("Is available:", isAvailable);
-                              return !isAvailable;
-                            }
-                          : (date) =>
-                              format(date, "yyyy-MM-dd") !==
-                              format(new Date(), "yyyy-MM-dd")
-                      }
-                      modifiers={
-                        mode === "book"
-                          ? {
-                              available: (date) => {
-                                return isDateAvailable(date);
-                              },
-                            }
-                          : {
-                              available: (date) =>
-                                format(date, "yyyy-MM-dd") ===
-                                format(new Date(), "yyyy-MM-dd"),
-                            }
-                      }
-                      modifiersClassNames={{
-                        available: "bg-green-100 hover:bg-green-200",
-                      }}
-                    />
+                    <div className="flex justify-center">
+                      <Calendar
+                        mode="single"
+                        selected={formState.date}
+                        onSelect={handleDateSelect}
+                        className="rounded-md border"
+                        disabled={
+                          mode === "book"
+                            ? (date) => {
+                                const isAvailable = isDateAvailable(date);
+                                console.log("Is available:", isAvailable);
+                                return !isAvailable;
+                              }
+                            : (date) =>
+                                format(date, "yyyy-MM-dd") !==
+                                format(new Date(), "yyyy-MM-dd")
+                        }
+                        modifiers={
+                          mode === "book"
+                            ? {
+                                available: (date) => {
+                                  return isDateAvailable(date);
+                                },
+                              }
+                            : {
+                                available: (date) =>
+                                  format(date, "yyyy-MM-dd") ===
+                                  format(new Date(), "yyyy-MM-dd"),
+                              }
+                        }
+                        modifiersClassNames={{
+                          available: "bg-green-100 hover:bg-green-200",
+                        }}
+                      />
+                    </div>
                   )
                 )}
 
-                <div className="flex flex-col gap-2 px-4">
-                  <Label htmlFor="address">Address</Label>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="address" className="text-sm font-medium">
+                    Address <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="address"
                     type="text"
@@ -641,27 +658,40 @@ export function CreateBookingDialog({
                         address: e.target.value,
                       }))
                     }
-                    placeholder="Enter your address"
+                    placeholder="Enter your complete address (e.g., Building name, Street, Area, City)"
+                    className={`${
+                      formState.address.trim() && !validateAddress(formState.address).isValid
+                        ? "border-red-500 focus:border-red-500"
+                        : ""
+                    }`}
                   />
+                  {formState.address.trim() && !validateAddress(formState.address).isValid && (
+                    <p className="text-sm text-red-500">
+                      {validateAddress(formState.address).message}
+                    </p>
+                  )}
                 </div>
               </div>
             </ScrollArea>
 
-            <DialogFooter>
-              <Button
-                type="submit"
-                onClick={handleSaveBooking}
-                disabled={
-                  mode === "book"
-                    ? !initialService || !formState.date
-                    : !isBidForm(formState) ||
-                      !formState.category ||
-                      !formState.date
-                }
-              >
-                Continue
-              </Button>
-            </DialogFooter>
+            <div className="flex-shrink-0 p-6 pt-0">
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  onClick={handleSaveBooking}
+                  disabled={
+                    !validateAddress(formState.address).isValid ||
+                    (mode === "book"
+                      ? !initialService || !formState.date
+                      : !isBidForm(formState) ||
+                        !formState.category ||
+                        !formState.date)
+                  }
+                >
+                  Continue
+                </Button>
+              </DialogFooter>
+            </div>
           </DialogContent>
         </Dialog>
       )}
