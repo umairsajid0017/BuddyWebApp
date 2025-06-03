@@ -5,6 +5,9 @@ import {
   useBidResponses,
   useDirectAsCustomer,
   useAllCustomerBids,
+  useCheckDeduction,
+  useInitPaymentGateway,
+  useGetPaymentInfo,
 } from "@/apis/apiCalls";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,13 +41,15 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { BidStatus, CURRENCY } from "@/constants/constantValues";
-import { Bid } from "@/types/bid-types";
-import { useState, useMemo } from "react";
+import { Bid, Offer } from "@/types/bid-types";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { BidOffers } from "@/components/BidOffers";
 import Main from "@/components/ui/main";
 import { ImageViewer } from "@/components/ImageViewer";
 import { getImageUrl, getStatusBadgeProps } from "@/helpers/utils";
+import { PaymentGatewayDialog } from "@/components/common/payment-gateway-dialog";
+import { AddToWalletData } from "@/apis/api-request-types";
 
 const DISPLAY_TABS = [
   {
@@ -105,6 +110,17 @@ const BidsPage = () => {
   // Fetch all bids
   const { data: allBidsData, isLoading, error, refetch } = useAllCustomerBids();
 
+  // Payment Flow State
+  const checkDeduction = useCheckDeduction();
+  const paymentGatewayMutation = useInitPaymentGateway();
+  const getPaymentInfoMutation = useGetPaymentInfo();
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState("");
+  const [currentPaymentId, setCurrentPaymentId] = useState<number | null>(null);
+  const [currentTransactionNumber, setCurrentTransactionNumber] = useState<string | undefined>(undefined);
+  const [pendingOfferAcceptance, setPendingOfferAcceptance] = useState<{ offerId: number; bidId: number; offerAmount: string } | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
   // Filter bids based on current tab
   const filteredBids = useMemo(() => {
     if (!allBidsData?.records) return [];
@@ -159,31 +175,155 @@ const BidsPage = () => {
     }
   };
 
-  const handleAcceptOffer = async (offerId: number, accept: boolean) => {
+  const executeActualOfferAcceptance = async (offerId: number, bidId: number, transactionNum?: string) => {
     try {
-      if (!selectedBid) return;
-      const response = await acceptOffer.mutateAsync({
+      const payload: { response_id: number; bid_id: number; status: number; transaction_number?: string; } = {
         response_id: offerId,
-        bid_id: selectedBid as number,
-        status: accept ? 1 : 0 ,
-      });
-      console.log("response", response);
+        bid_id: bidId,
+        status: 1, // 1 for accepting
+        transaction_number: transactionNum,
+      };
+      const response = await acceptOffer.mutateAsync(payload);
       toast({
         title: "Offer Accepted",
-        description: response.message,
+        description: response.message || "The offer has been successfully accepted.",
       });
-      refetch(); 
+      refetch();
+      setShowOffers(false); // Close the offers panel
+      setSelectedBid(null);
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Error Accepting Offer",
+        description: error.message || "Failed to accept the offer. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessingPayment(false);
+      setPendingOfferAcceptance(null);
+    }
+  };
+
+  const handlePaymentCloseForBidAcceptance = useCallback(async () => {
+    const paymentIdToCheck = currentPaymentId;
+    const pendingAcceptanceDetails = pendingOfferAcceptance;
+
+    setIsPaymentOpen(false);
+    setPaymentUrl("");
+    setCurrentPaymentId(null);
+    setCurrentTransactionNumber(undefined);
+
+    if (!paymentIdToCheck || !pendingAcceptanceDetails) {
+      toast({
+        title: "Payment Incomplete",
+        description: "Payment session ended or details are missing. The offer was not accepted.",
+      });
+      setIsProcessingPayment(false);
+      setPendingOfferAcceptance(null);
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    try {
+      const paymentInfo = await getPaymentInfoMutation.mutateAsync({ payment_id: paymentIdToCheck });
+
+      if (paymentInfo.error || paymentInfo.records.status !== "paid") {
+        const statusMessage = paymentInfo.records.status ? `Status: ${paymentInfo.records.status}.` : "Could not verify payment success.";
+        toast({
+          title: "Payment Not Successful",
+          description: `${statusMessage} The offer cannot be accepted.`,
+          variant: "destructive",
+        });
+        setIsProcessingPayment(false);
+        setPendingOfferAcceptance(null);
+        return;
+      }
+
+      const transactionNumber = paymentInfo.records.transaction_id;
+      toast({
+        title: "Payment Verified",
+        description: "Payment was successful. Proceeding to accept the offer.",
+      });
+      await executeActualOfferAcceptance(pendingAcceptanceDetails.offerId, pendingAcceptanceDetails.bidId, transactionNumber);
+
+    } catch (error: any) {
+      toast({
+        title: "Payment Verification Error",
+        description: error.message || "An error occurred while verifying payment status. The offer was not accepted.",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+      setPendingOfferAcceptance(null);
+    }
+  }, [currentPaymentId, pendingOfferAcceptance, getPaymentInfoMutation, toast, refetch, acceptOffer, executeActualOfferAcceptance]);
+
+  const handleAcceptOffer = async (offerId: number, accept: boolean) => {
+    if (!accept) { 
+      toast({ title: "Offer Rejected", description: "The offer has been marked as not accepted." });
+      return;
+    }
+
+    if (!selectedBid) {
+      toast({ title: "Error", description: "No bid selected.", variant: "destructive" });
+      return;
+    }
+
+    const selectedOffer = bidResponsesData?.records?.find(offer => offer.id === offerId);
+    if (!selectedOffer || typeof selectedOffer.proposed_price === 'undefined') {
+        toast({ title: "Error", description: "Offer details or price not found.", variant: "destructive" });
+        return;
+    }
+    const offerPriceStr = selectedOffer.proposed_price.toString();
+
+    setIsProcessingPayment(true);
+    setPendingOfferAcceptance({ offerId, bidId: selectedBid, offerAmount: offerPriceStr });
+
+    try {
+      const deductionResult = await checkDeduction.mutateAsync({
+        amount_omr: offerPriceStr,
+      });
+
+      if (parseFloat(deductionResult.deduct_amount) > 0) {
+        const paymentData: AddToWalletData = {
+          amount: deductionResult.deduct_amount,
+          payment_method_id: "1", 
+          comment: `Payment for accepting offer on bid #${selectedBid}`,
+          order_total_amount: parseFloat(offerPriceStr), 
+          action: "order_deduction", 
+        };
+        const paymentInitResult = await paymentGatewayMutation.mutateAsync(paymentData);
+
+        if (!paymentInitResult.error && paymentInitResult.pay_url) {
+          setPaymentUrl(paymentInitResult.pay_url);
+          setCurrentPaymentId(paymentInitResult.payment_id);
+          setIsPaymentOpen(true);
+        } else {
+          toast({
+            title: "Payment Initialization Failed",
+            description: paymentInitResult.message || "Could not initialize payment. Please try again.",
+            variant: "destructive",
+          });
+          setIsProcessingPayment(false);
+          setPendingOfferAcceptance(null);
+        }
+      } else {
+        toast({
+          title: "No Payment Required",
+          description: "Proceeding to accept the offer directly.",
+        });
+        await executeActualOfferAcceptance(offerId, selectedBid, undefined); 
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error Processing Offer Acceptance",
+        description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+      setIsProcessingPayment(false);
+      setPendingOfferAcceptance(null);
     }
   };
 
   const handleShowBidOffers = (bidId: number) => {
-    // Only allow showing offers for active bids
     if (currentTabKey !== "active") {
       toast({
         title: "Not Available",
@@ -334,7 +474,6 @@ const BidsPage = () => {
                                     </div>
                                   )}
 
-                                  {/* Only show dropdown menu for active bids */}
                                   {isActiveBid && (
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
@@ -360,7 +499,6 @@ const BidsPage = () => {
                                     </DropdownMenu>
                                   )}
                                 </div>
-                                {/* Only show View Offers button for active bids */}
                                 {isActiveBid && (
                                   <Button
                                     variant="default"
@@ -453,7 +591,6 @@ const BidsPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Image Viewer */}
       <ImageViewer
         src={selectedImage || ""}
         alt="Bid image"
@@ -461,7 +598,6 @@ const BidsPage = () => {
         onClose={() => setSelectedImage(null)}
       />
 
-      {/* Offers Panel - Only available for active bids */}
       <BidOffers
         isOpen={showOffers}
         onClose={() => {
@@ -473,6 +609,20 @@ const BidsPage = () => {
         error={responsesError}
         message={bidResponsesData?.message}
         handleAcceptOffer={handleAcceptOffer}
+      />
+
+      <PaymentGatewayDialog
+        isOpen={isPaymentOpen}
+        onOpenChange={(open) => {
+          if (!open && currentPaymentId) {
+            handlePaymentCloseForBidAcceptance();
+          } else {
+            setIsPaymentOpen(open);
+          }
+        }}
+        paymentUrl={paymentUrl}
+        handlePaymentClose={handlePaymentCloseForBidAcceptance}
+        title="Complete Payment for Offer"
       />
     </Main>
   );
