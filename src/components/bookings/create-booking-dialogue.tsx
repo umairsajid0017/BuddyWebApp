@@ -27,7 +27,15 @@ import { PlaceOrderResponsive } from "./create-booking/place-order-responsive";
 import { StartBookingResponsive } from "./create-booking/offer-bid-responsive";
 import { BookingConfirmation } from "./create-booking/booking-create-confirmation";
 import { ServiceCard } from "./create-booking/booking-service-card";
-import { useDirectBooking, useCreateBid, useServices, useCategories, useCalendarAvailability, useCheckDeduction, useInitPaymentGateway } from "@/apis/apiCalls";
+import {
+  useDirectBooking,
+  useCreateBid,
+  useServices,
+  useCategories,
+  useCalendarAvailability,
+  useCheckDeduction,
+  useInitPaymentGateway,
+} from "@/apis/apiCalls";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/store/authStore";
@@ -38,7 +46,11 @@ import { BackgroundGradient } from "../ui/background-gradient";
 import { Service } from "@/types/service-types";
 import { MediaFiles } from "@/types/general-types";
 import { useLocationUpdate } from "@/helpers/location";
-import { CreateBidData, CreateBookingData, AddToWalletData } from "@/apis/api-request-types";
+import {
+  CreateBidData,
+  CreateBookingData,
+  AddToWalletData,
+} from "@/apis/api-request-types";
 import { ROUTES } from "@/constants/routes";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateBookingMobileDialogue } from "./create-booking-mobile-dialogue";
@@ -90,7 +102,7 @@ export function CreateBookingDialog({
   const checkDeduction = useCheckDeduction();
   const paymentGatewayMutation = useInitPaymentGateway();
   const { updateUserLocation } = useLocationUpdate();
-  
+
   // Add mobile state detection
   const [isMobile, setIsMobile] = useState(false);
 
@@ -104,14 +116,14 @@ export function CreateBookingDialog({
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  if(mode === "book" && !initialService) {
+  if (mode === "book" && !initialService) {
     throw new Error("Initial service is required");
   }
   const { isLoading: isLoadingAvailability, isDateAvailable } =
     useCalendarAvailability(
-      mode === "book" && initialService?.id 
-        ? initialService.id.toString() 
-        : undefined
+      mode === "book" && initialService?.id
+        ? initialService.id.toString()
+        : undefined,
     );
 
   const [formState, setFormState] = useState<FormState>(() => {
@@ -139,34 +151,43 @@ export function CreateBookingDialog({
     useState(false);
 
   //TODO: Fix the type for the bid details
-  const [bidDetails, setBidDetails] = useState<
-  any | null
-  >(null);
+  const [bidDetails, setBidDetails] = useState<any | null>(null);
   //TODO: Fix the type for the booking details
-  const [bookingDetails, setBookingDetails] = useState<any | null
-  >(null);
+  const [bookingDetails, setBookingDetails] = useState<any | null>(null);
   const [isBookingLoading, setIsBookingLoading] = useState(false);
 
   const { services, isLoading } = useServices();
   const { categories, isLoading: categoriesLoading } = useCategories();
   console.log("Services:", services);
-  console.log("Categories:", categories)
+  console.log("Categories:", categories);
 
   // Add state to store deduction info
   const [deductionInfo, setDeductionInfo] = useState<{
     deduct_amount: string;
     wallet_amount: string;
   } | null>(null);
-  
+
   // Payment gateway state
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState("");
-  const [pendingMediaFiles, setPendingMediaFiles] = useState<MediaFiles | undefined>(undefined);
+  const [pendingMediaFiles, setPendingMediaFiles] = useState<
+    MediaFiles | undefined
+  >(undefined);
+
+  // State for bid payment flow
+  const [pendingBidPlacementInfo, setPendingBidPlacementInfo] = useState<{
+    amount: number;
+    mediaFiles?: MediaFiles;
+    description: string;
+    category: { id: number; title: string } | null;
+    address: string;
+  } | null>(null);
+  const [paymentFor, setPaymentFor] = useState<"booking" | "bid" | null>(null);
 
   const handleOpenChange = (open: boolean) => {
     console.log("Is guest:", isGuest);
-    if(isGuest) {
-     router.push(ROUTES.LOGIN);
+    if (isGuest) {
+      router.push(ROUTES.LOGIN);
       return;
     }
     setIsOpen(open);
@@ -200,18 +221,20 @@ export function CreateBookingDialog({
     setPaymentUrl("");
     setPendingMediaFiles(undefined);
     setIsBookingLoading(false);
+    setPendingBidPlacementInfo(null); // Reset pending bid info
+    setPaymentFor(null); // Reset payment context
   };
 
   const handleSaveBooking = () => {
     console.log("Form state:", formState);
-    
+
     // Validate address first
     const addressValidation = validateAddress(formState.address);
     if (!addressValidation.isValid) {
       toast.error(addressValidation.message || "Invalid address");
       return;
     }
-    
+
     const isValid =
       mode === "book"
         ? isBookingForm(formState) &&
@@ -249,7 +272,7 @@ export function CreateBookingDialog({
         ? format(bookingState.date, "yyyy-MM-dd")
         : "";
 
-      if(!initialService) {
+      if (!initialService) {
         throw new Error("Initial service is required");
       }
       const payload: CreateBookingData = {
@@ -278,56 +301,143 @@ export function CreateBookingDialog({
       setIsBookingLoading(false);
     }
   };
-  
+
   // Handler for payment dialog close
   const handlePaymentClose = useCallback(async () => {
+    const currentPaymentContext = paymentFor;
+    // Immediately clear paymentFor to prevent re-entry issues if async operations are slow
+    setPaymentFor(null);
+
     setIsPaymentOpen(false);
     setPaymentUrl("");
-    
-    // Check deduction again to see if payment was successful
-    try {
-      const bookingState = formState as BookFormState;
-      if (!bookingState.service) return;
-      
-      const expectedPrice = bookingState.service.fixed_price;
-      const deductionResult = await checkDeduction.mutateAsync({ amount_omr: expectedPrice });
-      
-      // Always store the latest deduction info
-      setDeductionInfo({
-        deduct_amount: deductionResult.deduct_amount,
-        wallet_amount: deductionResult.wallet_amount
-      });
-      
-      // Always show booking confirmation dialog
-      setIsBookingConfirmationOpen(true);
-      
-      // Attempt to create booking
-      await handleDirectBooking(pendingMediaFiles);
-      
-      // Show appropriate notification based on payment status
-      if (parseFloat(deductionResult.deduct_amount) === 0 || !deductionResult.deduct_amount) {
-        toast.success("Payment completed successfully");
-      } else {
-        // Still has amount to deduct
-        toast.warning("Payment not completed. Your booking might not be processed.");
+
+    if (currentPaymentContext === "booking") {
+      try {
+        const bookingState = formState as BookFormState;
+        if (!bookingState.service) {
+          toast.error(
+            "Service details missing for booking payment verification.",
+          );
+          return;
+        }
+
+        const expectedPrice = bookingState.service.fixed_price;
+        // Set loading true if not already, for deduction check and booking creation
+        if (!isBookingLoading) setIsBookingLoading(true);
+
+        const deductionResult = await checkDeduction.mutateAsync({
+          amount_omr: expectedPrice,
+        });
+
+        setDeductionInfo({
+          deduct_amount: deductionResult.deduct_amount,
+          wallet_amount: deductionResult.wallet_amount,
+        });
+
+        setIsBookingConfirmationOpen(true);
+        await handleDirectBooking(pendingMediaFiles); // This sets its own loading states internally
+
+        if (
+          parseFloat(deductionResult.deduct_amount) === 0 ||
+          !deductionResult.deduct_amount
+        ) {
+          toast.success("Payment completed successfully");
+        } else {
+          toast.warning(
+            "Payment not completed. Your booking might not be processed.",
+          );
+        }
+      } catch (error) {
+        toast.error("Error verifying booking payment status");
+        console.error("Booking payment verification error:", error);
+        setIsBookingConfirmationOpen(true); // Still show confirmation dialog
+        setIsBookingLoading(false); // Ensure loading is stopped on error
       }
-    } catch (error) {
-      toast.error("Error verifying payment status");
-      console.error("Payment verification error:", error);
-      // Still show booking confirmation with the error state
-      setIsBookingConfirmationOpen(true);
+    } else if (currentPaymentContext === "bid" && pendingBidPlacementInfo) {
+      const { amount, mediaFiles, description, category, address } =
+        pendingBidPlacementInfo;
+      // Clear pending info after retrieving
+      setPendingBidPlacementInfo(null);
+
+      try {
+        // Set loading true if not already, for deduction check and bid creation
+        if (!isBookingLoading) setIsBookingLoading(true);
+
+        const deductionResult = await checkDeduction.mutateAsync({
+          amount_omr: amount.toString(),
+        });
+        setDeductionInfo({
+          deduct_amount: deductionResult.deduct_amount,
+          wallet_amount: deductionResult.wallet_amount,
+        });
+
+        setIsConfirmationOpen(true); // Show bid confirmation dialog
+        await executeActualBidCreation(
+          amount,
+          mediaFiles,
+          description,
+          category,
+          address,
+        ); // This sets its own loading state internally
+
+        if (
+          parseFloat(deductionResult.deduct_amount) === 0 ||
+          !deductionResult.deduct_amount
+        ) {
+          toast.success("Payment for bid completed successfully.");
+        } else {
+          toast.warning(
+            "Payment for bid not completed. Your bid might not be processed if a fee was required.",
+          );
+        }
+      } catch (error) {
+        toast.error("Error verifying bid payment status or creating bid.");
+        console.error("Bid payment verification/creation error:", error);
+        setIsConfirmationOpen(true); // Still show confirmation dialog
+        setIsBookingLoading(false); // Ensure loading is stopped on error
+      }
+    } else if (currentPaymentContext === "bid" && !pendingBidPlacementInfo) {
+      // This case might happen if payment dialog was closed manually without completing payment
+      // and pendingBidPlacementInfo was somehow cleared or not set.
+      toast.warning(
+        "Bid payment process was not fully completed. Please check your bids.",
+      );
+      setIsBookingLoading(false);
     }
-  }, [formState, checkDeduction, pendingMediaFiles]);
-  
+
+    // Clear pending media files if they were for booking
+    if (currentPaymentContext === "booking") {
+      setPendingMediaFiles(undefined);
+    }
+  }, [
+    formState,
+    checkDeduction,
+    pendingMediaFiles,
+    paymentGatewayMutation,
+    directBooking,
+    paymentFor,
+    pendingBidPlacementInfo,
+    createBid,
+    user,
+    updateUserLocation,
+    isBookingLoading,
+  ]);
+
   // Register event listener to handle postMessage from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Check if the message is from our payment iframe
-      if (event.data === "close" || event.data?.action === "close") {
+      // Also check for Thawani's specific close messages
+      if (
+        event.data === "close" ||
+        event.data?.action === "close" ||
+        event.data === "Thawani::cancelled" ||
+        event.data === "Thawani::success"
+      ) {
         handlePaymentClose();
       }
     };
-    
+
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, [handlePaymentClose]);
@@ -338,7 +448,7 @@ export function CreateBookingDialog({
   ) => {
     setFormState((prev) => ({ ...prev, description, mediaFiles }));
     setIsPlaceOrderOpen(false);
-    
+
     if (mode === "bid") {
       console.log("Bid mode");
       setIsStartBookingOpen(true);
@@ -347,32 +457,35 @@ export function CreateBookingDialog({
       try {
         const bookingState = formState as BookFormState;
         if (!bookingState.service) return;
-        
+
         const expectedPrice = bookingState.service.fixed_price;
-        
+
         setIsBookingLoading(true);
-        const deductionResult = await checkDeduction.mutateAsync({ amount_omr: expectedPrice });
+        const deductionResult = await checkDeduction.mutateAsync({
+          amount_omr: expectedPrice,
+        });
         setDeductionInfo({
           deduct_amount: deductionResult.deduct_amount,
-          wallet_amount: deductionResult.wallet_amount
+          wallet_amount: deductionResult.wallet_amount,
         });
-        
+
         // Save media files for later use
         setPendingMediaFiles(mediaFiles);
-        
+
         // If there's an amount to deduct, show payment gateway
         if (parseFloat(deductionResult.deduct_amount) > 0) {
+          setPaymentFor("booking"); // Set payment context
           // Initialize payment gateway
           const paymentData: AddToWalletData = {
             amount: deductionResult.deduct_amount,
-            payment_method_id: "1", 
+            payment_method_id: "1",
             comment: "Booking payment",
             order_total_amount: parseFloat(expectedPrice),
             action: "order_deduction",
           };
-          
+
           const result = await paymentGatewayMutation.mutateAsync(paymentData);
-          
+
           if (!result.error && result.pay_url) {
             // Open the payment URL in the dialog
             setPaymentUrl(result.pay_url);
@@ -386,6 +499,7 @@ export function CreateBookingDialog({
           }
         } else {
           // No amount to deduct, proceed with booking directly
+          setIsBookingLoading(false); // Ensure loading is false before showing confirmation
           setIsBookingConfirmationOpen(true);
           await handleDirectBooking(mediaFiles);
         }
@@ -401,33 +515,124 @@ export function CreateBookingDialog({
 
   const handleBidPlacement = async (bidAmount: number) => {
     const bidState = formState as BidFormState;
-    if (!user || !bidState.category) return;
+    if (!user || !bidState.category) {
+      toast.error("User or category not defined for bid placement.");
+      return;
+    }
+
+    setIsBookingLoading(true);
+    try {
+      const expectedPrice = bidAmount.toString();
+      const deductionResult = await checkDeduction.mutateAsync({
+        amount_omr: expectedPrice,
+      });
+      setDeductionInfo({
+        deduct_amount: deductionResult.deduct_amount,
+        wallet_amount: deductionResult.wallet_amount,
+      });
+
+      setPendingBidPlacementInfo({
+        amount: bidAmount,
+        mediaFiles: bidState.mediaFiles,
+        description: bidState.description,
+        category: bidState.category,
+        address: bidState.address,
+      });
+      setPaymentFor("bid");
+
+      if (parseFloat(deductionResult.deduct_amount) > 0) {
+        const paymentData: AddToWalletData = {
+          amount: deductionResult.deduct_amount,
+          payment_method_id: "1",
+          comment: "Bid payment",
+          order_total_amount: parseFloat(expectedPrice),
+          action: "bid_payment", // Using a specific action for bids
+        };
+        const result = await paymentGatewayMutation.mutateAsync(paymentData);
+
+        if (!result.error && result.pay_url) {
+          setPaymentUrl(result.pay_url);
+          setIsPaymentOpen(true);
+          setIsStartBookingOpen(false); // Close the bid amount dialog
+        } else {
+          toast.error(result.message || "Failed to initialize payment for bid");
+          // Proceed to create bid but with a warning, or handle as an error fully?
+          // For now, let's attempt to create the bid and show confirmation.
+          setIsStartBookingOpen(false);
+          setIsConfirmationOpen(true);
+          await executeActualBidCreation(
+            bidAmount,
+            bidState.mediaFiles,
+            bidState.description,
+            bidState.category,
+            bidState.address,
+          );
+          // setIsBookingLoading(false); // executeActualBidCreation will handle this
+        }
+      } else {
+        // No amount to deduct, proceed with bid creation directly
+        setIsStartBookingOpen(false);
+        setIsConfirmationOpen(true);
+        await executeActualBidCreation(
+          bidAmount,
+          bidState.mediaFiles,
+          bidState.description,
+          bidState.category,
+          bidState.address,
+        );
+        // setIsBookingLoading(false); // executeActualBidCreation will handle this
+      }
+    } catch (error) {
+      toast.error("Error during bid placement process");
+      console.error("Bid placement error:", error);
+      setIsBookingLoading(false);
+      setIsStartBookingOpen(false); // Ensure bid dialog is closed on error
+    }
+    // setIsBookingLoading(false) should be handled by final steps (executeActualBidCreation or error catch)
+  };
+
+  const executeActualBidCreation = async (
+    amount: number,
+    mediaFiles: MediaFiles | undefined,
+    description: string,
+    category: { id: number; title: string } | null,
+    address: string,
+  ) => {
+    if (!user || !category) {
+      toast.error("User or category missing for bid creation.");
+      setIsBookingLoading(false);
+      return;
+    }
+
+    if (!isBookingLoading) setIsBookingLoading(true); // Ensure loading state
 
     try {
-      // Update location
       await updateUserLocation();
 
       const payload: CreateBidData = {
-        category_id: bidState.category.id.toString(),
-        description: bidState.description,
-        expected_price: bidAmount.toString(),
-        images: bidState.mediaFiles?.images,
-        audio: bidState.mediaFiles?.audio,
-        address: bidState.address,
+        category_id: category.id.toString(),
+        description: description,
+        expected_price: amount.toString(),
+        images: mediaFiles?.images,
+        audio: mediaFiles?.audio,
+        address: address,
       };
 
+      console.log("Bid creation payload:", payload);
       const response = await createBid.mutateAsync(payload);
 
       if (!response.error) {
         setBidDetails(response.records);
-        setIsStartBookingOpen(false);
-        setIsConfirmationOpen(true);
+        toast.success("Bid created successfully");
+        // setIsConfirmationOpen(true); // This should be set by the caller flow
       } else {
         toast.error(response.message || "Failed to create bid");
       }
     } catch (error) {
       toast.error("Error creating bid");
       console.error("Bid creation error:", error);
+    } finally {
+      setIsBookingLoading(false);
     }
   };
 
@@ -504,7 +709,9 @@ export function CreateBookingDialog({
               </Button>
             </DialogTrigger>
           </BackgroundGradient>
-          <DialogContent className={`sm:max-w-[475px] ${mode === "bid" ? "max-h-[90vh]" : "h-[90vh]"} flex flex-col p-0`}>
+          <DialogContent
+            className={`sm:max-w-[475px] ${mode === "bid" ? "max-h-[90vh]" : "h-[90vh]"} flex flex-col p-0`}
+          >
             <div className="flex-shrink-0 p-6 pb-0">
               <DialogHeader>
                 <DialogTitle>
@@ -517,7 +724,7 @@ export function CreateBookingDialog({
                 </DialogDescription>
               </DialogHeader>
             </div>
-            
+
             <ScrollArea className="flex-1 px-6">
               <div className="grid gap-4 py-4">
                 {mode === "book" ? (
@@ -601,7 +808,7 @@ export function CreateBookingDialog({
                     </Button>
                   </div>
                 </div>
-                
+
                 {isLoadingAvailability ? (
                   <Skeleton className="h-[300px] w-full" />
                 ) : (
@@ -660,16 +867,18 @@ export function CreateBookingDialog({
                     }
                     placeholder="Enter your complete address (e.g., Building name, Street, Area, City)"
                     className={`${
-                      formState.address.trim() && !validateAddress(formState.address).isValid
+                      formState.address.trim() &&
+                      !validateAddress(formState.address).isValid
                         ? "border-red-500 focus:border-red-500"
                         : ""
                     }`}
                   />
-                  {formState.address.trim() && !validateAddress(formState.address).isValid && (
-                    <p className="text-sm text-red-500">
-                      {validateAddress(formState.address).message}
-                    </p>
-                  )}
+                  {formState.address.trim() &&
+                    !validateAddress(formState.address).isValid && (
+                      <p className="text-sm text-red-500">
+                        {validateAddress(formState.address).message}
+                      </p>
+                    )}
                 </div>
               </div>
             </ScrollArea>

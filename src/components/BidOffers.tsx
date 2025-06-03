@@ -77,7 +77,7 @@ export function BidOffers({ isOpen, onClose, offers, isLoading, error, message, 
                   {formatDistanceToNow(new Date(offer.created_at), { addSuffix: true })}
                 </span>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">Message</Button>
+                  {/* <Button variant="outline" size="sm">Message</Button> */}
                   <Button size="sm" onClick={() => handleAcceptOffer(offer.id)}>Accept Offer</Button>
                 </div>
               </div>
