@@ -14,9 +14,10 @@ interface BidOffersProps {
   error: any;
   message?: string;
   handleAcceptOffer: (offerId: number, accept: boolean) => void;
+  isAcceptingOffer: boolean;
 }
 
-export function BidOffers({ isOpen, onClose, offers, isLoading, error, message, handleAcceptOffer }: BidOffersProps) {
+export function BidOffers({ isOpen, onClose, offers, isLoading, error, message, handleAcceptOffer, isAcceptingOffer }: BidOffersProps) {
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-[400px] sm:w-[540px]">
@@ -79,7 +80,7 @@ export function BidOffers({ isOpen, onClose, offers, isLoading, error, message, 
                 <div className="flex gap-2">
                   {/* <Button variant="outline" size="sm">Message</Button> */}
                   <Button size="sm" variant="outline" onClick={() => handleAcceptOffer(offer.id, false)}>Reject</Button>
-                  <Button size="sm" onClick={() => handleAcceptOffer(offer.id, true)}>Accept</Button>
+                  <Button size="sm" onClick={() => handleAcceptOffer(offer.id, true)} disabled={isAcceptingOffer}>{isAcceptingOffer ? "Accepting..." : "Accept"}</Button>
                 </div>
               </div>
             </div>

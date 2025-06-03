@@ -1088,12 +1088,13 @@ export const useCalendarAvailability = (service_id?: string) => {
 };
 
 export const useDirectAsCustomer = () => {
-  return useMutation<GeneralResponse, AxiosError, { response_id: number, bid_id: number, status: number }>({
-    mutationFn: async ({ response_id, bid_id, status }) => {
+  return useMutation<GeneralResponse, AxiosError, { response_id: number, bid_id: number, status: number, transaction_number?: string }>({
+    mutationFn: async ({ response_id, bid_id, status, transaction_number }) => {
       const formData = new FormData();
       formData.append("response_id", response_id.toString());
       formData.append("bid_id", bid_id.toString());
       formData.append("status", status.toString());
+      formData.append("transaction_number", transaction_number || "");
       
       const { data } = await http.post<GeneralResponse>(
         Endpoints.DIRECT_AS_CUSTOMER,

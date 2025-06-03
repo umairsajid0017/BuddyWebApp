@@ -101,7 +101,7 @@ export interface AddToWalletData {
   payment_method_id: string;
   comment?: string;
   order_total_amount?: number;
-  action?: "order_deduction" | "bid_payment" | "wallet_topup";
+  action?: "order_deduction" | "add_to_wallet";
 }
 
 export interface CnicVerificationRequest {
