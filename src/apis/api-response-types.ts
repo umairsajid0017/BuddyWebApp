@@ -14,6 +14,7 @@ import {
 } from "@/types/verification-types";
 import { Bookmark } from '@/types/bookmark-types';
 import { Notification } from '@/types/notification-types';
+import { PaymentStatus } from '@/constants/constantValues';
 
 export interface GeneralResponse {
   error: boolean;
@@ -209,6 +210,7 @@ export interface PaymentGatewayResponse {
   error: boolean;
   message: string;
   pay_url: string;
+  payment_id: number;
 }
 
 
@@ -218,6 +220,14 @@ export interface OfferResponse {
   records: Offer[];
 }
 
+export interface GetPaymentInfoResponse {
+  error: boolean;
+  message: string;
+  records: {
+    status: PaymentStatus;
+    transaction_id: string;
+  };
+}
 export interface CategoryServiceResponse {
   error: boolean;
   message: string;

@@ -115,7 +115,7 @@ export const Endpoints = {
 
   CALCULATE_CHARGES: "calculateCharges",
   SHOW_PAYMENT_HISTORY: "showPaymentHistory",
-  SHOW_ALL_PAYMENT_METHODS: "showAllPaymentMethods",
+  SHOW_ALL_PAYMENT_METHODS: "showAllPaymentMethods", 
   SHOW_SAVED_PAYMENT_METHOD: "showSavedPaymentMethod",
   ADD_PAYMENT_METHOD: "addPaymentMethod",
   UPDATE_PAYMENT_METHOD: "updatePaymentMethod",
@@ -123,6 +123,7 @@ export const Endpoints = {
   INIT_PAYMENT_GATEWAY: "initPaymentGateway",
   SHOW_WALLET_CREDIT: "showWalletCredit",
   DEDUCT_BOOKING_AMOUNT: "deductBookingAmount",
+  GET_PAYMENT_INFO: "getPaymentInfo",
 
   SHOW_SETTINGS: "showSettings",
 

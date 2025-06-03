@@ -47,3 +47,11 @@ export enum BookingStatus {
   TIMEOUT_CANCELED = 14,
   NOT_STARTED = 15,
 }
+
+
+export enum PaymentStatus {
+  PENDING = "pending",
+  PAID = "paid",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
+}

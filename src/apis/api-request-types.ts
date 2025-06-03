@@ -84,6 +84,7 @@ export interface CreateBookingData {
   audio?: File;
   booking_date: string;
   address: string;
+  transaction_number?: string;
 }
 
 export interface CreateBidRequest {
@@ -98,9 +99,9 @@ export interface CreateBidRequest {
 export interface AddToWalletData {
   amount: string;
   payment_method_id: string;
-  comment: string;
-  order_total_amount: number;
-  action: string;
+  comment?: string;
+  order_total_amount?: number;
+  action?: "order_deduction" | "bid_payment" | "wallet_topup";
 }
 
 export interface CnicVerificationRequest {
@@ -131,5 +132,9 @@ export interface AddReviewData {
   service_id: string;
   rating: string;
   comment: string;
+}
+
+export interface GetPaymentInfoData {
+  payment_id: number;
 }
 

@@ -35,6 +35,7 @@ import {
   useCalendarAvailability,
   useCheckDeduction,
   useInitPaymentGateway,
+  useGetPaymentInfo,
 } from "@/apis/apiCalls";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -50,6 +51,7 @@ import {
   CreateBidData,
   CreateBookingData,
   AddToWalletData,
+  GetPaymentInfoData,
 } from "@/apis/api-request-types";
 import { ROUTES } from "@/constants/routes";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -102,6 +104,7 @@ export function CreateBookingDialog({
   const directBooking = useDirectBooking();
   const checkDeduction = useCheckDeduction();
   const paymentGatewayMutation = useInitPaymentGateway();
+  const getPaymentInfoMutation = useGetPaymentInfo();
   const { updateUserLocation } = useLocationUpdate();
 
   // Add mobile state detection
@@ -174,16 +177,18 @@ export function CreateBookingDialog({
   const [pendingMediaFiles, setPendingMediaFiles] = useState<
     MediaFiles | undefined
   >(undefined);
+  const [currentPaymentId, setCurrentPaymentId] = useState<number | null>(null);
+  const [currentTransactionNumber, setCurrentTransactionNumber] = useState<string | undefined>(undefined);
 
-  // State for bid payment flow
-  const [pendingBidPlacementInfo, setPendingBidPlacementInfo] = useState<{
-    amount: number;
-    mediaFiles?: MediaFiles;
-    description: string;
-    category: { id: number; title: string } | null;
-    address: string;
-  } | null>(null);
-  const [paymentFor, setPaymentFor] = useState<"booking" | "bid" | null>(null);
+  // State for bid payment flow - This will be removed
+  // const [pendingBidPlacementInfo, setPendingBidPlacementInfo] = useState<{
+  //   amount: number;
+  //   mediaFiles?: MediaFiles;
+  //   description: string;
+  //   category: { id: number; title: string } | null;
+  //   address: string;
+  // } | null>(null);
+  const [paymentFor, setPaymentFor] = useState<"booking" | null>(null); // Removed "bid" type
 
   const handleOpenChange = (open: boolean) => {
     console.log("Is guest:", isGuest);
@@ -222,7 +227,7 @@ export function CreateBookingDialog({
     setPaymentUrl("");
     setPendingMediaFiles(undefined);
     setIsBookingLoading(false);
-    setPendingBidPlacementInfo(null); // Reset pending bid info
+    // setPendingBidPlacementInfo(null); // Reset pending bid info - Removed
     setPaymentFor(null); // Reset payment context
   };
 
@@ -255,24 +260,18 @@ export function CreateBookingDialog({
     setIsPlaceOrderOpen(true);
   };
 
-  const handleDirectBooking = async (mediaFiles?: MediaFiles) => {
+  const handleDirectBooking = useCallback(async (mediaFiles?: MediaFiles, transactionNumber?: string) => {
     const bookingState = formState as BookFormState;
     if (!user || !bookingState.service) return;
 
     try {
-      // If it's not already loading (might be set from payment flow)
       if (!isBookingLoading) {
         setIsBookingLoading(true);
       }
-
-      // Update location
       await updateUserLocation();
-
-      // Format date to YYYY-MM-DD
       const formattedDate = bookingState.date
         ? format(bookingState.date, "yyyy-MM-dd")
         : "";
-
       if (!initialService) {
         throw new Error("Initial service is required");
       }
@@ -284,11 +283,9 @@ export function CreateBookingDialog({
         booking_date: formattedDate,
         worker_id: initialService?.user.id.toString() ?? "",
         service_id: initialService.id.toString(),
+        transaction_number: transactionNumber,
       };
-
-      console.log("Direct booking payload:", payload);
       const response = await directBooking.mutateAsync(payload);
-
       if (!response.error) {
         setBookingDetails(response.records);
         toast.success("Booking created successfully");
@@ -301,134 +298,105 @@ export function CreateBookingDialog({
     } finally {
       setIsBookingLoading(false);
     }
-  };
+  }, [formState, user, initialService, directBooking, updateUserLocation, isBookingLoading]);
 
-  // Handler for payment dialog close
   const handlePaymentClose = useCallback(async () => {
     const currentPaymentContext = paymentFor;
-    // Immediately clear paymentFor to prevent re-entry issues if async operations are slow
+    const paymentIdToCheck = currentPaymentId;
+
     setPaymentFor(null);
+    setCurrentPaymentId(null); 
+    setCurrentTransactionNumber(undefined);
 
     setIsPaymentOpen(false);
     setPaymentUrl("");
 
-    if (currentPaymentContext === "booking") {
-      try {
-        const bookingState = formState as BookFormState;
-        if (!bookingState.service) {
-          toast.error(
-            "Service details missing for booking payment verification.",
-          );
-          return;
-        }
-
-        const expectedPrice = bookingState.service.fixed_price;
-        // Set loading true if not already, for deduction check and booking creation
-        if (!isBookingLoading) setIsBookingLoading(true);
-
-        const deductionResult = await checkDeduction.mutateAsync({
-          amount_omr: expectedPrice,
-        });
-
-        setDeductionInfo({
-          deduct_amount: deductionResult.deduct_amount,
-          wallet_amount: deductionResult.wallet_amount,
-        });
-
-        setIsBookingConfirmationOpen(true);
-        await handleDirectBooking(pendingMediaFiles); // This sets its own loading states internally
-
-        if (
-          parseFloat(deductionResult.deduct_amount) === 0 ||
-          !deductionResult.deduct_amount
-        ) {
-          toast.success("Payment completed successfully");
-        } else {
-          toast.warning(
-            "Payment not completed. Your booking might not be processed.",
-          );
-        }
-      } catch (error) {
-        toast.error("Error verifying booking payment status");
-        console.error("Booking payment verification error:", error);
-        setIsBookingConfirmationOpen(true); // Still show confirmation dialog
-        setIsBookingLoading(false); // Ensure loading is stopped on error
+    if (!paymentIdToCheck) {
+      toast.warning("Payment session ended. Status unknown as no payment ID was found.");
+      if (currentPaymentContext === "booking") {
+        setIsBookingConfirmationOpen(true); 
+      } else if (currentPaymentContext === "bid") {
+        setIsConfirmationOpen(true); 
       }
-    } else if (currentPaymentContext === "bid" && pendingBidPlacementInfo) {
-      const { amount, mediaFiles, description, category, address } =
-        pendingBidPlacementInfo;
-      // Clear pending info after retrieving
-      setPendingBidPlacementInfo(null);
-
-      try {
-        // Set loading true if not already, for deduction check and bid creation
-        if (!isBookingLoading) setIsBookingLoading(true);
-
-        const deductionResult = await checkDeduction.mutateAsync({
-          amount_omr: amount.toString(),
-        });
-        setDeductionInfo({
-          deduct_amount: deductionResult.deduct_amount,
-          wallet_amount: deductionResult.wallet_amount,
-        });
-
-        setIsConfirmationOpen(true); // Show bid confirmation dialog
-        await executeActualBidCreation(
-          amount,
-          mediaFiles,
-          description,
-          category,
-          address,
-        ); // This sets its own loading state internally
-
-        if (
-          parseFloat(deductionResult.deduct_amount) === 0 ||
-          !deductionResult.deduct_amount
-        ) {
-          toast.success("Payment for bid completed successfully.");
-        } else {
-          toast.warning(
-            "Payment for bid not completed. Your bid might not be processed if a fee was required.",
-          );
-        }
-      } catch (error) {
-        toast.error("Error verifying bid payment status or creating bid.");
-        console.error("Bid payment verification/creation error:", error);
-        setIsConfirmationOpen(true); // Still show confirmation dialog
-        setIsBookingLoading(false); // Ensure loading is stopped on error
-      }
-    } else if (currentPaymentContext === "bid" && !pendingBidPlacementInfo) {
-      // This case might happen if payment dialog was closed manually without completing payment
-      // and pendingBidPlacementInfo was somehow cleared or not set.
-      toast.warning(
-        "Bid payment process was not fully completed. Please check your bids.",
-      );
       setIsBookingLoading(false);
+      return;
     }
 
-    // Clear pending media files if they were for booking
-    if (currentPaymentContext === "booking") {
-      setPendingMediaFiles(undefined);
+    try {
+      setIsBookingLoading(true); 
+      const paymentInfo = await getPaymentInfoMutation.mutateAsync({ payment_id: paymentIdToCheck });
+
+      if (paymentInfo.error || paymentInfo.records.status !== "paid") {
+        const statusMessage = paymentInfo.records.status ? `Status: ${paymentInfo.records.status}.` : "Could not verify payment success.";
+        toast.error(`Payment not successful. ${statusMessage} Your ${currentPaymentContext} may not be processed.`);
+        if (currentPaymentContext === "booking") {
+           setBookingDetails((prev: any) => ({ ...prev, paymentStatus: paymentInfo.records.status || "failed" }));
+        } else if (currentPaymentContext === "bid") {
+           setBidDetails((prev: any) => ({ ...prev, paymentStatus: paymentInfo.records.status || "failed" }));
+        }
+        setIsBookingLoading(false);
+        if (currentPaymentContext === "booking") setIsBookingConfirmationOpen(true);
+        else if (currentPaymentContext === "bid") setIsConfirmationOpen(true);
+        return; 
+      }
+
+      const transactionNumber = paymentInfo.records.transaction_id;
+      setCurrentTransactionNumber(transactionNumber);
+
+      toast.success("Payment verified successfully.");
+
+      if (currentPaymentContext === "booking") {
+        try {
+          const bookingState = formState as BookFormState;
+          if (!bookingState.service) {
+            toast.error("Service details missing for booking payment verification.");
+            setIsBookingLoading(false);
+            setIsBookingConfirmationOpen(true);
+            return;
+          }
+           setDeductionInfo({ 
+             deduct_amount: "0", 
+             wallet_amount: deductionInfo?.wallet_amount || "N/A", 
+           });
+          setIsBookingConfirmationOpen(true);
+          await handleDirectBooking(pendingMediaFiles, transactionNumber); 
+        } catch (error) {
+          toast.error("Error finalizing booking after payment.");
+          console.error("Booking finalization error:", error);
+          setIsBookingConfirmationOpen(true); 
+        }
+      } 
+    } catch (error: any) {
+      toast.error(error.message || "Error verifying payment status.");
+      console.error("Payment verification error:", error);
+      if (currentPaymentContext === "booking") {
+        setIsBookingConfirmationOpen(true);
+      } 
+    } finally {
+      if (currentPaymentContext === "booking") {
+        setPendingMediaFiles(undefined);
+      }
     }
   }, [
     formState,
-    checkDeduction,
+    checkDeduction, 
     pendingMediaFiles,
-    paymentGatewayMutation,
     directBooking,
     paymentFor,
-    pendingBidPlacementInfo,
-    createBid,
+    createBid, 
     user,
-    updateUserLocation,
-    isBookingLoading,
+    updateUserLocation, 
+    isBookingLoading, 
+    getPaymentInfoMutation, 
+    currentPaymentId, 
+    currentTransactionNumber,
+    deductionInfo, 
+    handleDirectBooking, 
   ]);
 
   // Register event listener to handle postMessage from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // Check if the message is from our payment iframe
-      // Also check for Thawani's specific close messages
       if (
         event.data === "close" ||
         event.data?.action === "close" ||
@@ -490,19 +458,21 @@ export function CreateBookingDialog({
           if (!result.error && result.pay_url) {
             // Open the payment URL in the dialog
             setPaymentUrl(result.pay_url);
+            setCurrentPaymentId(result.payment_id); 
+            console.log("Payment ID:", result.payment_id);
             setIsPaymentOpen(true);
           } else {
             // Show error and still open confirmation dialog
             toast.error(result.message || "Failed to initialize payment");
             setIsBookingConfirmationOpen(true);
-            await handleDirectBooking(mediaFiles);
+            await handleDirectBooking(mediaFiles, currentTransactionNumber);
             setIsBookingLoading(false);
           }
         } else {
           // No amount to deduct, proceed with booking directly
           setIsBookingLoading(false); // Ensure loading is false before showing confirmation
           setIsBookingConfirmationOpen(true);
-          await handleDirectBooking(mediaFiles);
+          await handleDirectBooking(mediaFiles, currentTransactionNumber);
         }
       } catch (error) {
         toast.error("Error checking wallet deduction amount");
@@ -523,117 +493,27 @@ export function CreateBookingDialog({
 
     setIsBookingLoading(true);
     try {
-      const expectedPrice = bidAmount.toString();
-      const deductionResult = await checkDeduction.mutateAsync({
-        amount_omr: expectedPrice,
-      });
-      setDeductionInfo({
-        deduct_amount: deductionResult.deduct_amount,
-        wallet_amount: deductionResult.wallet_amount,
-      });
-
-      setPendingBidPlacementInfo({
-        amount: bidAmount,
-        mediaFiles: bidState.mediaFiles,
-        description: bidState.description,
-        category: bidState.category,
-        address: bidState.address,
-      });
-      setPaymentFor("bid");
-
-      if (parseFloat(deductionResult.deduct_amount) > 0) {
-        const paymentData: AddToWalletData = {
-          amount: deductionResult.deduct_amount,
-          payment_method_id: "1",
-          comment: "Bid payment",
-          order_total_amount: parseFloat(expectedPrice),
-          action: "bid_payment", // Using a specific action for bids
-        };
-        const result = await paymentGatewayMutation.mutateAsync(paymentData);
-
-        if (!result.error && result.pay_url) {
-          setPaymentUrl(result.pay_url);
-          setIsPaymentOpen(true);
-          setIsStartBookingOpen(false); // Close the bid amount dialog
-        } else {
-          toast.error(result.message || "Failed to initialize payment for bid");
-          // Proceed to create bid but with a warning, or handle as an error fully?
-          // For now, let's attempt to create the bid and show confirmation.
-          setIsStartBookingOpen(false);
-          setIsConfirmationOpen(true);
-          await executeActualBidCreation(
-            bidAmount,
-            bidState.mediaFiles,
-            bidState.description,
-            bidState.category,
-            bidState.address,
-          );
-          // setIsBookingLoading(false); // executeActualBidCreation will handle this
-        }
-      } else {
-        // No amount to deduct, proceed with bid creation directly
-        setIsStartBookingOpen(false);
-        setIsConfirmationOpen(true);
-        await executeActualBidCreation(
-          bidAmount,
-          bidState.mediaFiles,
-          bidState.description,
-          bidState.category,
-          bidState.address,
-        );
-        // setIsBookingLoading(false); // executeActualBidCreation will handle this
-      }
+      // Removed deduction check and payment gateway initialization for bids
+      setIsStartBookingOpen(false);
+      // Directly execute bid creation without payment
+      await executeActualBidCreation(
+        bidAmount,
+        bidState.mediaFiles,
+        bidState.description,
+        bidState.category,
+        bidState.address,
+      );
+      // Show confirmation after successful bid creation
+      // No, this should be handled by executeActualBidCreation or its caller
+      // setIsConfirmationOpen(true); 
     } catch (error) {
       toast.error("Error during bid placement process");
       console.error("Bid placement error:", error);
-      setIsBookingLoading(false);
-      setIsStartBookingOpen(false); // Ensure bid dialog is closed on error
-    }
-    // setIsBookingLoading(false) should be handled by final steps (executeActualBidCreation or error catch)
-  };
-
-  const executeActualBidCreation = async (
-    amount: number,
-    mediaFiles: MediaFiles | undefined,
-    description: string,
-    category: { id: number; title: string } | null,
-    address: string,
-  ) => {
-    if (!user || !category) {
-      toast.error("User or category missing for bid creation.");
-      setIsBookingLoading(false);
-      return;
-    }
-
-    if (!isBookingLoading) setIsBookingLoading(true); // Ensure loading state
-
-    try {
-      await updateUserLocation();
-
-      const payload: CreateBidData = {
-        category_id: category.id.toString(),
-        description: description,
-        expected_price: amount.toString(),
-        images: mediaFiles?.images,
-        audio: mediaFiles?.audio,
-        address: address,
-      };
-
-      console.log("Bid creation payload:", payload);
-      const response = await createBid.mutateAsync(payload);
-
-      if (!response.error) {
-        setBidDetails(response.records);
-        toast.success("Bid created successfully");
-        // setIsConfirmationOpen(true); // This should be set by the caller flow
-      } else {
-        toast.error(response.message || "Failed to create bid");
-      }
-    } catch (error) {
-      toast.error("Error creating bid");
-      console.error("Bid creation error:", error);
+      // setIsConfirmationOpen(true); // Ensure confirmation is shown even on error
     } finally {
       setIsBookingLoading(false);
+      // Ensure bid dialog is closed if it was open, though it's closed before this now
+      // setIsStartBookingOpen(false); 
     }
   };
 
@@ -661,6 +541,44 @@ export function CreateBookingDialog({
 
     setFormState((prev) => ({ ...prev, date }));
   };
+
+  const executeActualBidCreation = useCallback(async (
+    amount: number,
+    mediaFiles: MediaFiles | undefined,
+    description: string,
+    category: { id: number; title: string } | null,
+    address: string,
+    transactionNumber?: string,
+  ) => {
+    if (!user || !category) {
+      toast.error("User or category missing for bid creation.");
+      return;
+    }
+
+    const payload: CreateBidData = {
+      category_id: category.id.toString(),
+      description: description,
+      expected_price: amount.toString(),
+      images: mediaFiles?.images,
+      audio: mediaFiles?.audio,
+      address: address,
+    };
+    const response = await createBid.mutateAsync(payload);
+
+    if (!response.error) {
+      toast.success("Bid created successfully");
+      setCurrentPaymentId(null); 
+      setCurrentTransactionNumber(undefined);
+      setIsPaymentOpen(false);
+      // Set bid details for confirmation dialog
+      setBidDetails(response.records); // Assuming response.records contains bid details
+      setIsConfirmationOpen(true); // Open confirmation dialog
+    } else {
+      toast.error(response.message || "Failed to create bid");
+      setIsConfirmationOpen(true); // Still open confirmation dialog, but with an error state potentially
+    }
+  }, [user, createBid]);
+  
 
   return (
     <>
@@ -867,12 +785,11 @@ export function CreateBookingDialog({
                       }))
                     }
                     placeholder="Enter your complete address (e.g., Building name, Street, Area, City)"
-                    className={`${
-                      formState.address.trim() &&
+                    className={`${formState.address.trim() &&
                       !validateAddress(formState.address).isValid
                         ? "border-red-500 focus:border-red-500"
                         : ""
-                    }`}
+                      }`}
                   />
                   {formState.address.trim() &&
                     !validateAddress(formState.address).isValid && (
@@ -934,11 +851,11 @@ export function CreateBookingDialog({
         onClose={() => {
           setIsBookingConfirmationOpen(false);
           resetForm();
-          if (!isBookingLoading && bookingDetails) {
+          if (!isBookingLoading && bookingDetails && bookingDetails.paymentStatus === "paid") { 
             router.push("/bookings");
           }
         }}
-        bookingDetails={bookingDetails ?? undefined}
+        bookingDetails={bookingDetails}
         isLoading={isBookingLoading}
         deductionInfo={deductionInfo}
       />
@@ -949,7 +866,7 @@ export function CreateBookingDialog({
           setIsConfirmationOpen(false);
           resetForm();
         }}
-        bidDetails={bidDetails ?? undefined}
+        bidDetails={bidDetails}
       />
 
       {/* Payment Gateway Dialog */}
@@ -964,7 +881,7 @@ export function CreateBookingDialog({
         }}
         paymentUrl={paymentUrl}
         handlePaymentClose={handlePaymentClose}
-        title="Complete Payment" // Title used in the original component
+        title="Complete Payment" 
       />
     </>
   );

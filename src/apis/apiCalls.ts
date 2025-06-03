@@ -47,6 +47,7 @@ import {
   VerificationCheckResponse,
   WalletCreditResponse,
   AddReviewResponse,
+  GetPaymentInfoResponse,
 } from "@/apis/api-response-types";
 import {
   AddToWalletData,
@@ -65,6 +66,7 @@ import {
   SendOtpData,
   VerifyOtpData,
   AddReviewData,
+  GetPaymentInfoData,
 } from "./api-request-types";
 import { Service } from "@/types/service-types";
 import { Category } from "@/types/category-types";
@@ -621,7 +623,7 @@ export const useCustomerTransactions = () => {
 };
 
 export const useInitPaymentGateway = () => {
-  return useMutation({
+  return useMutation<PaymentGatewayResponse, AxiosError, AddToWalletData>({
     mutationFn: async (paymentData: AddToWalletData) => {
       const { data } = await http.post<PaymentGatewayResponse>(
         Endpoints.INIT_PAYMENT_GATEWAY,
@@ -632,6 +634,16 @@ export const useInitPaymentGateway = () => {
   });
 };
 
+export const useGetPaymentInfo = () => {
+  return useMutation<GetPaymentInfoResponse, AxiosError, GetPaymentInfoData>({
+    mutationFn: async (params: GetPaymentInfoData) => {
+      const { data } = await http.get<GetPaymentInfoResponse>(
+        `${Endpoints.GET_PAYMENT_INFO}?payment_id=${params.payment_id}`,
+      );
+      return data;
+    },
+  });
+};
 
 export const useAllCustomerBids = () => {
   return useQuery<BidsResponse, AxiosError>({
@@ -799,6 +811,7 @@ export const useDirectBooking = () => {
       formData.append("booking_date", bookingData.booking_date);
       formData.append("address", bookingData.address);
       formData.append("service_id", bookingData.service_id);
+      formData.append("transaction_number", bookingData.transaction_number || "");
       
 
       if (bookingData.description) {
