@@ -288,7 +288,7 @@ export function SearchComponent({
               </svg>
             </button>
           )}
-          <Button className="h-12 rounded-r-lg bg-primary hover:bg-primary-600">
+          <Button className="hidden h-12 rounded-r-lg bg-primary hover:bg-primary-600 md:block">
             <Search className="h-4 w-4" />
           </Button>
         </div>

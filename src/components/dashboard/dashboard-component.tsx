@@ -50,7 +50,7 @@ export default function DashboardComponent() {
   console.log(specialOfferItems);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto md:px-4 py-8">
       {/* <DashboardStats /> */}
       <main className="flex-1 p-6">
         <section className="mt-6 flex flex-col gap-4 lg:flex-row">
