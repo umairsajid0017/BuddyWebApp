@@ -23,6 +23,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Transaction } from "@/types/wallet-types"
 import { AddToWalletData } from "@/apis/api-request-types"
+import { PaymentGatewayDialog } from "@/components/common/payment-gateway-dialog"
 
 const WalletPage = () => {
   const [filter, setFilter] = useState("all");
@@ -207,8 +208,8 @@ const WalletPage = () => {
           <h1 className="text-3xl font-bold">My Wallet</h1>
 
           {/* Payment Gateway Dialog */}
-          <Dialog
-            open={isPaymentOpen}
+          <PaymentGatewayDialog
+            isOpen={isPaymentOpen}
             onOpenChange={(open) => {
               if (!open) {
                 handlePaymentClose();
@@ -216,117 +217,10 @@ const WalletPage = () => {
                 setIsPaymentOpen(true);
               }
             }}
-          >
-            <DialogContent className="h-[80vh] max-w-[90vw] overflow-hidden rounded-lg p-0 md:max-w-[900px]">
-              <div className="flex items-center justify-between bg-gradient-to-r from-[#1D0D25] to-[#673086] p-5 text-white">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-white/20 p-2">
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M21 12V7H17.5L15.5 5H8.5L6.5 7H3V12H21Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M3 12V19H21V12"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M15 15C15 16.6569 13.6569 18 12 18C10.3431 18 9 16.6569 9 15C9 13.3431 10.3431 12 12 12C13.6569 12 15 13.3431 15 15Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <DialogTitle className="text-2xl font-bold">
-                      Payment Gateway
-                    </DialogTitle>
-                    <p className="text-sm text-white/70">
-                      Secure payment processing
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <ScrollArea className="h-[calc(80vh-134px)]">
-                <div className="min-h-full bg-gradient-to-b from-[#f8f8f8] to-white p-4">
-                  {paymentUrl ? (
-                    <div className="h-full w-full overflow-hidden rounded-lg border border-gray-100 bg-white shadow-inner">
-                      <div className="relative h-[calc(80vh-182px)] w-full">
-                        <div
-                          className="absolute inset-0 z-10 flex items-center justify-center bg-white/80"
-                          id="loading-indicator"
-                        >
-                          <div className="flex flex-col items-center">
-                            <div className="mb-2 h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                            <p className="text-sm text-gray-600">
-                              Loading payment gateway...
-                            </p>
-                          </div>
-                        </div>
-                        <iframe
-                          ref={iframeRef}
-                          src={paymentUrl}
-                          className="h-full w-full border-none"
-                          title="Payment Gateway"
-                          sandbox="allow-forms allow-scripts allow-same-origin allow-top-navigation allow-modals"
-                          onLoad={() => {
-                            const loadingIndicator =
-                              document.getElementById("loading-indicator");
-                            if (loadingIndicator)
-                              loadingIndicator.style.display = "none";
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex h-[calc(80vh-150px)] w-full items-center justify-center">
-                      <div className="flex flex-col items-center">
-                        <div className="mb-4 h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-                        <p className="text-lg font-medium">
-                          Initializing payment...
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-              <div className="flex items-center justify-between border-t bg-gray-50 p-3">
-                <div className="flex items-center">
-                  <div className="flex space-x-1">
-                    <div className="h-4 w-6 rounded bg-gray-300"></div>
-                    <div className="h-4 w-6 rounded bg-gray-400"></div>
-                    <div className="h-4 w-6 rounded bg-gray-500"></div>
-                    <div className="h-4 w-6 rounded bg-gray-600"></div>
-                  </div>
-                  <span className="ml-2 text-xs text-gray-500">
-                    Secure payment
-                  </span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePaymentClose}
-                  className="text-sm"
-                >
-                  Cancel Payment
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+            paymentUrl={paymentUrl}
+            handlePaymentClose={handlePaymentClose}
+            title="Complete Your Payment"
+          />
         </div>
 
         {/* Balance Card */}
