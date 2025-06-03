@@ -13,7 +13,7 @@ interface BidOffersProps {
   isLoading: boolean;
   error: any;
   message?: string;
-  handleAcceptOffer: (offerId: number) => void;
+  handleAcceptOffer: (offerId: number, accept: boolean) => void;
 }
 
 export function BidOffers({ isOpen, onClose, offers, isLoading, error, message, handleAcceptOffer }: BidOffersProps) {
@@ -78,7 +78,8 @@ export function BidOffers({ isOpen, onClose, offers, isLoading, error, message, 
                 </span>
                 <div className="flex gap-2">
                   {/* <Button variant="outline" size="sm">Message</Button> */}
-                  <Button size="sm" onClick={() => handleAcceptOffer(offer.id)}>Accept Offer</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleAcceptOffer(offer.id, false)}>Reject</Button>
+                  <Button size="sm" onClick={() => handleAcceptOffer(offer.id, true)}>Accept</Button>
                 </div>
               </div>
             </div>

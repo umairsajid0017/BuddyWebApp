@@ -799,6 +799,7 @@ export const useDirectBooking = () => {
       formData.append("booking_date", bookingData.booking_date);
       formData.append("address", bookingData.address);
       formData.append("service_id", bookingData.service_id);
+      
 
       if (bookingData.description) {
         formData.append("description", bookingData.description);
@@ -1073,7 +1074,7 @@ export const useCalendarAvailability = (service_id?: string) => {
   };
 };
 
-export const useAcceptOffer = () => {
+export const useDirectAsCustomer = () => {
   return useMutation<GeneralResponse, AxiosError, { response_id: number, bid_id: number, status: number }>({
     mutationFn: async ({ response_id, bid_id, status }) => {
       const formData = new FormData();

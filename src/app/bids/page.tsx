@@ -3,7 +3,7 @@
 import {
   useCancelBid,
   useBidResponses,
-  useAcceptOffer,
+  useDirectAsCustomer,
   useAllCustomerBids,
 } from "@/apis/apiCalls";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -92,7 +92,7 @@ const NoBidsView: React.FC<{ tabLabel: string }> = ({ tabLabel }) => (
 
 const BidsPage = () => {
   const [currentTabKey, setCurrentTabKey] = useState<BidTabKey>("active");
-  const acceptOffer = useAcceptOffer();
+  const acceptOffer = useDirectAsCustomer();
   const cancelBid = useCancelBid();
   const { toast } = useToast();
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -159,13 +159,13 @@ const BidsPage = () => {
     }
   };
 
-  const handleAcceptOffer = async (offerId: number) => {
+  const handleAcceptOffer = async (offerId: number, accept: boolean) => {
     try {
       if (!selectedBid) return;
       const response = await acceptOffer.mutateAsync({
         response_id: offerId,
         bid_id: selectedBid as number,
-        status: 1,
+        status: accept ? 1 : 0 ,
       });
       console.log("response", response);
       toast({
