@@ -31,6 +31,17 @@ import { LoginType } from "@/constants/constantValues";
 import { getImageUrl } from "@/helpers/utils";
 import { useAuth } from "@/store/authStore";
 import { Endpoints } from "@/apis/endpoints";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+
 export default function NavBar() {
   const { user, logoutUser } = useAuth();
 
@@ -284,24 +295,30 @@ export default function NavBar() {
           )}
         </div>
       </div>
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-gradient-to-r from-secondary-900 to-secondary-700 p-4 md:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4 text-white hover:bg-secondary-800"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-          <div className="mt-16 flex flex-col items-center space-y-4">
+
+      <Drawer open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} direction="bottom">
+        <DrawerTrigger asChild>
+        
+        </DrawerTrigger>
+        <DrawerContent className="h-[80%] w-full max-w-sm bg-gradient-to-b from-[#1D0D25] to-[#673086] p-0 text-white md:hidden">
+          <DrawerHeader className="p-4 flex justify-center">
+            <div className="flex items-center justify-between">
+              <DrawerTitle className="text-2xl font-bold">Menu</DrawerTitle>
+              {/* <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="text-white hover:bg-secondary-800">
+                  <X className="h-5 w-5" />
+                </Button>
+              </DrawerClose> */}
+            </div>
+          </DrawerHeader>
+          <div className="flex flex-col items-center space-y-4 p-4">
             <Button
               variant="ghost"
               onClick={() => {
                 router.push("/bookings");
                 setIsMobileMenuOpen(false);
               }}
-              className="text-white hover:bg-secondary-800"
+              className="w-full text-lg text-white hover:bg-secondary-800"
             >
               Bookings
             </Button>
@@ -311,20 +328,11 @@ export default function NavBar() {
                 router.push("/bids");
                 setIsMobileMenuOpen(false);
               }}
-              className="text-white hover:bg-secondary-800"
+              className="w-full text-lg text-white hover:bg-secondary-800"
             >
               My Bids
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                router.push("/bookings");
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-white hover:bg-secondary-800"
-            >
-              My Bookings
-            </Button>
+            {/* Duplicate My Bookings removed, assuming one is enough */}
             {!isGuestUser && (
               <Button
                 variant="ghost"
@@ -332,7 +340,7 @@ export default function NavBar() {
                   router.push("/profile");
                   setIsMobileMenuOpen(false);
                 }}
-                className="text-white hover:bg-secondary-800"
+                className="w-full text-lg text-white hover:bg-secondary-800"
               >
                 My Account
               </Button>
@@ -343,14 +351,29 @@ export default function NavBar() {
                 router.push("/help-center");
                 setIsMobileMenuOpen(false);
               }}
-              className="text-white hover:bg-secondary-800"
+              className="w-full text-lg text-white hover:bg-secondary-800"
             >
               Help Center
             </Button>
-            <CreateBookingDialog />
+             <Button
+                variant="ghost"
+                onClick={() => {
+                  router.push(Endpoints.PRIVACY_POLICY);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full text-lg text-white hover:bg-secondary-800"
+              >
+                Privacy Policy
+              </Button>
+            <div className="mt-6">
+             <CreateBookingDialog isGuest={isGuestUser} />
+            </div>
           </div>
-        </div>
-      )}
+          {/* <DrawerFooter className="p-4">
+            <Button variant="outline" onClick={() => setIsMobileMenuOpen(false)}>Close</Button>
+          </DrawerFooter> */}
+        </DrawerContent>
+      </Drawer>
     </header>
   );
 }
