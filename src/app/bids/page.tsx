@@ -114,27 +114,37 @@ const BidsPage = () => {
     }
   };
 
-  const executeActualOfferAcceptance = async (offerId: number, bidId: number, transactionNum?: string) => {
+  const executeActualOfferAcceptance = async (offerId: number, bidId: number, status: number, transactionNum?: string) => {
     setIsProcessingPayment(true);
     try {
       const payload: { response_id: number; bid_id: number; status: number; transaction_number?: string; } = {
         response_id: offerId,
         bid_id: bidId,
-        status: 1, 
+        status: status, 
         transaction_number: transactionNum,
       };
       const response = await acceptOffer.mutateAsync(payload);
+      const toastTitle = status === 1 ? "Offer Accepted" : "Offer Rejected";
+      const toastDescription = status === 1 
+        ? response.message || "The offer has been successfully accepted."
+        : response.message || "The offer has been rejected.";
+      
       toast({
-        title: "Offer Accepted",
-        description: response.message || "The offer has been successfully accepted.",
+        title: toastTitle,
+        description: toastDescription,
       });
       refetch();
-      setShowOffers(false); 
+      setShowOffers(false);
       setSelectedBidForOffers(null);
     } catch (error: any) {
+      const errorTitle = status === 1 ? "Error Accepting Offer" : "Error Rejecting Offer";
+      const errorDescription = status === 1
+        ? error.message || "Failed to accept the offer. Please try again."
+        : error.message || "Failed to reject the offer. Please try again.";
+        
       toast({
-        title: "Error Accepting Offer",
-        description: error.message || "Failed to accept the offer. Please try again.",
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive",
       });
     } finally {
@@ -180,7 +190,7 @@ const BidsPage = () => {
           title: "Payment Verified",
           description: "Payment was successful. Proceeding to accept the offer.",
         });
-        await executeActualOfferAcceptance(pendingAcceptanceDetails.offerId, pendingAcceptanceDetails.bidId, transactionNumber);
+        await executeActualOfferAcceptance(pendingAcceptanceDetails.offerId, pendingAcceptanceDetails.bidId, 1, transactionNumber);
       }
     } catch (error: any) {
       toast({
@@ -196,15 +206,17 @@ const BidsPage = () => {
   }, [currentPaymentId, pendingOfferAcceptance, getPaymentInfoMutation, toast, refetch, acceptOffer]);
 
   const handleAcceptOffer = async (offerId: number, accept: boolean) => {
-    if (!accept) { 
-      toast({ title: "Offer Rejected", description: "The offer has been marked as not accepted." });
-      return;
-    }
-
     if (!selectedBidForOffers) {
       toast({ title: "Error", description: "No bid selected for offers.", variant: "destructive" });
       return;
     }
+
+    if (!accept) { 
+      await executeActualOfferAcceptance(offerId, selectedBidForOffers, 0, undefined);
+      
+      return;
+    }
+
 
     const selectedOffer = bidResponsesData?.records?.find(offer => offer.id === offerId);
     if (!selectedOffer || typeof selectedOffer.proposed_price === 'undefined') { 
@@ -249,7 +261,7 @@ const BidsPage = () => {
           title: "No Payment Required",
           description: "Proceeding to accept the offer directly.",
         });
-        await executeActualOfferAcceptance(offerId, selectedBidForOffers, undefined); 
+        await executeActualOfferAcceptance(offerId, selectedBidForOffers, 1, undefined); 
       }
     } catch (error: any) {
       toast({
