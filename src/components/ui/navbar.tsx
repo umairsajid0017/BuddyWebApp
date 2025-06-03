@@ -300,7 +300,7 @@ export default function NavBar() {
         <DrawerTrigger asChild>
         
         </DrawerTrigger>
-        <DrawerContent className="h-[80%] w-full max-w-sm bg-gradient-to-b from-[#1D0D25] to-[#673086] p-0 text-white md:hidden">
+        <DrawerContent className="h-[80%] w-full  bg-gradient-to-b from-[#1D0D25] to-[#673086] p-0 text-white md:hidden">
           <DrawerHeader className="p-4 flex justify-center">
             <div className="flex items-center justify-between">
               <DrawerTitle className="text-2xl font-bold">Menu</DrawerTitle>

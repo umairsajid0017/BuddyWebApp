@@ -38,28 +38,28 @@ const DISPLAY_STATUSES = [
 type BookingStatusKey = (typeof DISPLAY_STATUSES)[number]["key"];
 
 const LoadingBookings = () => (
-  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
     {[1, 2, 3, 4].map((i) => (
-      <Skeleton key={i} className="h-[200px] w-full" />
+      <Skeleton key={i} className="h-[200px] w-full rounded-lg" />
     ))}
   </div>
 );
 
 const NoBookingsView: React.FC<{ status: string }> = ({ status }) => (
-  <div className="flex flex-col items-center justify-center py-12">
-    <div className="pointer-events-none flex items-center justify-center">
+  <div className="flex flex-col items-center justify-center py-8 text-center sm:py-12">
+    <div className="pointer-events-none mb-4 flex items-center justify-center">
       <Image
         src="/assets/verify-email.svg"
-        alt="Verify Email"
-        className="h-[180px] w-[180px]"
+        alt="No Bookings"
+        className="h-[150px] w-[150px] sm:h-[180px] sm:w-[180px]"
         width={180}
         height={180}
       />
     </div>
-    <h2 className="mb-2 text-center text-2xl font-semibold">
+    <h2 className="mb-2 text-xl font-semibold sm:text-2xl">
       You have no {status} bookings
     </h2>
-    <p className="mb-6 text-center text-gray-500">
+    <p className="mb-4 text-sm text-gray-500 sm:mb-6 sm:text-base">
       You do not have any {status} bookings. Make a new booking by clicking the
       button.
     </p>
@@ -85,9 +85,9 @@ const BookingsComponent: React.FC = () => {
   }
 
   return (
-    <>
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My Bookings</h1>
+    <div className="container mx-auto p-4 md:p-6">
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-xl font-bold sm:text-2xl">My Bookings</h1>
         {/* <CreateBookingDialog /> */}
       </div>
       <Tabs
@@ -95,10 +95,11 @@ const BookingsComponent: React.FC = () => {
         onValueChange={(value) =>
           setCurrentStatusKey(value as BookingStatusKey)
         }
+        className="w-full"
       >
-        <TabsList className="mb-4">
+        <TabsList className="md:mb-6 mb-8 grid w-full grid-cols-2 sm:grid-cols-4">
           {DISPLAY_STATUSES.map(({ key, label }) => (
-            <TabsTrigger key={key} value={key}>
+            <TabsTrigger key={key} value={key} className="px-3 py-2 text-xs sm:text-sm">
               {label}
             </TabsTrigger>
           ))}
@@ -108,7 +109,7 @@ const BookingsComponent: React.FC = () => {
             {isLoading ? (
               <LoadingBookings />
             ) : (bookingsResponse?.records ?? []).length > 0 ? (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-4">
                 {bookingsResponse?.records.map((booking: Booking) => (
                   <TaskCard key={booking.id} booking={booking} />
                 ))}
@@ -119,7 +120,7 @@ const BookingsComponent: React.FC = () => {
           </TabsContent>
         ))}
       </Tabs>
-    </>
+    </div>
   );
 };
 
