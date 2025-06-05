@@ -13,6 +13,7 @@ import { colors } from "@/constants/colors";
 import TooltipWrapper from "../ui/tooltip-wrapper";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { StarDisplay } from "../ui/star-rating";
 
 const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -48,7 +49,12 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
     });
   };
 
+  // Calculate average rating
+  const averageRating = service.ratings && service.ratings.length > 0
+    ? service.ratings.reduce((acc, rating) => acc + rating.rating, 0) / service.ratings.length
+    : 0;
 
+  const reviewCount = service.ratings ? service.ratings.length : 0;
 
   return (
     <Link href={`/services/${service.id}`} className="block">
@@ -67,6 +73,21 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
               <Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-gray-800 shadow-sm">
                 {service.category.title}
               </Badge>
+            </div>
+          )}
+          
+          {/* Rating Badge */}
+          {averageRating > 0 && (
+            <div className="absolute top-3 right-3">
+              <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm">
+                <StarDisplay 
+                  rating={averageRating} 
+                  size="sm" 
+                  showValue={true}
+                  showCount={false}
+                  className="gap-0.5"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -93,6 +114,19 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
                 </span>
               </div>
             )}
+
+            {/* Rating and Reviews */}
+            {averageRating > 0 && (
+              <div className="flex items-center gap-2">
+                <StarDisplay 
+                  rating={averageRating}
+                  size="sm"
+                  showValue={true}
+                  showCount={true}
+                  reviewCount={reviewCount}
+                />
+              </div>
+            )}
             
             <p className="text-sm text-gray-600 leading-relaxed">
               {service.description.length > 80 
@@ -101,7 +135,7 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
               }
             </p>
             
-             <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <p className="text-xl font-bold text-primary">
                 {CURRENCY}. {service.fixed_price}
               </p>
