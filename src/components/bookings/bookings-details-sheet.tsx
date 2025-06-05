@@ -22,6 +22,7 @@ import { getImageUrl } from "@/helpers/utils";
 import { format } from "date-fns";
 import { BookingStatus } from "@/constants/constantValues";
 import { AddReviewDialog } from "./add-review-dialog";
+import { ReviewManager } from "@/components/services/review-manager";
 
 type BookingDetailsSheetProps = {
   booking: Booking;
@@ -41,6 +42,8 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
   const handleChat = () => {
     setIsChatOpen(true);
   };
+
+
 
   return (
     <>
@@ -214,15 +217,13 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                   )}
                   
                   {booking.status === BookingStatus.COMPLETED && (
-                    <AddReviewDialog
-                      serviceId={booking.service.id}
-                      trigger={
-                        <Button className="flex-1">
-                          <Star className="mr-2 h-4 w-4" />
-                          Add Review
-                        </Button>
-                      }
-                    />
+                    <div className="w-full">
+                      <ReviewManager 
+                        serviceId={booking.service.id} 
+                        showAddReview={true}
+                        isServicePage={false}
+                      />
+                    </div>
                   )}
                 </div>
               </div>

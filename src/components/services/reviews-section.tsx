@@ -4,21 +4,27 @@ import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Heart, MoreHorizontal, Star } from "lucide-react"
+import { Heart, MoreHorizontal, Star, Edit, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { ServiceRating } from "@/types/service-types"
+import { Review } from "@/types/service-types"
+import { EditReviewDialog } from "@/components/bookings/edit-review-dialog"
+import { DeleteReviewDialog } from "@/components/bookings/delete-review-dialog"
+import { useAuth } from "@/store/authStore"
 
 interface ReviewsSectionProps {
-  ratings: ServiceRating[]
+  ratings: Review[]
+  onReviewUpdated?: () => void
 }
 
-export default function ReviewsSection({ ratings = [] }: ReviewsSectionProps) {
+export default function ReviewsSection({ ratings = [], onReviewUpdated }: ReviewsSectionProps) {
   const [selectedFilter, setSelectedFilter] = useState<number | 'all'>('all')
+  const { user } = useAuth()
 
   const averageRating = ratings.length > 0
     ? (ratings.reduce((acc, rating) => acc + rating.rating, 0) / ratings.length).toFixed(1)
@@ -43,6 +49,15 @@ export default function ReviewsSection({ ratings = [] }: ReviewsSectionProps) {
       return `${diffDays} ${diffDays === 1 ? 'week' : 'weeks'} ago`
     }
     return date.toLocaleDateString()
+  }
+
+  // Check if the current user owns this review
+  const isUserReview = (rating: Review) => {
+    return user && user.id === rating.customer_Id
+  }
+
+  const handleReviewUpdate = () => {
+    onReviewUpdated?.()
   }
 
   return (
@@ -92,7 +107,9 @@ export default function ReviewsSection({ ratings = [] }: ReviewsSectionProps) {
                     <AvatarFallback>U</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-semibold">User {rating.rated_by}</div>
+                    <div className="font-semibold">
+                      {isUserReview(rating) ? "You" : rating.customer.name}
+                    </div>
                     <div className="flex items-center">
                       {Array.from({ length: rating.rating }).map((_, i) => (
                         <Star key={i} className="h-4 w-4 fill-current text-primary" />
@@ -111,6 +128,31 @@ export default function ReviewsSection({ ratings = [] }: ReviewsSectionProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {isUserReview(rating) ? (
+                        <>
+                          <EditReviewDialog
+                            review={rating}
+                            onSuccess={handleReviewUpdate}
+                            trigger={
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Review
+                              </DropdownMenuItem>
+                            }
+                          />
+                          <DeleteReviewDialog
+                            review={rating}
+                            onSuccess={handleReviewUpdate}
+                            trigger={
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Review
+                              </DropdownMenuItem>
+                            }
+                          />
+                          <DropdownMenuSeparator />
+                        </>
+                      ) : null}
                       <DropdownMenuItem>Report</DropdownMenuItem>
                       <DropdownMenuItem>Share</DropdownMenuItem>
                     </DropdownMenuContent>
@@ -121,7 +163,7 @@ export default function ReviewsSection({ ratings = [] }: ReviewsSectionProps) {
               <div className="mt-2 flex items-center gap-1">
                 <Button variant="ghost" size="sm" className="text-primary">
                   <Heart className="mr-1 h-4 w-4" />
-                  {rating.total_likes}
+                  0
                 </Button>
               </div>
             </div>

@@ -148,3 +148,7 @@ export interface GetPaymentInfoData {
   payment_id: number;
 }
 
+export interface GetReviewsData {
+  service_id: number;
+}
+

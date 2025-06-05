@@ -12,7 +12,7 @@ import Main from "@/components/ui/main";
 import PopularServicesSection from "@/components/services/popular-services-section";
 import { Badge } from "@/components/ui/badge";
 import { Service, ServiceRating } from "@/types/service-types";
-import ReviewsSection from "@/components/services/reviews-section";
+import { ReviewManager } from "@/components/services/review-manager";
 import UserProfileCard from "@/components/services/user-profile-card";
 import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
 import { CURRENCY, LoginType } from "@/constants/constantValues";
@@ -159,7 +159,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
             <UserProfileCard user={service.user} />
           </section>
           <PopularServicesSection services={services} />
-          <ReviewsSection ratings={service.ratings} />
+          <ReviewManager serviceId={service.id} showAddReview={false} isServicePage={true} />
         </div>
       )}
     </Main>

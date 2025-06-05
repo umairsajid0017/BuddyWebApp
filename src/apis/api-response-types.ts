@@ -2,7 +2,7 @@ import { Offer } from '@/types/bid-types';
 
 import { Booking } from "@/types/booking-types";
 import { AvailabilityDetail, User } from "../types/general-types";
-import { CategoryService, Service } from "../types/service-types";
+import { CategoryService, Service, Review } from "../types/service-types";
 import { Bid } from "@/types/bid-types";
 import { FAQ } from "@/types/faq-types";
 import { Category } from "@/types/category-types";
@@ -282,6 +282,12 @@ export interface DeleteReviewResponse {
   error: boolean;
   message: string;
   records?: any;
+}
+
+export interface GetReviewsResponse {
+  error: boolean;
+  message: string;
+  records: Review[];
 }
 
 

@@ -50,6 +50,7 @@ import {
   EditReviewResponse,
   DeleteReviewResponse,
   GetPaymentInfoResponse,
+  GetReviewsResponse,
 } from "@/apis/api-response-types";
 import {
   AddToWalletData,
@@ -71,6 +72,7 @@ import {
   EditReviewData,
   DeleteReviewData,
   GetPaymentInfoData,
+  GetReviewsData,
 } from "./api-request-types";
 import { Service } from "@/types/service-types";
 import { Category } from "@/types/category-types";
@@ -1472,6 +1474,20 @@ export const useDeleteReview = () => {
       }
       return data;
     },
+  });
+};
+
+export const useGetReviews = (serviceId: number) => {
+  return useQuery<GetReviewsResponse, AxiosError>({
+    queryKey: ["reviews", serviceId],
+    queryFn: async () => {
+      const { data } = await http.get<GetReviewsResponse>(
+        Endpoints.GET_REVIEWS,
+        { service_id: serviceId }
+      );
+      return data;
+    },
+    enabled: !!serviceId,
   });
 };
 

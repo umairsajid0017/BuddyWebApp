@@ -1,5 +1,6 @@
 import { Category } from "./category-types";
 import { User, ImageType } from "./general-types";
+import { Booking } from "./booking-types";
 
 export interface ServiceRating {
   id: number;
@@ -13,7 +14,23 @@ export interface ServiceRating {
   total_likes: number;
 }
 
-
+export interface Review {
+  id: number;
+  customer_Id: number;
+  worker_Id: number;
+  booking_Id: number;
+  service_id: number;
+  rating: number;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  is_reported: number;
+  report_reason_id: number | null;
+  booking: Booking;
+  customer: User;
+  worker: User;
+}
 
 export interface Service {
   id: number;
@@ -37,8 +54,6 @@ export interface Service {
   tagline: string;
   added_by: string | null;
 }
-
-
 
 export interface CategoryService {
   service_id: number;
