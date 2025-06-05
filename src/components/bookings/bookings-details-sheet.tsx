@@ -21,8 +21,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { getImageUrl } from "@/helpers/utils";
 import { format } from "date-fns";
 import { BookingStatus } from "@/constants/constantValues";
-import { AddReviewDialog } from "./add-review-dialog";
-import { ReviewManager } from "@/components/services/review-manager";
+import { AddReviewDialog } from "../common/reviews/add-review-dialog";
+import { ReviewManager } from "@/components/common/reviews/review-manager";
 
 type BookingDetailsSheetProps = {
   booking: Booking;

@@ -13,8 +13,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Review } from "@/types/service-types"
-import { EditReviewDialog } from "@/components/bookings/edit-review-dialog"
-import { DeleteReviewDialog } from "@/components/bookings/delete-review-dialog"
+import { EditReviewDialog } from "@/components/common/reviews/edit-review-dialog"
+import { DeleteReviewDialog } from "@/components/common/reviews/delete-review-dialog"
 import { useAuth } from "@/store/authStore"
 
 interface ReviewsSectionProps {

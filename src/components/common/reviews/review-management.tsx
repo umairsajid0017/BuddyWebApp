@@ -14,20 +14,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useGetReviews } from "@/apis/apiCalls";
 import { useAuth } from "@/store/authStore";
-import { EditReviewDialog } from "@/components/bookings/edit-review-dialog";
-import { DeleteReviewDialog } from "@/components/bookings/delete-review-dialog";
-import { AddReviewDialog } from "@/components/bookings/add-review-dialog";
+import { EditReviewDialog } from "@/components/common/reviews/edit-review-dialog";
+import { DeleteReviewDialog } from "@/components/common/reviews/delete-review-dialog";
+import { AddReviewDialog } from "@/components/common/reviews/add-review-dialog";
 import { Review } from "@/types/service-types";
 import { getImageUrl } from "@/helpers/utils";
 
 interface ReviewManagementProps {
   serviceId: number;
   showAddReview?: boolean;
+  bookingId?: string;
 }
 
 export const ReviewManagement: React.FC<ReviewManagementProps> = ({
   serviceId,
   showAddReview = false,
+  bookingId,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<number | 'all'>('all');
   const { user } = useAuth();
@@ -110,9 +112,10 @@ export const ReviewManagement: React.FC<ReviewManagementProps> = ({
             <span className="text-muted-foreground">{reviews.length} reviews</span>
           </div>
           
-          {showAddReview && !userReview && (
+          {showAddReview && !userReview && bookingId && (
             <AddReviewDialog
               serviceId={serviceId}
+              bookingId={bookingId}
               onSuccess={handleReviewUpdate}
               trigger={
                 <Button className="flex items-center gap-2">

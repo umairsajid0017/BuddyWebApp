@@ -12,7 +12,7 @@ import Main from "@/components/ui/main";
 import PopularServicesSection from "@/components/services/popular-services-section";
 import { Badge } from "@/components/ui/badge";
 import { Service, ServiceRating } from "@/types/service-types";
-import { ReviewManager } from "@/components/services/review-manager";
+import { ReviewManager } from "@/components/common/reviews/review-manager";
 import UserProfileCard from "@/components/services/user-profile-card";
 import { CreateBookingDialog } from "@/components/bookings/create-booking-dialogue";
 import { CURRENCY, LoginType } from "@/constants/constantValues";
