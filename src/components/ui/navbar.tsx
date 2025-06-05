@@ -92,11 +92,11 @@ export default function NavBar() {
   };
 
   return (
-    <header className="flex justify-center bg-gradient-to-b from-[#1D0D25] to-[#673086] shadow">
+    <header className="flex justify-center bg-gradient-to-b from-[#371b46] to-[#673086] shadow backdrop-blur-lg bg-opacity-20">
       <div className="container flex items-center justify-between px-6 py-2 md:mx-auto">
         {!isSearchVisible && (
           <Link href={"/"} className="flex items-center gap-2">
-            <Image src={"/assets/logo.png"} alt="logo" width={72} height={72} />
+            <Image src={"/assets/logo.png"} alt="logo" width={88} height={88} />
             <span className="text-3xl font-bold text-white">Buddy</span>
           </Link>
         )}
