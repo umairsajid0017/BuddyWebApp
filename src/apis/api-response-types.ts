@@ -272,4 +272,16 @@ export interface AddReviewResponse {
   records?: any;
 }
 
+export interface EditReviewResponse {
+  error: boolean;
+  message: string;
+  records?: any;
+}
+
+export interface DeleteReviewResponse {
+  error: boolean;
+  message: string;
+  records?: any;
+}
+
 

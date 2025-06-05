@@ -134,6 +134,16 @@ export interface AddReviewData {
   comment: string;
 }
 
+export interface EditReviewData {
+  review_id: string;
+  rating: string;
+  comment: string;
+}
+
+export interface DeleteReviewData {
+  review_id: string;
+}
+
 export interface GetPaymentInfoData {
   payment_id: number;
 }

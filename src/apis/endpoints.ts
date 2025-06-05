@@ -79,6 +79,8 @@ export const Endpoints = {
   ADD_VERIFICATION_PASSPORT: "addVerificationPassport",
 
   ADD_REVIEW: "addReview",
+  EDIT_REVIEW: "editReview",
+  DELETE_REVIEW: "deleteReview",
   GET_REVIEWS: "getReviews",
 
   SEND_FEEDBACK: "sendFeedback",

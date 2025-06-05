@@ -47,6 +47,8 @@ import {
   VerificationCheckResponse,
   WalletCreditResponse,
   AddReviewResponse,
+  EditReviewResponse,
+  DeleteReviewResponse,
   GetPaymentInfoResponse,
 } from "@/apis/api-response-types";
 import {
@@ -66,6 +68,8 @@ import {
   SendOtpData,
   VerifyOtpData,
   AddReviewData,
+  EditReviewData,
+  DeleteReviewData,
   GetPaymentInfoData,
 } from "./api-request-types";
 import { Service } from "@/types/service-types";
@@ -1412,6 +1416,54 @@ export const useAddReview = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+  });
+};
+
+export const useEditReview = () => {
+  return useMutation<EditReviewResponse, AxiosError, EditReviewData>({
+    mutationFn: async (reviewData: EditReviewData) => {
+      const formData = new FormData();
+      formData.append("review_id", reviewData.review_id);
+      formData.append("rating", reviewData.rating);
+      formData.append("comment", reviewData.comment);
+      
+      const { data } = await http.post<EditReviewResponse>(
+        Endpoints.EDIT_REVIEW,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (data.error) {
+        throw new Error(data.message);
+      }
+      return data;
+    },
+  });
+};
+
+export const useDeleteReview = () => {
+  return useMutation<DeleteReviewResponse, AxiosError, DeleteReviewData>({
+    mutationFn: async (reviewData: DeleteReviewData) => {
+      const urlencoded = new URLSearchParams();
+      urlencoded.append("review_id", reviewData.review_id);
+      
+      const { data } = await http.deleteWithBody<DeleteReviewResponse>(
+        Endpoints.DELETE_REVIEW,
+        urlencoded,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
           },
         }
       );
