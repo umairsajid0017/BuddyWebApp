@@ -74,20 +74,16 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
     if (serviceResponse) {
       setService({
         ...serviceResponse.records,
-        ratings: [],
         long: serviceResponse.records.long ? Number(serviceResponse.records.long) : null,
         lat: serviceResponse.records.lat ? Number(serviceResponse.records.lat) : null,
         fixed_price: serviceResponse.records.fixed_price,
       });
     }
+    console.log(serviceResponse);
   }, [serviceResponse]);
 
-  const averageRating =
-    service && service.ratings.length > 0
-      ? service.ratings.reduce((acc: number, rating: ServiceRating) => acc + rating.rating, 0) / service.ratings.length
-      : 0;
-
-  const reviewCount = service?.ratings.length || 0;
+ 
+  const reviewCount = service?.total_reviews ? Number(service.total_reviews) : 0;
 
   if (isLoading) {
     return <ServiceDetailsSkeleton />;
@@ -124,10 +120,10 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
                     
                     {/* Enhanced Rating Display */}
                     <div className="mb-4 flex items-center gap-4">
-                      {averageRating > 0 ? (
+                      {service.ratings && Number(service.ratings) > 0 ? (
                         <div className="flex items-center gap-2">
                           <StarDisplay 
-                            rating={averageRating}
+                            rating={Number(service.ratings)}
                             size="md"
                             showValue={true}
                             showCount={true}
@@ -159,7 +155,7 @@ const ServiceDetails: React.FC<ServiceDetailsProps> = ({ params }) => {
             <UserProfileCard user={service.user} />
           </section>
           <PopularServicesSection services={services} />
-          <ReviewManager serviceId={service.id} showAddReview={false} isServicePage={true} />
+          <ReviewManager serviceId={service.id} showAddReview={false} isServicePage={true}  />
         </div>
       )}
     </Main>

@@ -36,6 +36,7 @@ export const DeleteReviewDialog: React.FC<DeleteReviewDialogProps> = ({
     try {
       const response = await deleteReviewMutation.mutateAsync({
         review_id: review.id.toString(),
+        booking_id: review.booking_Id.toString(),
       });
 
       toast({

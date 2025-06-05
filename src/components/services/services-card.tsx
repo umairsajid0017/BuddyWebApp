@@ -49,11 +49,7 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
     });
   };
 
-  // Calculate average rating
-  const averageRating = service.ratings && service.ratings.length > 0
-    ? service.ratings.reduce((acc, rating) => acc + rating.rating, 0) / service.ratings.length
-    : 0;
-
+ 
   const reviewCount = service.ratings ? service.ratings.length : 0;
 
   return (
@@ -77,11 +73,11 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
           )}
           
           {/* Rating Badge */}
-          {averageRating > 0 && (
+          { service.ratings && (
             <div className="absolute top-3 right-3">
               <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm">
                 <StarDisplay 
-                  rating={averageRating} 
+                  rating={Number(service.ratings)} 
                   size="sm" 
                   showValue={true}
                   showCount={false}
@@ -116,10 +112,10 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
             )}
 
             {/* Rating and Reviews */}
-            {averageRating > 0 && (
+            {service.ratings && Number(service.ratings) > 0 && (
               <div className="flex items-center gap-2">
                 <StarDisplay 
-                  rating={averageRating}
+                  rating={Number(service.ratings)}
                   size="sm"
                   showValue={true}
                   showCount={true}

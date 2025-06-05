@@ -117,7 +117,7 @@ export const StarDisplay: React.FC<StarDisplayProps> = ({
             <Star
               className={cn(
                 sizeClasses[size],
-                "fill-transparent text-muted-foreground"
+                "fill-transparent text-text-200"
               )}
             />
             <Star
@@ -136,7 +136,7 @@ export const StarDisplay: React.FC<StarDisplayProps> = ({
             key={`empty-${index}`}
             className={cn(
               sizeClasses[size],
-              "fill-transparent text-muted-foreground"
+              "fill-transparent text-text-200"
             )}
           />
         ))}

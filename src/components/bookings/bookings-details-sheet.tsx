@@ -222,6 +222,7 @@ const BookingDetailsSheet: React.FC<BookingDetailsSheetProps> = ({
                         serviceId={booking.service.id} 
                         showAddReview={true}
                         isServicePage={false}
+                        bookingId={booking.id.toString()}
                       />
                     </div>
                   )}

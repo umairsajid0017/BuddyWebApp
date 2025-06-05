@@ -1411,7 +1411,8 @@ export const useAddReview = () => {
       formData.append("service_id", reviewData.service_id);
       formData.append("rating", reviewData.rating);
       formData.append("comment", reviewData.comment);
-      
+      formData.append("booking_id", reviewData.booking_id);
+
       const { data } = await http.post<AddReviewResponse>(
         Endpoints.ADD_REVIEW,
         formData,
@@ -1436,6 +1437,7 @@ export const useEditReview = () => {
       formData.append("review_id", reviewData.review_id);
       formData.append("rating", reviewData.rating);
       formData.append("comment", reviewData.comment);
+      formData.append("booking_id", reviewData.booking_id);
       
       const { data } = await http.post<EditReviewResponse>(
         Endpoints.EDIT_REVIEW,
@@ -1459,6 +1461,7 @@ export const useDeleteReview = () => {
     mutationFn: async (reviewData: DeleteReviewData) => {
       const urlencoded = new URLSearchParams();
       urlencoded.append("review_id", reviewData.review_id);
+      urlencoded.append("booking_id", reviewData.booking_id);
       
       const { data } = await http.deleteWithBody<DeleteReviewResponse>(
         Endpoints.DELETE_REVIEW,

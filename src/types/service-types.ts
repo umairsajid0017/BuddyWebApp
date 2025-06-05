@@ -47,7 +47,8 @@ export interface Service {
   updated_at: string | null;
   user: User;
   category: Category;
-  ratings: ServiceRating[];
+  ratings: string;
+  total_reviews: string;
   hourly_price: string;
   address: string;
   price_mode: "fixed" | "hourly";

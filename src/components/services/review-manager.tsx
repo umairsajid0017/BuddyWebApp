@@ -25,12 +25,14 @@ interface ReviewManagerProps {
   serviceId: number;
   showAddReview?: boolean;
   isServicePage?: boolean;
+  bookingId?: string;
 }
 
 export const ReviewManager: React.FC<ReviewManagerProps> = ({
   serviceId,
   showAddReview = false,
   isServicePage = false,
+  bookingId,
 }) => {
 
     const isMobile = useIsMobile();
@@ -119,9 +121,10 @@ export const ReviewManager: React.FC<ReviewManagerProps> = ({
             </span>
           </div>
 
-          {showAddReview && !userReview && (
+          {showAddReview && !userReview && bookingId && (
             <AddReviewDialog
               serviceId={serviceId}
+              bookingId={bookingId}
               onSuccess={handleReviewUpdate}
               trigger={
                 <Button className="flex items-center gap-2">

@@ -70,6 +70,7 @@ export const EditReviewDialog: React.FC<EditReviewDialogProps> = ({
         review_id: review.id.toString(),
         rating: rating.toString(),
         comment: comment.trim(),
+        booking_id: review.booking_Id.toString(),
       });
 
       toast({

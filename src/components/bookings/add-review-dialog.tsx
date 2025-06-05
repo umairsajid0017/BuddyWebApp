@@ -20,12 +20,14 @@ import { toast } from "@/hooks/use-toast";
 
 interface AddReviewDialogProps {
   serviceId: number;
+  bookingId: string;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
 }
 
 export const AddReviewDialog: React.FC<AddReviewDialogProps> = ({
   serviceId,
+  bookingId,
   trigger,
   onSuccess,
 }) => {
@@ -61,6 +63,7 @@ export const AddReviewDialog: React.FC<AddReviewDialogProps> = ({
         service_id: serviceId.toString(),
         rating: rating.toString(),
         comment: comment.trim(),
+        booking_id: bookingId.toString(),
       });
 
     

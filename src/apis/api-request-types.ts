@@ -132,16 +132,19 @@ export interface AddReviewData {
   service_id: string;
   rating: string;
   comment: string;
+  booking_id: string;
 }
 
 export interface EditReviewData {
   review_id: string;
   rating: string;
   comment: string;
+  booking_id: string;
 }
 
 export interface DeleteReviewData {
   review_id: string;
+  booking_id: string;
 }
 
 export interface GetPaymentInfoData {
