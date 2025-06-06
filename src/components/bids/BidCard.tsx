@@ -13,6 +13,7 @@ import { Clock, MapPin, MoreVertical, PlayCircle } from "lucide-react";
 import { Bid } from "@/types/bid-types";
 import { CURRENCY, BidStatus } from "@/constants/constantValues";
 import { getImageUrl, getStatusBadgeProps } from "@/helpers/utils";
+import { BidCountdownTimer } from "./BidCountdownTimer";
 
 interface BidCardProps {
   bid: Bid;
@@ -22,6 +23,7 @@ interface BidCardProps {
   onCancelBidInitiate: (bidId: number) => void; // Renamed to avoid conflict if a direct onCancelBid prop is added later
   onPlayAudio: (bidId: number | null) => void;
   onSelectImage: (imageUrl: string) => void;
+  onBidExpire?: () => void;
 }
 
 export const BidCard: React.FC<BidCardProps> = ({
@@ -32,6 +34,7 @@ export const BidCard: React.FC<BidCardProps> = ({
   onCancelBidInitiate,
   onPlayAudio,
   onSelectImage,
+  onBidExpire,
 }) => {
   const statusProps = getStatusBadgeProps(bid.status);
 
@@ -76,6 +79,15 @@ export const BidCard: React.FC<BidCardProps> = ({
                 {bid.address}
               </div>
             </div>
+            {isActiveBid && bid.status === BidStatus.OPEN && bid.expiration_time > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Expires in:</span>
+                <BidCountdownTimer
+                  expirationTimeInSeconds={bid.expiration_time}
+                  onExpire={onBidExpire}
+                />
+              </div>
+            )}
             {bid.bid_canceled_reason && (
               <p className="text-sm text-destructive">
                 Cancellation reason: {bid.bid_canceled_reason}

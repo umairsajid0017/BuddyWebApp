@@ -373,6 +373,14 @@ const BidsPage = () => {
                           onCancelBidInitiate={handleCancelBidInitiate}
                           onPlayAudio={handlePlayAudio}
                           onSelectImage={handleSelectImage}
+                          onBidExpire={() => {
+                            toast({
+                              title: "Bid Expired",
+                              description: `Bid "${bid.service?.name || 'Service'}" has expired and been timeout cancelled.`,
+                              variant: "destructive",
+                            });
+                            refetch(); 
+                          }}
                         />
                       );
                     })}
