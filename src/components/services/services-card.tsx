@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { BookmarkIcon, StarIcon } from "lucide-react";
+import { BookmarkIcon, Star, StarIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent } from "../ui/card";
+import { Card, CardContent, CardHeader } from "../ui/card";
 import { Service } from "@/types/service-types";
 import { CURRENCY } from "@/constants/constantValues";
-import { getImageUrl } from "@/helpers/utils";
+import { cn, getImageUrl } from "@/helpers/utils";
 import { Button } from "../ui/button";
 import { useAddBookmark, useShowBookmarks } from "@/apis/apiCalls";
 import { colors } from "@/constants/colors";
@@ -54,8 +54,8 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
 
   return (
     <Link href={`/services/${service.id}`} className="block">
-      <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
-        <div className="relative h-44 overflow-hidden bg-gray-200">
+      <Card className="overflow-hidden transition-shadow duration-300 hover:shadow-lg h-[400px] flex flex-col">
+        <div className="relative h-44 overflow-hidden bg-gray-200 flex-shrink-0">
           <Image
             src={imageUrl}
             alt={service.name}
@@ -63,17 +63,20 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
             objectFit="cover"
             unoptimized
           />
-          
+
           {service.category && (
             <div className="absolute top-3 left-3">
-              <Badge variant="outline" className="bg-white/90 backdrop-blur-sm text-gray-800 shadow-sm">
+              <Badge
+                variant="outline"
+                className="bg-white/90 backdrop-blur-sm text-gray-800 shadow-sm"
+              >
                 {service.category.title}
               </Badge>
             </div>
           )}
-          
+
           {/* Rating Badge */}
-          { service.ratings && (
+          {/* { service.ratings && Number(service.ratings) && (
             <div className="absolute top-3 right-3">
               <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 shadow-sm">
                 <StarDisplay 
@@ -85,68 +88,93 @@ const ServiceCard: React.FC<{ service: Service }> = ({ service }) => {
                 />
               </div>
             </div>
-          )}
+          )} */}
         </div>
         
-        <CardContent className="p-4">
-          <div className="space-y-3">
-            <h4 className="text-lg font-semibold text-gray-900 leading-tight">
+        <div className="flex flex-col flex-1">
+          <CardHeader className="flex justify-between items-start flex-row pb-3 px-4 pt-4">
+            <h4 className="text-lg font-semibold text-gray-900 leading-tight flex-1 pr-2">
               {service.name}
             </h4>
-            
-            {service.user && (
-              <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage 
-                    src={service.user.image ? getImageUrl(service.user.image) : undefined} 
-                    alt={service.user.name || "Provider"} 
-                  />
-                  <AvatarFallback className="text-xs">
-                    {service.user.name?.charAt(0).toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm text-gray-600 font-medium">
-                  {service.user.name || "Service Provider"}
-                </span>
-              </div>
-            )}
-
             {/* Rating and Reviews */}
             {service.ratings && Number(service.ratings) > 0 && (
-              <div className="flex items-center gap-2">
-                <StarDisplay 
-                  rating={Number(service.ratings)}
-                  size="sm"
-                  showValue={true}
-                  showCount={true}
-                  reviewCount={reviewCount}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {/* <StarDisplay 
+                    rating={Number(service.ratings)}
+                    size="sm"
+                    showValue={true}
+                    showCount={true}
+                    reviewCount={reviewCount}
+                  /> */}
+                <Star
+                  className="fill-yellow-400 text-yellow-400 h-4 w-4"
                 />
+                <span className="text-sm font-medium">{service.ratings}</span>
               </div>
             )}
-            
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {service.description.length > 80 
-                ? service.description.slice(0, 80) + "..." 
-                : service.description
-              }
-            </p>
-            
-            <div className="flex items-center justify-between">
+          </CardHeader>
+          
+          <CardContent className="px-4 pb-4 flex flex-col flex-1">
+            <div className="space-y-3 flex-1">
+              {service.user && (
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage
+                      src={
+                        service.user.image
+                          ? getImageUrl(service.user.image)
+                          : undefined
+                      }
+                      alt={service.user.name || "Provider"}
+                    />
+                    <AvatarFallback className="text-xs">
+                      {service.user.name?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm text-gray-600 font-medium">
+                    {service.user.name || "Service Provider"}
+                  </span>
+                </div>
+              )}
+
+              <div className="h-12 overflow-hidden">
+                <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                  {service.description.length > 100
+                    ? service.description.slice(0, 100) + "..."
+                    : service.description}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
               <p className="text-xl font-bold text-primary">
                 {CURRENCY}. {service.fixed_price}
               </p>
-              <div className="flex items-center text-xs text-gray-600">
-                <TooltipWrapper
-                  content={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
+              <TooltipWrapper
+                content={
+                  isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"
+                }
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => handleBookmark(e, service.id)}
+                  className="h-8 w-8"
                 >
-                  <Button variant="ghost" size="icon" onClick={(e) => handleBookmark(e, service.id)}>
-                    <BookmarkIcon className="h-4 w-4" fill={isBookmarked ? colors.primary.DEFAULT : "none"} stroke={isBookmarked ? colors.primary.DEFAULT : colors.text.DEFAULT} />
-                  </Button>
-                </TooltipWrapper>
-              </div>
+                  <BookmarkIcon
+                    className="h-4 w-4"
+                    fill={isBookmarked ? colors.primary.DEFAULT : "none"}
+                    stroke={
+                      isBookmarked
+                        ? colors.primary.DEFAULT
+                        : colors.text.DEFAULT
+                    }
+                  />
+                </Button>
+              </TooltipWrapper>
             </div>
-          </div>
-        </CardContent>
+          </CardContent>
+        </div>
       </Card>
     </Link>
   );
